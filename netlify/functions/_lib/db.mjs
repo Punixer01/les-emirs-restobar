@@ -1,11 +1,5 @@
-import { neon } from "@neondatabase/serverless";
+// Netlify DB (Neon). @netlify/neon reads the read-write NETLIFY_DATABASE_URL
+// that Netlify injects into the function runtime when the DB integration is active.
+import { neon } from "@netlify/neon";
 
-// Netlify injects NETLIFY_DATABASE_URL at runtime (Neon extension).
-const url =
-  process.env.NETLIFY_DATABASE_URL ||
-  process.env.DATABASE_URL ||
-  process.env.NEON_DATABASE_URL;
-
-if (!url) console.warn("[db] NETLIFY_DATABASE_URL is not set.");
-
-export const sql = neon(url);
+export const sql = neon();
