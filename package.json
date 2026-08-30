@@ -7,7 +7,7 @@
     "db:setup": "node scripts/setup-db.mjs"
   },
   "dependencies": {
-    "@netlify/neon": "^0.0.4",
+    "@netlify/neon": "^0.1.2",
     "@neondatabase/serverless": "^0.10.4",
     "resend": "^4.5.1",
     "web-push": "^3.6.7"
