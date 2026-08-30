@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="theme-color" content="#0f1512" />
+<link rel="manifest" href="/reception.webmanifest" />
+<link rel="apple-touch-icon" href="/assets/icons/icon-reception-192.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Émirs Réception" />
+<title>Les Émirs — Réception</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#0f1512;--card:#17201c;--card-2:#1e2a25;--cream:#eef2ee;--soft:#9fb0a8;--line:rgba(238,242,238,.12);
+  --marine:#3f8f79;--gold:#d0a84e;--red:#d97a6a;--green:#4fae82;
+  --serif:"Fraunces",Georgia,serif;--sans:"Inter",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--cream);font-family:var(--sans);font-size:16px;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+h1,h2{font-family:var(--serif);font-weight:500;margin:0}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select{font-family:inherit;font-size:16px}
+.hide{display:none!important}
+a{color:inherit}
+
+.login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:50;padding:20px}
+.login__box{width:100%;max-width:340px;text-align:center}
+.login__box .mark{font-family:var(--serif);font-size:26px;color:var(--cream)}
+.login__box .mark b{color:var(--gold)}
+.login__box p{color:var(--soft);font-size:12px;letter-spacing:.18em;text-transform:uppercase;margin:6px 0 26px}
+.login__box input{width:100%;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--cream);text-align:center;letter-spacing:.1em}
+.login__box input:focus{outline:none;border-color:var(--marine)}
+.login__box button{width:100%;margin-top:12px;padding:16px;background:var(--marine);color:#04110c;border-radius:10px;font-weight:600}
+.login__err{color:var(--red);font-size:13px;min-height:1em;margin-top:10px}
+
+.top{position:sticky;top:0;z-index:10;background:rgba(15,21,18,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+.top .brand{font-family:var(--serif);font-size:20px}
+.top .brand b{color:var(--gold)}
+.top .right{display:flex;gap:10px;align-items:center}
+.chip{font-size:12px;color:var(--soft);border:1px solid var(--line);border-radius:20px;padding:6px 12px}
+.seg{display:flex;gap:6px;padding:12px 18px 0}
+.seg button{flex:1;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--soft);font-weight:600;font-size:14px}
+.seg button.on{background:var(--card-2);color:var(--cream);border-color:var(--marine)}
+.wrap{padding:14px 18px 90px;max-width:760px;margin:0 auto}
+.date-h{font-family:var(--serif);font-size:17px;color:var(--gold);margin:18px 4px 10px;text-transform:capitalize}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.card.done{opacity:.5}
+.card__top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.card__name{font-family:var(--serif);font-size:22px}
+.card__time{font-family:var(--serif);font-size:22px;color:var(--gold)}
+.card__meta{color:var(--soft);font-size:14px;margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tag{font-size:12px;padding:3px 10px;border-radius:20px}
+.tag--inside{background:rgba(63,143,121,.18);color:var(--marine)}
+.tag--terrace{background:rgba(208,168,78,.18);color:var(--gold)}
+.tag--seated{background:rgba(79,174,130,.18);color:var(--green)}
+.tag--arrived{background:rgba(63,143,121,.2);color:var(--marine)}
+.tag--no_show{background:rgba(217,122,106,.18);color:var(--red)}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.actions button{padding:14px 8px;border-radius:10px;font-weight:600;font-size:14px;border:1px solid var(--line);background:var(--card-2);color:var(--cream)}
+.actions .ar{background:var(--marine);color:#04110c;border-color:var(--marine)}
+.actions .st{background:var(--green);color:#04110c;border-color:var(--green)}
+.actions .ns{background:transparent;color:var(--red);border-color:rgba(217,122,106,.4)}
+.callbtn{margin-left:auto;font-size:13px;color:var(--marine);border:1px solid var(--line);border-radius:20px;padding:6px 12px}
+.empty{text-align:center;color:var(--soft);padding:60px 20px}
+.refresh{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--marine);color:#04110c;font-weight:600;padding:12px 22px;border-radius:30px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+</style>
+</head>
+<body>
+
+<div class="login" id="login">
+  <div class="login__box">
+    <div class="mark">Les <b>Émirs</b></div>
+    <p>Réception</p>
+    <input id="code" type="password" inputmode="text" placeholder="Code réception" autocomplete="off" />
+    <button id="loginBtn">Entrer</button>
+    <div class="login__err" id="loginErr"></div>
+  </div>
+</div>
+
+<div id="app" class="hide">
+  <div class="top">
+    <div class="brand">Les <b>Émirs</b></div>
+    <div class="right"><span class="chip" id="clock"></span><button class="chip" id="installBtn" style="display:none">⤓ Installer</button><button class="chip" id="logoutBtn">Quitter</button></div>
+  </div>
+  <div class="seg">
+    <button data-scope="today" class="on">Aujourd'hui</button>
+    <button data-scope="upcoming">À venir</button>
+  </div>
+  <div class="wrap" id="list"><div class="empty">Chargement…</div></div>
+  <button class="refresh" id="refreshBtn">↻ Actualiser</button>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var TOKEN=null; try{ TOKEN=localStorage.getItem('emirs_desk_token'); }catch(e){}
+  var SCOPE='today';
+
+  /* PWA: install to home screen */
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(function(){}); }
+  var deferredPrompt=null, installBtn=document.getElementById('installBtn');
+  window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredPrompt=e; installBtn.style.display='inline-block'; });
+  installBtn.addEventListener('click', async function(){
+    if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; installBtn.style.display='none'; }
+    else { alert("Pour installer : menu du navigateur → « Ajouter à l'écran d'accueil »."); }
+  });
+  if(/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone){ installBtn.style.display='inline-block'; }
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  async function api(path, opts){
+    opts=opts||{}; var headers={'content-type':'application/json'};
+    if(opts.auth!==false && TOKEN) headers['authorization']='Bearer '+TOKEN;
+    var r=await fetch('/api/'+path,{method:opts.method||'GET',headers:headers,body:opts.body?JSON.stringify(opts.body):undefined});
+    if(r.status===401){ logout(); throw new Error('unauthorized'); }
+    var data=null; try{ data=await r.json(); }catch(e){}
+    return {status:r.status,data:data};
+  }
+
+  var loginEl=document.getElementById('login'), appEl=document.getElementById('app');
+  function showApp(){ loginEl.classList.add('hide'); appEl.classList.remove('hide'); load(); startPoll(); tick(); }
+  function logout(){ TOKEN=null; try{localStorage.removeItem('emirs_desk_token');}catch(e){} appEl.classList.add('hide'); loginEl.classList.remove('hide'); }
+  document.getElementById('logoutBtn').addEventListener('click', logout);
+  async function doLogin(){
+    var code=document.getElementById('code').value.trim(), err=document.getElementById('loginErr'); if(!code) return;
+    try{
+      var res=await api('auth',{method:'POST',auth:false,body:{code:code}});
+      if(res.status===200 && res.data.token){ TOKEN=res.data.token; try{localStorage.setItem('emirs_desk_token',TOKEN);}catch(e){} showApp(); }
+      else err.textContent='Code invalide.';
+    }catch(e){ err.textContent='Connexion impossible.'; }
+  }
+  document.getElementById('loginBtn').addEventListener('click', doLogin);
+  document.getElementById('code').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+
+  document.querySelectorAll('.seg button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.seg button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on');
+      SCOPE=b.getAttribute('data-scope'); load();
+    });
+  });
+  document.getElementById('refreshBtn').addEventListener('click', load);
+
+  var DOW=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  var MON=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  function fdate(d){ var x=new Date(d+'T00:00:00'); return DOW[x.getDay()]+' '+x.getDate()+' '+MON[x.getMonth()]; }
+  function ftime(t){ return String(t||'').slice(0,5); }
+  function seat(s){ return s==='terrace'?'Terrasse':'Intérieur'; }
+
+  function tick(){ var d=new Date(); document.getElementById('clock').textContent=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2); }
+  setInterval(tick, 20000);
+
+  async function load(){
+    var res; try{ res=await api('reservations?scope='+SCOPE); }catch(e){ return; }
+    var list=(res.data.reservations||[]);
+    var el=document.getElementById('list');
+    if(!list.length){ el.innerHTML='<div class="empty">Aucune réservation '+(SCOPE==='today'?"aujourd'hui.":'à venir.')+'</div>'; return; }
+    // group by date
+    var groups={}; list.forEach(function(r){ (groups[r.res_date]=groups[r.res_date]||[]).push(r); });
+    var html='';
+    Object.keys(groups).sort().forEach(function(date){
+      if(SCOPE!=='today') html+='<div class="date-h">'+fdate(date)+'</div>';
+      groups[date].forEach(function(r){
+        var done=(r.status==='seated'||r.status==='no_show');
+        var statusTag = (r.status==='seated')?'<span class="tag tag--seated">Installé</span>':
+                        (r.status==='arrived')?'<span class="tag tag--arrived">Arrivé</span>':
+                        (r.status==='no_show')?'<span class="tag tag--no_show">No-show</span>':'';
+        html+='<div class="card'+(done?' done':'')+'">'+
+          '<div class="card__top"><div class="card__name">'+esc(r.name)+'</div><div class="card__time">'+ftime(r.res_time)+'</div></div>'+
+          '<div class="card__meta"><span class="tag tag--'+r.seating+'">'+seat(r.seating)+'</span>'+
+            '<span>'+r.party_size+' couverts</span>'+statusTag+
+            '<a class="callbtn" href="tel:'+esc(r.phone)+'">Appeler</a></div>'+
+          '<div class="actions">'+
+            '<button class="ar" data-id="'+r.id+'" data-s="arrived">Arrivé</button>'+
+            '<button class="st" data-id="'+r.id+'" data-s="seated">Installé</button>'+
+            '<button class="ns" data-id="'+r.id+'" data-s="no_show">No-show</button>'+
+          '</div></div>';
+      });
+    });
+    el.innerHTML=html;
+    el.querySelectorAll('[data-s]').forEach(function(b){
+      b.addEventListener('click', async function(){
+        if(b.getAttribute('data-s')==='no_show' && !confirm('Marquer comme no-show ? Le client sera blacklisté.')) return;
+        b.disabled=true;
+        try{ await api('reservation-status',{method:'POST',body:{id:+b.getAttribute('data-id'),status:b.getAttribute('data-s')}}); }catch(e){}
+        load();
+      });
+    });
+  }
+
+  var poll=null; function startPoll(){ if(poll)clearInterval(poll); poll=setInterval(load, 15000); }
+
+  if(TOKEN) showApp(); else document.getElementById('code').focus();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "les-emirs-app",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "db:setup": "node scripts/setup-db.mjs"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "resend": "^4.5.1",
+    "web-push": "^3.6.7"
+  }
+}

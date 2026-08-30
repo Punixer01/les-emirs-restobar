@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /$
+Allow: /index.html
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /reception
+Disallow: /reception.html
+Disallow: /api/
+
+Sitemap: https://les-emirs-premium.netlify.app/sitemap.xml
