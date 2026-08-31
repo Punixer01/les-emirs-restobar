@@ -22,6 +22,26 @@
   from = "/modifier"
   to = "/modifier.html"
   status = 200
+[[redirects]]
+  from = "/maison"
+  to = "/maison.html"
+  status = 200
+[[redirects]]
+  from = "/galerie"
+  to = "/galerie.html"
+  status = 200
+[[redirects]]
+  from = "/signature"
+  to = "/signature.html"
+  status = 200
+[[redirects]]
+  from = "/reserver"
+  to = "/reserver.html"
+  status = 200
+[[redirects]]
+  from = "/contact"
+  to = "/contact.html"
+  status = 200
 
 # API → functions
 [[redirects]]

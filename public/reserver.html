@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Réserver une table — Les Émirs</title>
+<meta name="description" content="Réservez votre table au restaurant Les Émirs, Port El Kantaoui, Sousse. Intérieur ou terrasse, midi et soir." />
+<meta name="robots" content="index, follow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/assets/site.css" />
+</head>
+<body class="subpage">
+<div class="intro" id="intro" aria-hidden="true"><img class="intro__logo" src="/assets/logo-cream.png" alt="Les Émirs" /></div>
+<div class="rail" aria-hidden="true"><i id="rail"></i></div>
+<header class="nav" id="nav">
+  <div class="nav__in">
+    <a href="/" class="brand" aria-label="Les Émirs — accueil">
+      <img class="brand__logo brand__logo--cream" src="/assets/logo-cream.png" alt="Les Émirs" />
+      <img class="brand__logo brand__logo--ink" src="/assets/logo-ink.png" alt="" aria-hidden="true" />
+    </a>
+    <nav class="nav__links">
+      <a href="/">Accueil</a>
+      <a href="/maison">La Maison</a>
+      <a href="/carte">La Carte</a>
+      <a href="/galerie">Galerie</a>
+      <a href="/contact">Contact</a>
+    </nav>
+    <a href="/reserver" class="nav__cta">Réserver</a>
+    <button class="burger" id="burger" aria-label="Menu"><span></span><span></span></button>
+  </div>
+</header>
+<div class="mobile" id="mobile">
+  <a href="/maison"><span class="num">01</span>La Maison</a>
+  <a href="/carte"><span class="num">02</span>La Carte</a>
+  <a href="/galerie"><span class="num">03</span>Galerie</a>
+  <a href="/contact"><span class="num">04</span>Contact</a>
+  <a href="/reserver"><span class="num">05</span>Réserver</a>
+</div>
+<section class="masthead"><div class="wrap">
+    <span class="label" data-r>Réserver</span>
+    <h1 data-r data-d="1">Votre table<br>vous attend.</h1>
+    
+  </div></section><section class="resa" id="reserver">
+  <div class="wrap grid">
+    <div class="resa__aside">
+      <span class="label" data-r>Réserver</span>
+      <h2 data-r data-d="1">Votre table<br>vous attend.</h2>
+      <p data-r data-d="2">Nous confirmons chaque demande par téléphone. Pour les grandes tablées, écrivez-nous.</p>
+      <ul class="resa__hours" data-r data-d="3">
+        <li><span class="k">Déjeuner</span><span class="v" id="hLunch">12:00 — 15:30</span></li>
+        <li><span class="k">Dîner</span><span class="v" id="hDinner">19:00 — 23:00</span></li>
+        <li><span class="k">Ouvert</span><span class="v" id="hDays">Tous les jours</span></li>
+      </ul>
+    </div>
+    <form class="resa__form" id="resaForm" data-r data-d="1" novalidate>
+      <input type="text" name="company" id="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
+      <div class="frow">
+        <div class="field"><label for="nom">Nom</label><input id="nom" name="nom" type="text" placeholder="Votre nom" required /></div>
+        <div class="field"><label for="tel">Téléphone</label><input id="tel" name="tel" type="tel" placeholder="+216 ..." required /></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label for="date">Date</label><input id="date" name="date" type="date" required /></div>
+        <div class="field"><label for="heure">Heure</label><input id="heure" name="heure" type="time" required /></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label for="place">Place</label>
+          <select id="place"><option value="inside">Salle — Intérieur</option><option value="terrace">Terrasse</option></select></div>
+        <div class="field"><label for="couverts">Couverts</label>
+          <select id="couverts"><option>2 personnes</option><option>3 personnes</option><option>4 personnes</option><option>5 personnes</option><option>6 personnes</option><option>7 et plus</option></select></div>
+      </div>
+      <div class="frow">
+        <div class="field"><label for="service">Service</label>
+          <select id="service"><option value="dinner">Dîner</option><option value="lunch">Déjeuner</option></select></div>
+        <div class="field"><label for="email">Email <span style="color:var(--stone-soft);text-transform:none;letter-spacing:0">(facultatif)</span></label>
+          <input id="email" name="email" type="email" placeholder="Pour recevoir la confirmation" /></div>
+      </div>
+      <div class="resa__submit">
+        <button class="btn" type="submit">Demander la réservation</button>
+        <p class="resa__msg" id="resaMsg" role="status"></p>
+      </div>
+    </form>
+  </div>
+</section>
+<section class="chapters"><div class="wrap"><a class="chap chap--prev" href="/galerie"><span class="k">← Galerie</span><span class="t">Galerie</span></a><a class="chap chap--next" href="/contact"><span class="k">Contact →</span><span class="t">Contact</span></a></div></section>
+<footer class="foot" id="contact">
+  <div class="wrap grid">
+    <div class="foot__top">
+      <div class="foot__brand">
+        <img class="foot__logo-img" src="/assets/logo-ink.png" alt="Les Émirs" />
+        <p>Maison de la mer — poissons, grillades &amp; fruits de mer, face à la Méditerranée.</p>
+      </div>
+      <div class="foot__col">
+        <span class="h">Adresse</span>
+        <span>Port El Kantaoui</span>
+        <span>Hammam Sousse, Sousse — Tunisie</span>
+        <a href="https://www.google.com/maps?q=Port+El+Kantaoui,+Sousse,+Tunisie" target="_blank" rel="noopener" style="margin-top:6px">Voir sur la carte →</a>
+      </div>
+      <div class="foot__col">
+        <span class="h">Contact</span>
+        <a href="tel:+216" id="cPhoneLink">+216 XX XXX XXX</a>
+        <a href="https://www.facebook.com/restaurantlesemirs/" target="_blank" rel="noopener" id="cFbLink">Facebook — Les Émirs</a>
+        <span class="h" style="margin-top:16px">Horaires</span>
+        <span>Tous les jours · 12h — 23h</span>
+      </div>
+    </div>
+    <div class="foot__bottom">
+      <span>© <span id="year"></span> Restaurant Les Émirs · Port El Kantaoui</span>
+      <span>Maison de la mer</span>
+    </div>
+  </div>
+</footer>
+<script src="/assets/site.js"></script>
+</body>
+</html>
