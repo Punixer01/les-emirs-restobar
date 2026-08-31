@@ -10,11 +10,12 @@ export default async (req) => {
   if (!me) return json({ error: "unauthorized" }, 401);
 
   const pol = await sql`select value from settings where key = 'policy'`;
-  const threshold = pol.length ? (pol[0].value?.loyal_threshold ?? 5) : 5;
+  let _pv = {}; try { _pv = pol.length ? JSON.parse(pol[0].value || "{}") : {}; } catch (e) {}
+  const threshold = _pv.loyal_threshold ?? 5;
 
   if (req.method === "GET") {
-    const loyal = await sql`select count(*)::int as n from clients where email is not null and bookings_completed >= ${threshold}`;
-    const all = await sql`select count(*)::int as n from clients where email is not null`;
+    const loyal = await sql`select count(*) as n from clients where email is not null and bookings_completed >= ${threshold}`;
+    const all = await sql`select count(*) as n from clients where email is not null`;
     return json({ loyal: loyal[0].n, all: all[0].n, threshold });
   }
 

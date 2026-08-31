@@ -10,11 +10,12 @@ export default async (req) => {
   const url = new URL(req.url);
   const q = url.searchParams.get("q");
   const pol = await sql`select value from settings where key = 'policy'`;
-  const threshold = pol.length ? (pol[0].value?.loyal_threshold ?? 5) : 5;
+  let _pv = {}; try { _pv = pol.length ? JSON.parse(pol[0].value || "{}") : {}; } catch (e) {}
+  const threshold = _pv.loyal_threshold ?? 5;
 
   const rows = q
     ? await sql`select * from clients
-                where name ilike ${"%" + q + "%"} or phone ilike ${"%" + q + "%"}
+                where name like ${"%" + q + "%"} or phone like ${"%" + q + "%"}
                 order by bookings_completed desc, bookings_total desc limit 300`
     : await sql`select * from clients order by bookings_completed desc, bookings_total desc limit 300`;
 

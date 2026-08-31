@@ -9,7 +9,7 @@ export default async (req) => {
   const path = b.path ? String(b.path).slice(0, 200) : null;
   const meta = b.meta && typeof b.meta === "object" ? b.meta : {};
   try {
-    await sql`insert into events (type, path, meta) values (${type}, ${path}, ${JSON.stringify(meta)}::jsonb)`;
+    await sql`insert into events (type, path, meta) values (${type}, ${path}, ${JSON.stringify(meta)})`;
   } catch (e) {
     /* analytics must never break the site */
   }

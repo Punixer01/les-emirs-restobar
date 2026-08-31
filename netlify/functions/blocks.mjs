@@ -11,7 +11,7 @@ export default async (req) => {
     const date = url.searchParams.get("date");
     const rows = date
       ? await sql`select * from blocks where block_date = ${date} order by start_time`
-      : await sql`select * from blocks where block_date >= current_date order by block_date, start_time`;
+      : await sql`select * from blocks where block_date >= date('now') order by block_date, start_time`;
     return json({ blocks: rows });
   }
 

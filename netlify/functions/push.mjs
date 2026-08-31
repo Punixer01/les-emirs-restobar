@@ -16,7 +16,7 @@ export default async (req) => {
     if (!sub || !sub.endpoint) return json({ error: "subscription" }, 400);
     await sql`
       insert into push_subscriptions (role, endpoint, sub)
-      values ('owner', ${sub.endpoint}, ${JSON.stringify(sub)}::jsonb)
+      values ('owner', ${sub.endpoint}, ${JSON.stringify(sub)})
       on conflict (endpoint) do nothing`;
     return json({ ok: true });
   }

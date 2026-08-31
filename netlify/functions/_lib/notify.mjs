@@ -85,7 +85,7 @@ export async function pushOwners(sql, payload) {
   try {
     const subs = await sql`select id, sub from push_subscriptions where role = 'owner'`;
     await Promise.all(subs.map(async (s) => {
-      try { await webpush.sendNotification(s.sub, JSON.stringify(payload)); }
+      try { await webpush.sendNotification(typeof s.sub === "string" ? JSON.parse(s.sub) : s.sub, JSON.stringify(payload)); }
       catch (e) {
         if (e.statusCode === 404 || e.statusCode === 410)
           await sql`delete from push_subscriptions where id = ${s.id}`;

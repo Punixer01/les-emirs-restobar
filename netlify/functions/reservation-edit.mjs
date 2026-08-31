@@ -55,7 +55,7 @@ export default async (req) => {
   if (!party || party < 1 || party > 30) return json({ error: "Nombre de couverts invalide." }, 400);
 
   const upd = await sql`
-    update reservations set res_time = ${time}, party_size = ${party}, updated_at = now()
+    update reservations set res_time = ${time}, party_size = ${party}, updated_at = datetime('now')
     where id = ${id} returning *`;
   return json({ ok: true, reservation: publicView(upd[0]) });
 };

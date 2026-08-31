@@ -21,10 +21,10 @@ async function list(req) {
 
   let rows;
   if (scope === "today") {
-    rows = await sql`select * from reservations where res_date = current_date order by res_time asc`;
+    rows = await sql`select * from reservations where res_date = date('now') order by res_time asc`;
   } else if (scope === "upcoming") {
     rows = await sql`select * from reservations
-                     where res_date >= current_date and status = 'accepted'
+                     where res_date >= date('now') and status = 'accepted'
                      order by res_date asc, res_time asc`;
   } else if (status && date) {
     rows = await sql`select * from reservations where status = ${status} and res_date = ${date} order by res_time asc`;
@@ -53,7 +53,7 @@ async function create(req) {
     select 1 from blocks
     where block_date = ${value.date}
       and (seating = 'all' or seating = ${value.seating})
-      and start_time <= ${value.time}::time and end_time > ${value.time}::time
+      and start_time <= ${value.time} and end_time > ${value.time}
     limit 1`;
   if (blocked.length)
     return json({ error: "Ce créneau est complet. Merci de choisir un autre horaire.", code: "full" }, 409);
@@ -63,9 +63,9 @@ async function create(req) {
     insert into clients (phone, name, email, bookings_total)
     values (${value.phone}, ${value.name}, ${value.email}, 1)
     on conflict (phone) do update
-      set bookings_total = clients.bookings_total + 1,
+      set bookings_total = bookings_total + 1,
           name  = excluded.name,
-          email = coalesce(excluded.email, clients.email)
+          email = coalesce(excluded.email, email)
     returning id, is_blocked`;
   const clientId = clientRows[0].id;
 

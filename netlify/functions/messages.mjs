@@ -22,8 +22,8 @@ export default async (req) => {
     if (b.action === "read") {
       const me = auth(req, ["owner"]);
       if (!me) return json({ error: "unauthorized" }, 401);
-      if (b.id) await sql`update messages set is_read = true where id = ${b.id}`;
-      else await sql`update messages set is_read = true where direction = 'inbound' and is_read = false`;
+      if (b.id) await sql`update messages set is_read = 1 where id = ${b.id}`;
+      else await sql`update messages set is_read = 1 where direction = 'inbound' and is_read = 0`;
       return json({ ok: true });
     }
 

@@ -22,9 +22,9 @@ export default async (req) => {
       insert into blacklist (phone, name, reason, created_by)
       values (${phone}, ${b.name || null}, ${b.reason || "Ajouté par le restaurant"}, ${me.role})
       on conflict (phone) do update
-        set reason = excluded.reason, name = coalesce(excluded.name, blacklist.name)
+        set reason = excluded.reason, name = coalesce(excluded.name, name)
       returning *`;
-    await sql`update clients set is_blocked = true where phone = ${phone}`;
+    await sql`update clients set is_blocked = 1 where phone = ${phone}`;
     return json({ ok: true, entry: rows[0] });
   }
 
@@ -33,7 +33,7 @@ export default async (req) => {
     const phone = normPhone(b.phone);
     if (!phone) return json({ error: "téléphone requis" }, 400);
     await sql`delete from blacklist where phone = ${phone}`;
-    await sql`update clients set is_blocked = false where phone = ${phone}`;
+    await sql`update clients set is_blocked = 0 where phone = ${phone}`;
     return json({ ok: true });
   }
 

@@ -96,7 +96,7 @@ export default async (req) => {
     let custom = false;
     try {
       const rows = await sql`select value from settings where key = 'content'`;
-      if (rows.length) { stored = rows[0].value || {}; custom = true; }
+      if (rows.length) { try { stored = JSON.parse(rows[0].value || "{}"); } catch (e) {} custom = true; }
     } catch (e) { /* DB down -> return defaults so the site never breaks */ }
     return json({ content: { ...DEFAULTS, ...stored }, custom });
   }
@@ -108,7 +108,7 @@ export default async (req) => {
     const body = await readBody(req);
     const content = body.content && typeof body.content === "object" ? body.content : {};
     await sql`
-      insert into settings (key, value) values ('content', ${JSON.stringify(content)}::jsonb)
+      insert into settings (key, value) values ('content', ${JSON.stringify(content)})
       on conflict (key) do update set value = excluded.value`;
     return json({ ok: true });
   }
