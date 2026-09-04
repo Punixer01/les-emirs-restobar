@@ -1,6 +1,7 @@
 import { sql } from "./_lib/db.mjs";
 import { json, readBody, normPhone } from "./_lib/util.mjs";
 import { auth } from "./_lib/auth.mjs";
+import { rateLimit } from "./_lib/ratelimit.mjs";
 import { notifyOwnerMessage } from "./_lib/notify.mjs";
 
 // GET  /api/messages          (owner) — inbox (client -> restaurant)
@@ -28,6 +29,9 @@ export default async (req) => {
     }
 
     // public inbound message
+    const gate = await rateLimit(req, "msg", 5, 60 * 60);
+    if (!gate.ok) return json({ error: "Trop de messages envoyés. Merci de nous appeler." }, 429);
+
     const body = String(b.body || b.message || "").trim();
     if (body.length < 2) return json({ error: "Message vide." }, 400);
     if (body.length > 2000) return json({ error: "Message trop long." }, 400);

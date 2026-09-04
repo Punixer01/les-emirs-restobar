@@ -38,6 +38,17 @@ create table if not exists push_subscriptions (
   sub text not null, created_at text default (datetime('now'))
 );
 create table if not exists settings ( key text primary key, value text );
+create table if not exists emails (
+  id integer primary key autoincrement,
+  from_addr text not null, from_name text, to_addr text,
+  subject text, body text, snippet text,
+  is_read integer not null default 0, size integer, direction text not null default 'in',
+  created_at text default (datetime('now'))
+);
+create index if not exists idx_emails_created on emails(created_at desc);
+create table if not exists rate_limits (
+  key text primary key, count integer not null default 0, reset_at integer not null default 0
+);
 create table if not exists messages (
   id integer primary key autoincrement, direction text not null default 'inbound',
   client_id integer references clients(id) on delete set null,
@@ -46,6 +57,34 @@ create table if not exists messages (
   is_read integer default 0, created_at text default (datetime('now'))
 );
 create index if not exists idx_messages_created on messages(created_at);
+`;
+
+// Floor plan + punctuality. `alter table add column` throws if the column is
+// already there, which is fine — each statement is applied independently and
+// "duplicate column" is swallowed as an expected no-op.
+const UPGRADE = `
+create table if not exists tables (
+  id integer primary key autoincrement, code text not null, zone text not null default 'inside',
+  seats integer not null default 2, shape text not null default 'round',
+  x real not null default 10, y real not null default 10, rot integer not null default 0,
+  active integer not null default 1, note text
+);
+create unique index if not exists idx_tables_code on tables(code);
+create index if not exists idx_tables_zone on tables(zone);
+alter table reservations add column table_id integer;
+alter table reservations add column arrived_at text;
+alter table reservations add column seated_at text;
+alter table reservations add column late_minutes integer;
+alter table reservations add column source text default 'web';
+alter table reservations add column waiting integer default 0;
+alter table reservations add column modified integer not null default 0;
+alter table reservations add column mod_summary text;
+create index if not exists idx_res_table on reservations(table_id);
+alter table tables add column merged_into integer;
+alter table tables add column blocked integer default 0;
+alter table tables add column blocked_note text;
+alter table clients add column on_time integer default 0;
+alter table clients add column late_count integer default 0;
 `;
 
 const SEEDS = [
@@ -60,12 +99,17 @@ export default async (req) => {
   const me = auth(req, ["owner"]) || (codeToRole(body && body.code) === "owner" ? { role: "owner" } : null);
   if (!me) return json({ error: "unauthorized" }, 401);
 
-  const statements = SCHEMA.split(";").map((s) => s.trim()).filter(Boolean).concat(SEEDS);
-  let ok = 0;
+  const split = (s) => s.split(";").map((x) => x.trim()).filter(Boolean);
+  const statements = split(SCHEMA).concat(split(UPGRADE)).concat(SEEDS);
+  let ok = 0, skipped = 0;
   const errors = [];
   for (const stmt of statements) {
     try { await sql.query(stmt); ok++; }
-    catch (e) { errors.push({ stmt: stmt.slice(0, 44), error: String(e.message || e) }); }
+    catch (e) {
+      const msg = String(e.message || e);
+      if (/duplicate column/i.test(msg)) { skipped++; continue; }  // already migrated
+      errors.push({ stmt: stmt.slice(0, 44), error: msg });
+    }
   }
-  return json({ ok: errors.length === 0, executed: ok, total: statements.length, errors });
+  return json({ ok: errors.length === 0, executed: ok, already: skipped, total: statements.length, errors });
 };

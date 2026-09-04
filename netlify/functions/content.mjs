@@ -4,17 +4,17 @@ import { auth } from "./_lib/auth.mjs";
 
 // Editable site content. GET is public (site reads it); POST is owner (CMS save).
 export const DEFAULTS = {
-  tagline: "Poissons, grillades & fruits de mer, face à la Méditerranée.",
+  tagline: "Apéros, déjeuners, dîners… et vibes chill au cœur de Port El Kantaoui.",
   about:
     "Depuis le port, nous cuisinons la mer avec respect — poissons du jour saisis à la braise, fruits de mer et épices d’ici. Une table où la Méditerranée se raconte, assiette après assiette.",
-  phone: "+216 XX XXX XXX",
+  phone: "+216 73 348 700",
   address: "Port El Kantaoui, Hammam Sousse, Sousse — Tunisie",
   facebook: "https://www.facebook.com/restaurantlesemirs/",
   hours: { lunch: "12:00 — 15:30", dinner: "19:00 — 23:00", days: "Tous les jours" },
   quotes: {
     signature_title: "La Gargoulette des Émirs",
     signature_text: "Agneau à l’étouffée, mijoté lentement dans une jarre d’argile scellée — brisée devant vous, à partager.",
-    terrace: "L’art de recevoir, au bord de la mer.",
+    terrace: "L’art de recevoir, au bord du port, face à la Méditerranée.",
     invite: "Une table où la Méditerranée se raconte, assiette après assiette.",
   },
   menu: [

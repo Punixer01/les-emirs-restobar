@@ -4,3 +4,9 @@ node_modules/
 .env.local
 *.log
 _old-blobs-attempt/
+.dev.vars
+.wrangler/
+node_modules/
+wrangler.local.toml
+backup/
+*.sql.bak

@@ -3,7 +3,7 @@ import { json, readBody } from "./_lib/util.mjs";
 import { auth } from "./_lib/auth.mjs";
 import { notifyClientDecision } from "./_lib/notify.mjs";
 
-const ALLOWED = ["pending", "accepted", "declined", "arrived", "seated", "no_show", "cancelled"];
+const ALLOWED = ["pending", "accepted", "declined", "arrived", "seated", "no_show", "cancelled", "expired"];
 
 // POST /api/reservation-status  { id, status }
 export default async (req) => {
@@ -14,7 +14,12 @@ export default async (req) => {
   const { id, status } = await readBody(req);
   if (!id || !ALLOWED.includes(status)) return json({ error: "bad request" }, 400);
 
-  const rows = await sql`update reservations set status = ${status}, updated_at = datetime('now') where id = ${id} returning *`;
+  /* Accepting (or re-accepting a client-modified booking) clears the review
+     flag so it leaves the "à revoir" state. */
+  const clearMod = (status === "accepted") ? 1 : 0;
+  const rows = clearMod
+    ? await sql`update reservations set status = ${status}, modified = 0, mod_summary = null, updated_at = datetime('now') where id = ${id} returning *`
+    : await sql`update reservations set status = ${status}, updated_at = datetime('now') where id = ${id} returning *`;
   if (!rows.length) return json({ error: "not found" }, 404);
   const r = rows[0];
 

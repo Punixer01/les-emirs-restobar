@@ -45,7 +45,11 @@ export function validateBooking(b) {
   const party = parseInt(b.party, 10);
   if (!party || party < 1 || party > 30) errors.push("couverts");
   const seating = b.seating === "terrace" ? "terrace" : "inside";
+  /* The confirmation, the QR pass and the change link all travel by email,
+     so a booking without one cannot actually be served. Staff-entered
+     bookings are exempt: they are taken over the phone. */
   const email = b.email && /.+@.+\..+/.test(b.email) ? String(b.email).trim() : null;
+  if (!email && !b.staff) errors.push("email");
   return {
     errors,
     value: {

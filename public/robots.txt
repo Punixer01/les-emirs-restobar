@@ -7,4 +7,4 @@ Disallow: /reception
 Disallow: /reception.html
 Disallow: /api/
 
-Sitemap: https://les-emirs-premium.netlify.app/sitemap.xml
+Sitemap: https://lesemirs.com/sitemap.xml

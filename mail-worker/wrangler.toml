@@ -1,0 +1,13 @@
+name = "les-emirs-mail"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# reached only by Email Routing — it needs no public URL at all
+workers_dev = false
+
+# the same database the dashboard reads, so mail lands straight in the inbox
+[[d1_databases]]
+binding = "DB"
+database_name = "les-emirs-db"
+database_id = "230eb171-adc7-4ea2-9ea9-e089db5d4274"

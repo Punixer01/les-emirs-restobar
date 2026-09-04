@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Votre réservation — Les Émirs</title>
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#f2ece0" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bone:#f2ece0; --paper:#faf7f0; --ink:#17150f; --stone:#6f675a; --stone-soft:#8b8271;
+  --marine:#1f473f; --gold:#b08d3e; --hair:#e2dccf; --red:#a4552f;
+  --font-serif:"Fraunces",Georgia,serif; --font-sans:"Inter",system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bone);color:var(--ink);font-family:var(--font-sans);
+  -webkit-font-smoothing:antialiased;padding:24px 16px 60px;display:flex;justify-content:center}
+.wrap{width:100%;max-width:420px}
+
+.head{text-align:center;margin-bottom:22px}
+.head img{width:200px;max-width:64vw;height:auto}
+.head .sub{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--stone-soft);margin-top:8px}
+
+.card{background:var(--paper);border:1px solid var(--hair);border-radius:14px;overflow:hidden;
+  box-shadow:0 16px 44px rgba(23,21,15,.09)}
+.card__bar{height:4px;background:var(--marine)}
+.card__in{padding:26px 24px}
+
+.status{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;padding:6px 12px;border-radius:100px;font-weight:600}
+.status--accepted{background:#eaf3ef;color:var(--marine)}
+.status--pending{background:#fdf6e6;color:#8a6d1f}
+.status--arrived,.status--seated{background:#eaf3ef;color:var(--marine)}
+.status--cancelled,.status--declined{background:#fbeee8;color:var(--red)}
+
+h1{font-family:var(--font-serif);font-weight:300;font-size:clamp(1.6rem,6vw,2rem);margin-top:14px;line-height:1.15}
+.ref{font-family:var(--font-serif);font-size:1.05rem;color:var(--stone);margin-top:6px;letter-spacing:.04em}
+
+.qrbox{margin:24px 0 20px;padding:16px;background:#fff;border:1px solid var(--hair);border-radius:10px;
+  display:flex;flex-direction:column;align-items:center;gap:10px}
+.qrbox svg{width:100%;max-width:250px;height:auto;display:block}
+.qrbox .hint{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--stone-soft);text-align:center}
+
+.rows{border-top:1px solid var(--hair)}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+  padding:14px 0;border-bottom:1px solid var(--hair)}
+.row .k{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--stone-soft)}
+.row .v{font-family:var(--font-serif);font-size:1.15rem;text-align:right}
+.row .v.big{font-size:1.5rem}
+.table-badge{display:inline-block;background:var(--marine);color:var(--bone);
+  font-family:var(--font-sans);font-size:.95rem;font-weight:600;padding:4px 12px;border-radius:6px}
+
+.note{margin-top:20px;font-size:13px;line-height:1.65;color:var(--stone)}
+.note a{color:var(--marine)}
+.foot{text-align:center;margin-top:24px;font-size:11px;color:var(--stone-soft);line-height:1.7}
+.foot a{color:var(--stone);text-decoration:none}
+.msg{text-align:center;padding:48px 16px;color:var(--stone)}
+.skel{opacity:.35}
+@media print{
+  body{background:#fff;padding:0}
+  .foot,.note{display:none}
+  .card{box-shadow:none;border-color:#ccc}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <img src="assets/logo-ink.png" alt="Restaurant Les Émirs" />
+    <div class="sub">Port El Kantaoui · Sousse</div>
+  </div>
+
+  <div id="root">
+    <div class="card"><div class="card__bar"></div><div class="card__in skel">
+      <div class="msg">Chargement…</div>
+    </div></div>
+  </div>
+
+  <div class="foot">
+    Restaurant Les Émirs — Port El Kantaoui, Sousse<br />
+    <a href="/">lesemirs.com</a>
+  </div>
+</div>
+
+<script src="assets/qr.js"></script>
+<script>
+(function(){
+  "use strict";
+  var p = new URLSearchParams(location.search);
+  var R = p.get("r"), T = p.get("t");
+  var root = document.getElementById("root");
+
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+  var DOW=["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+  var MON=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  function fdate(d){ var x=new Date(d+"T00:00:00");
+    return DOW[x.getDay()]+" "+x.getDate()+" "+MON[x.getMonth()]; }
+  function ftime(t){ return String(t||"").slice(0,5).replace(":","h"); }
+  function seat(s){ return s==="terrace"?"Terrasse":"Salle intérieure"; }
+  function statusFr(s){ return ({pending:"En attente de confirmation",accepted:"Confirmée",
+    declined:"Refusée",arrived:"Arrivé",seated:"Arrivée",no_show:"Non honorée",
+    cancelled:"Annulée"})[s]||s; }
+
+  function card(inner){ return '<div class="card"><div class="card__bar"></div><div class="card__in">'+inner+'</div></div>'; }
+
+  if(!R || !T){
+    root.innerHTML = card('<div class="msg">Lien invalide.</div>');
+    return;
+  }
+
+  fetch("/api/pass?r="+encodeURIComponent(R)+"&t="+encodeURIComponent(T))
+    .then(function(r){ return r.json().then(function(d){ return {s:r.status,d:d}; }); })
+    .then(function(res){
+      if(res.s!==200 || !res.d.reservation){
+        root.innerHTML = card('<div class="msg">'+esc((res.d&&res.d.error)||"Réservation introuvable.")+'</div>');
+        return;
+      }
+      var r = res.d.reservation;
+      var dead = r.status==="cancelled" || r.status==="declined";
+
+      // the QR carries this page's own URL, so staff scanning it land on the same record
+      var target = location.origin + "/pass?r=" + encodeURIComponent(R) + "&t=" + encodeURIComponent(T);
+      var svg = "";
+      try { svg = window.QR ? QR.qrSvg(target,{size:250,margin:2,dark:"#17150f",light:"#ffffff"}) : ""; }
+      catch(e){ svg = ""; }
+
+      var qrBlock = dead ? "" :
+        '<div class="qrbox">'+ (svg || '<img alt="QR" src="/api/qr?r='+encodeURIComponent(R)+'&t='+encodeURIComponent(T)+'" style="width:100%;max-width:250px" />') +
+        '<div class="hint">À présenter à l\'accueil</div></div>';
+
+      root.innerHTML = card(
+        '<span class="status status--'+esc(r.status)+'">'+esc(statusFr(r.status))+'</span>'+
+        '<h1>'+esc(r.name)+'</h1>'+
+        '<div class="ref">Référence '+esc(r.reference)+'</div>'+
+        qrBlock+
+        '<div class="rows">'+
+          '<div class="row"><span class="k">Date</span><span class="v">'+esc(fdate(r.res_date))+'</span></div>'+
+          '<div class="row"><span class="k">Heure</span><span class="v big">'+esc(ftime(r.res_time))+'</span></div>'+
+          '<div class="row"><span class="k">Couverts</span><span class="v">'+esc(String(r.party_size))+'</span></div>'+
+          '<div class="row"><span class="k">Place</span><span class="v">'+esc(seat(r.seating))+'</span></div>'+
+          (r.table_code ? '<div class="row"><span class="k">Table</span><span class="v"><span class="table-badge">'+esc(r.table_code)+'</span></span></div>' : '')+
+        '</div>'+
+        (dead ? '' :
+          '<p class="note">Présentez ce code à l\'accueil en arrivant.<br />'+
+          'Pour changer l\'heure ou le nombre de couverts, utilisez le lien '+
+          '« Modifier ma réservation » dans votre email de confirmation '+
+          '(jusqu\'à 3 h avant).</p>')
+      );
+    })
+    .catch(function(){
+      root.innerHTML = card('<div class="msg">Impossible de charger la réservation.</div>');
+    });
+})();
+</script>
+</body>
+</html>

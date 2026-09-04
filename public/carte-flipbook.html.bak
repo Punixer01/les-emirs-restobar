@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>La Carte — Les Émirs</title>
+<meta name="description" content="La carte du restaurant Les Émirs — entrées, spécialités tunisiennes, poissons, viandes, pâtes et desserts. Port El Kantaoui, Sousse." />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bone:#eae3d5;--paper:#f7f3ea;--paper-2:#f1ebde;--ink:#1a1712;--stone:#6b6456;--mute:#9a9384;
+  --line:#ddd4c2;--marine:#1f473f;--gold:#9a7b33;--gold-soft:#b89446;
+  --serif:"Fraunces",Georgia,serif;--sans:"Inter",system-ui,sans-serif;--ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:radial-gradient(120% 120% at 50% 0%,#26221b 0%,#141210 70%);color:var(--ink);
+  font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden;-webkit-tap-highlight-color:transparent}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+.top{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+  padding:16px clamp(16px,4vw,40px);padding-top:calc(14px + env(safe-area-inset-top))}
+.top a.home{display:flex;align-items:center;gap:9px;color:#efe7d6;font-family:var(--serif);font-size:1.1rem;letter-spacing:.03em}
+.top a.home img{height:22px}
+.top .hint{color:rgba(239,231,214,.6);font-size:11px;letter-spacing:.22em;text-transform:uppercase}
+
+/* stage */
+.stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:64px 12px 78px;perspective:2200px}
+.book{position:relative;width:min(560px,94vw);height:min(760px,82vh);}
+.book__shadow{position:absolute;inset:auto 4% -22px 4%;height:40px;background:radial-gradient(60% 100% at 50% 0%,rgba(0,0,0,.5),transparent 70%);filter:blur(6px)}
+
+.pages{position:absolute;inset:0;overflow:hidden;border-radius:6px 10px 10px 6px;
+  box-shadow:0 30px 80px rgba(0,0,0,.5),0 2px 0 rgba(255,255,255,.04)}
+.track{display:flex;height:100%;transition:transform .7s var(--ease);will-change:transform}
+.page{min-width:100%;height:100%;position:relative;background:
+  linear-gradient(90deg,rgba(0,0,0,.10) 0,rgba(0,0,0,0) 6%,rgba(0,0,0,0) 94%,rgba(0,0,0,.05) 100%),
+  var(--paper);
+  display:flex;flex-direction:column;padding:clamp(30px,5vw,54px) clamp(26px,5vw,52px)}
+.page::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/></svg>")}
+.page::after{content:"";position:absolute;left:0;top:0;bottom:0;width:26px;background:linear-gradient(90deg,rgba(0,0,0,.12),transparent)}
+
+/* cover */
+.cover{align-items:center;justify-content:center;text-align:center;background:
+  radial-gradient(120% 90% at 50% 18%,#20302b 0%,#132420 55%,#0e1a17 100%)}
+.cover::after{display:none}
+.cover img{height:64px;margin-bottom:26px}
+.cover .k{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--gold-soft)}
+.cover h1{font-family:var(--serif);font-weight:300;color:#f4ecdb;font-size:clamp(2.6rem,9vw,4.2rem);margin:16px 0 0;letter-spacing:.01em}
+.cover .rule{width:52px;height:1px;background:var(--gold);margin:24px auto;opacity:.7}
+.cover p{color:rgba(244,236,219,.7);font-family:var(--serif);font-style:italic;font-size:1.05rem;max-width:24ch}
+.cover .open{margin-top:34px;border:1px solid var(--gold);color:var(--gold-soft);font-size:11px;letter-spacing:.2em;text-transform:uppercase;padding:13px 26px;border-radius:2px;transition:background .35s,color .35s}
+.cover .open:hover{background:var(--gold);color:#12201c}
+
+/* section page */
+.sec__cat{font-family:var(--serif);font-weight:400;color:var(--marine);font-size:clamp(1.7rem,4.5vw,2.4rem);letter-spacing:-.01em}
+.sec__cat em{font-style:italic;color:var(--gold)}
+.sec__rule{width:40px;height:1px;background:var(--gold);margin:14px 0 22px;opacity:.7}
+.items{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding-right:4px}
+.items::-webkit-scrollbar{width:0}
+.item{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:8px;margin:0 0 16px}
+.item__n{font-family:var(--serif);font-size:clamp(1rem,2.4vw,1.18rem);color:var(--ink);line-height:1.25}
+.item__d{display:block;font-family:var(--sans);font-size:11.5px;color:var(--mute);margin-top:3px;font-style:italic}
+.item__leader{border-bottom:1px dotted var(--line);align-self:end;margin:0 6px 6px;min-width:14px;height:0}
+.item__p{font-family:var(--serif);font-size:1.1rem;color:var(--gold);white-space:nowrap;font-feature-settings:"tnum"}
+.item__p span{font-family:var(--sans);font-size:10px;color:var(--mute);letter-spacing:.08em;margin-left:2px}
+.sec__foot{margin-top:14px;display:flex;justify-content:space-between;align-items:center;color:var(--mute);font-size:11px;letter-spacing:.06em}
+.sec__foot .pg{font-family:var(--serif);color:var(--stone)}
+
+/* closing */
+.end{align-items:center;justify-content:center;text-align:center}
+.end h2{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,6vw,3rem);color:var(--marine)}
+.end p{color:var(--stone);margin-top:14px;font-family:var(--serif);font-style:italic}
+.end a{margin-top:28px;background:var(--marine);color:#f4ecdb;font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:14px 30px;border-radius:2px}
+
+/* nav */
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:center;gap:20px;
+  padding:16px;padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+.nav button{width:46px;height:46px;border-radius:50%;border:1px solid rgba(239,231,214,.28);color:#efe7d6;font-size:18px;
+  display:flex;align-items:center;justify-content:center;background:rgba(20,18,16,.4);backdrop-filter:blur(6px);transition:opacity .3s,border-color .3s}
+.nav button:disabled{opacity:.3}
+.nav button:not(:disabled):hover{border-color:var(--gold)}
+.nav .count{color:rgba(239,231,214,.7);font-family:var(--serif);font-size:.95rem;min-width:64px;text-align:center}
+
+/* click zones (desktop page turn) */
+.zone{position:fixed;top:64px;bottom:78px;width:16%;z-index:15;cursor:pointer}
+.zone.left{left:0}.zone.right{right:0}
+@media(max-width:640px){ .zone{display:none} .book{height:min(720px,80vh)} }
+.turning .track{transition:transform .7s var(--ease)}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="home" href="/"><img src="/assets/logo-cream.png" alt="" onerror="this.style.display='none'"/>Les Émirs</a>
+  <span class="hint">Glissez pour tourner</span>
+</div>
+
+<div class="zone left" id="zoneL" aria-label="Page précédente"></div>
+<div class="zone right" id="zoneR" aria-label="Page suivante"></div>
+
+<div class="stage">
+  <div class="book">
+    <div class="pages"><div class="track" id="track"><div class="page cover">
+      <img src="/assets/logo-cream.png" alt="Les Émirs" onerror="this.style.display='none'"/>
+      <span class="k">Port El Kantaoui — Sousse</span>
+      <h1>La Carte</h1>
+      <div class="rule"></div>
+      <p>Apéros, déjeuners, dîners… et vibes chill au cœur de Port El Kantaoui.</p>
+      <button class="open" id="openBtn">Ouvrir la carte</button>
+    </div></div></div>
+    <div class="book__shadow"></div>
+  </div>
+</div>
+
+<div class="nav">
+  <button id="prev" aria-label="Précédent">‹</button>
+  <span class="count" id="count">Couverture</span>
+  <button id="next" aria-label="Suivant">›</button>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  function e(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  var track=document.getElementById('track'), prevBtn=document.getElementById('prev'), nextBtn=document.getElementById('next'), count=document.getElementById('count');
+  var pages=[]; // dom nodes after cover
+  var idx=0, total=1;
+
+  function render(content){
+    var menu=(content&&content.menu)||[];
+    // group by cat, preserve order
+    var order=[], groups={};
+    menu.forEach(function(m){ var c=m.cat||'Autres'; if(!groups[c]){groups[c]=[];order.push(c);} groups[c].push(m); });
+    var frag='';
+    order.forEach(function(cat,i){
+      var items=groups[cat].map(function(m){
+        return '<div class="item"><div class="item__n">'+e(m.name)+(m.desc?'<span class="item__d">'+e(m.desc)+'</span>':'')+'</div>'+
+          '<div class="item__leader"></div><div class="item__p">'+e(m.price)+'<span>DT</span></div></div>';
+      }).join('');
+      frag+='<div class="page sec"><div class="sec__cat">'+e(cat)+'</div><div class="sec__rule"></div>'+
+        '<div class="items">'+items+'</div>'+
+        '<div class="sec__foot"><span>Les Émirs</span><span class="pg">'+(i+1)+' / '+order.length+'</span></div></div>';
+    });
+    frag+='<div class="page end"><h2>Bon appétit</h2><p>Une table où la Méditerranée se raconte.</p><a href="/#reserver">Réserver une table</a></div>';
+    // append after cover
+    track.insertAdjacentHTML('beforeend', frag);
+    pages=[].slice.call(track.querySelectorAll('.page'));
+    total=pages.length;
+    update();
+  }
+
+  function update(){
+    track.style.transform='translateX('+(-idx*100)+'%)';
+    prevBtn.disabled=(idx===0); nextBtn.disabled=(idx===total-1);
+    if(idx===0) count.textContent='Couverture';
+    else if(idx===total-1) count.textContent='Fin';
+    else count.textContent='Page '+idx+' / '+(total-2);
+  }
+  function go(n){ idx=Math.max(0,Math.min(total-1,n)); update(); }
+
+  prevBtn.addEventListener('click',function(){go(idx-1);});
+  nextBtn.addEventListener('click',function(){go(idx+1);});
+  document.getElementById('zoneL').addEventListener('click',function(){go(idx-1);});
+  document.getElementById('zoneR').addEventListener('click',function(){go(idx+1);});
+  document.getElementById('openBtn').addEventListener('click',function(){go(1);});
+  document.addEventListener('keydown',function(ev){ if(ev.key==='ArrowRight')go(idx+1); else if(ev.key==='ArrowLeft')go(idx-1); });
+
+  // swipe
+  var x0=null,y0=null;
+  var stage=document.querySelector('.stage');
+  stage.addEventListener('touchstart',function(ev){ x0=ev.touches[0].clientX; y0=ev.touches[0].clientY; },{passive:true});
+  stage.addEventListener('touchend',function(ev){
+    if(x0==null)return; var dx=ev.changedTouches[0].clientX-x0, dy=ev.changedTouches[0].clientY-y0;
+    if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)){ go(idx + (dx<0?1:-1)); }
+    x0=null;y0=null;
+  },{passive:true});
+
+  fetch('/api/content').then(function(r){return r.json();}).then(function(d){ render(d.content||{}); })
+    .catch(function(){ render({menu:[]}); count.textContent='—'; });
+})();
+</script>
+</body>
+</html>

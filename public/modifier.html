@@ -51,20 +51,42 @@ a.home{color:var(--marine);font-size:13px}
     .then(function(d){
       if(d.error){ fail(d.error); return; }
       var v=d.reservation;
-      var head='<h1>Bonjour '+esc(v.name)+'</h1><div class="res">Réservation <b>'+esc(v.reference)+'</b><br>'+fdate(v.date)+' · <b>'+esc(v.time)+'</b> · '+v.party+' couverts · '+(v.seating==='terrace'?'Terrasse':'Intérieur')+'</div>';
+      var head='<h1>Bonjour '+esc(v.name)+'</h1><div class="res">Réservation <b>'+esc(v.reference)+'</b><br>'+fdate(v.date)+' · <b>'+esc(v.time)+'</b> · '+v.party+' couverts · '+(v.seating==='terrace'?'Terrasse':'Salle intérieure')+'</div>';
       if(!d.editable){ content.innerHTML=head+'<p class="center" style="color:var(--stone)">'+esc(d.reason||'Modification indisponible.')+'</p><p class="center note"><a class="home" href="/">Retour au site</a></p>'; return; }
-      var opts=''; for(var i=1;i<=12;i++){opts+='<option value="'+i+'"'+(i===v.party?' selected':'')+'>'+i+(i>=12?' et plus':'')+' personne'+(i>1?'s':'')+'</option>';}
+      /* same window the booking form offers, so a guest can never pick an
+         hour the restaurant does not take */
+      var hopts='';
+      for(var m=12*60;m<=21*60+30;m+=30){
+        var hh=String(Math.floor(m/60)).padStart(2,'0'), mm=String(m%60).padStart(2,'0'), val=hh+':'+mm;
+        hopts+='<option value="'+val+'"'+(val===v.time?' selected':'')+'>'+hh+'h'+mm+'</option>';
+      }
+      var popts='';
+      for(var p=1;p<=20;p++){ popts+='<option value="'+p+'"'+(p===Number(v.party)?' selected':'')+'>'+p+' couvert'+(p>1?'s':'')+'</option>'; }
       content.innerHTML=head+
-        '<p style="color:var(--stone);font-size:13px;margin:0 0 16px">Vous pouvez modifier l’heure et le nombre de couverts (jusqu’à 3 h avant).</p>'+
-        '<div class="fg"><label for="time">Heure</label><input id="time" type="time" value="'+esc(v.time)+'"></div>'+
-        '<div class="fg"><label for="party">Couverts</label><select id="party">'+opts+'</select></div>'+
+        '<p style="color:var(--stone);font-size:13px;margin:0 0 16px">Vous pouvez modifier l’heure, la place et le nombre de couverts (jusqu’à 3 h avant). Toute modification est renvoyée au restaurant pour confirmation.</p>'+
+        '<div class="fg"><label for="time">Heure</label><select id="time">'+hopts+'</select></div>'+
+        '<div class="fg"><label for="party">Nombre de couverts</label><select id="party">'+popts+
+          '<option value="__more"'+(Number(v.party)>20?' selected':'')+'>Plus de 20 — nous appeler</option></select></div>'+
+        '<div class="fg"><label for="seating">Place</label><select id="seating">'+
+          '<option value="inside"'+(v.seating!=='terrace'?' selected':'')+'>Salle intérieure</option>'+
+          '<option value="terrace"'+(v.seating==='terrace'?' selected':'')+'>Terrasse</option></select></div>'+
         '<button class="btn" id="save">Enregistrer les modifications</button>'+
         '<div class="msg" id="msg"></div>';
       document.getElementById('save').addEventListener('click',function(){
-        var btn=this,msg=document.getElementById('msg'); btn.disabled=true; msg.style.color='var(--stone)'; msg.textContent='Enregistrement…';
-        fetch('/api/reservation-edit',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({r:r,t:t,time:document.getElementById('time').value,party:document.getElementById('party').value})})
+        var btn=this,msg=document.getElementById('msg');
+        var pv=document.getElementById('party').value;
+        if(pv==='__more'){ msg.style.color='var(--red)'; msg.textContent='Pour plus de 20 couverts, merci de nous appeler.'; return; }
+        btn.disabled=true; msg.style.color='var(--stone)'; msg.textContent='Enregistrement…';
+        fetch('/api/reservation-edit',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({r:r,t:t,time:document.getElementById('time').value,seating:document.getElementById('seating').value,party:+pv})})
           .then(function(res){return res.json();})
-          .then(function(out){ if(out.ok){ msg.style.color='var(--green)'; msg.textContent='✔ Réservation mise à jour. Merci !'; } else { msg.style.color='var(--red)'; msg.textContent=out.error||'Modification impossible.'; btn.disabled=false; } })
+          .then(function(out){
+            if(out.ok){
+              var w=out.reservation;
+              msg.style.color='var(--green)';
+              msg.innerHTML='✔ C’est noté : <b>'+esc(w.time)+'</b> · '+w.party+' couverts · '+(w.seating==='terrace'?'Terrasse':'Salle intérieure')+'.<br>'+(out.review?'Votre demande est envoyée au restaurant pour confirmation.':'Le restaurant est prévenu.');
+              btn.disabled=false;
+            } else { msg.style.color='var(--red)'; msg.textContent=out.error||'Modification impossible.'; btn.disabled=false; }
+          })
           .catch(function(){ msg.style.color='var(--red)'; msg.textContent='Erreur réseau.'; btn.disabled=false; });
       });
     })

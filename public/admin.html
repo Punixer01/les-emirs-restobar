@@ -58,7 +58,10 @@ a{color:inherit}
 .wrap{max-width:1120px;margin:0 auto;padding:16px 16px calc(40px + env(safe-area-inset-bottom))}
 
 /* kpis */
-.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:18px}
+.kpis{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.kpirow{display:grid;gap:10px}
+.kpirow--4{grid-template-columns:repeat(4,1fr)}
+.kpirow--3{grid-template-columns:repeat(3,1fr)}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;box-shadow:var(--sh)}
 .kpi .n{font-family:var(--serif);font-size:26px;line-height:1;color:var(--marine)}
 .kpi .l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin-top:7px}
@@ -67,6 +70,10 @@ a{color:inherit}
 /* generic */
 .section-h{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:2px 0 12px;flex-wrap:wrap}
 .section-h h2{font-size:19px}
+.filterchip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
+  padding:8px 14px;border-radius:20px;background:var(--marine);color:#fff;cursor:pointer;
+  border:1px solid var(--marine);white-space:nowrap}
+.filterchip:hover{opacity:.9}
 .tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
 .tools input,.tools select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
 .tools input:focus,.tools select:focus{outline:none;border-color:var(--marine)}
@@ -76,10 +83,25 @@ a{color:inherit}
 .row:last-child{border-bottom:none}
 .row__main{flex:1;min-width:0}
 .row__name{font-family:var(--serif);font-size:17px}
-.row__sub{color:var(--stone);font-size:13px;margin-top:3px;word-break:break-word}
+.row__sub{color:var(--stone);font-size:13px;margin-top:3px;line-height:1.5}
+.row__tags{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:5px}
+.row__when{font-size:13.5px;color:var(--ink);margin-top:5px}
+.row__when b{font-weight:600}
+.nowrap{white-space:nowrap}
+.brk{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;vertical-align:bottom}
 .act{display:flex;gap:7px;flex-wrap:wrap}
 .btn{padding:9px 13px;border-radius:10px;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink)}
 .btn--sm{padding:7px 11px;font-size:12px}
+/* icon buttons: real SVG rather than a text glyph, label appears where there is room */
+.btn--ico{display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none}
+.btn--warn{border-color:#e6d6ae;color:#8a6d1f;background:#fdf6e6}
+a.btn{text-decoration:none}
+.kpi--go{cursor:pointer;text-align:left;font:inherit;transition:border-color .2s,transform .15s}
+.kpi--go:hover{border-color:var(--marine)}
+.kpi--go:active{transform:scale(.97)}
+.btn--ico .ico{width:16px;height:16px;flex:0 0 auto}
+.btn__lbl{display:none}
 .btn--m{background:var(--marine);color:#fff;border-color:var(--marine)}
 .btn--ok{background:var(--green);color:#fff;border-color:var(--green)}
 .btn--no{background:#fff;color:var(--red);border-color:#e8cfc7}
@@ -121,10 +143,12 @@ a{color:inherit}
 .saved{color:var(--green);font-size:13px;font-weight:500}
 
 /* modal */
-.modal{position:fixed;inset:0;z-index:70;background:rgba(24,21,16,.5);display:flex;align-items:flex-end;justify-content:center;opacity:0;visibility:hidden;transition:opacity .25s}
+.modal{position:fixed;inset:0;z-index:70;background:rgba(24,21,16,.5);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;opacity:0;visibility:hidden;transition:opacity .28s ease,visibility .28s;overflow:hidden}
 .modal.open{opacity:1;visibility:visible}
-.modal__box{width:100%;max-width:480px;background:var(--card);border-radius:18px 18px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));transform:translateY(20px);transition:transform .25s}
+.modal__box{width:100%;max-width:480px;background:var(--card);border-radius:18px 18px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));transform:translateY(22px);transition:transform .42s cubic-bezier(.16,1,.3,1);max-height:92svh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .modal.open .modal__box{transform:none}
+.modal__box--ask{max-width:400px}
+.ask__body{color:var(--stone);font-size:14.5px;line-height:1.6;margin:6px 0 14px}
 .modal__box h3{font-size:18px;margin-bottom:4px}
 .modal__box .who{color:var(--stone);font-size:13px;margin-bottom:14px}
 .modal__box textarea{width:100%;min-height:110px;padding:12px;border:1px solid var(--line);border-radius:12px;resize:vertical}
@@ -135,13 +159,190 @@ a{color:inherit}
 .chip{font-size:12px;padding:7px 11px;border:1px solid var(--line);border-radius:20px;background:var(--bone-2)}
 
 @media(min-width:560px){ .modal{align-items:center} .modal__box{border-radius:18px} }
+
+.hint{font-size:12.5px;color:var(--mute);line-height:1.6}
+/* ---- QR scanner (owner) — full-screen camera overlay ---- */
+.scan{position:fixed;inset:0;z-index:120;background:#0b0f0d;color:#eef2ee;display:flex;flex-direction:column;
+  opacity:0;visibility:hidden;transition:opacity .26s ease,visibility .26s}
+.scan.open{opacity:1;visibility:visible}
+.scan__head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(238,242,238,.12);font-size:14px;color:#9fb0a8}
+.scan__x{background:none;border:0;color:#eef2ee;font-size:30px;line-height:1;padding:0 6px;cursor:pointer}
+.scan__stage{position:relative;flex:1;min-height:0;background:#000;overflow:hidden}
+.scan__stage video{width:100%;height:100%;object-fit:cover;display:block}
+.scan__frame{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:min(66vw,260px);aspect-ratio:1;border:2px solid rgba(238,242,238,.85);border-radius:16px;
+  box-shadow:0 0 0 100vmax rgba(0,0,0,.45)}
+.scan__hint{position:absolute;left:0;right:0;bottom:18px;text-align:center;font-size:13px;color:#eef2ee;
+  text-shadow:0 1px 6px rgba(0,0,0,.8);padding:0 20px}
+.scan__result{padding:0 16px;max-height:52vh;overflow:auto;background:#0b0f0d}
+.scan__result:empty{display:none}
+.scan__manual{display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid rgba(238,242,238,.12);background:#0b0f0d}
+.scan__manual input{flex:1;padding:13px;border:1px solid rgba(238,242,238,.18);border-radius:10px;background:#17201c;color:#eef2ee;font-size:15px}
+.scan__manual input:focus{outline:none;border-color:#3f8f79}
+.scan__manual button{padding:13px 18px;border:1px solid rgba(238,242,238,.18);border-radius:10px;background:#1e2a25;color:#eef2ee;font-weight:600;cursor:pointer}
+.hit{background:#17201c;border:1px solid rgba(238,242,238,.14);border-radius:14px;padding:18px;margin:14px 0}
+.hit--ok{border-color:rgba(79,174,130,.5)}
+.hit--late{border-color:rgba(217,122,106,.55)}
+.hit--bad{border-color:rgba(217,122,106,.7)}
+.hit__name{font-family:var(--serif,Georgia);font-size:22px;color:#eef2ee}
+.hit__msg{color:#9fb0a8;font-size:14px;margin-top:6px}
+.hit__big{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.hit__cell{background:#0b0f0d;border-radius:10px;padding:10px;text-align:center}
+.hit__cell .k{font-size:11px;color:#9fb0a8;text-transform:uppercase;letter-spacing:.1em}
+.hit__cell .v{font-family:var(--serif,Georgia);font-size:22px;color:#eef2ee;margin-top:4px}
+.hit__cell .v.tbl{color:#d0a84e}
+.hit__go{width:100%;margin-top:8px;padding:15px;border:0;border-radius:12px;background:#4fae82;color:#04110c;font-weight:700;font-size:15px;cursor:pointer}
+.scan .tag--loyal{background:rgba(208,168,78,.16);color:#d0a84e;font-size:12px;padding:3px 10px;border-radius:20px}
+
+/* the real plan sits under the draggable tables, faded back so the tables
+   stay the thing you read; toggled off when it gets in the way */
+.plan{position:relative}
+/* Match the drawing's own proportions while it is shown, so a table at 40%
+   of the plan sits at 40% of the drawing. With a different aspect ratio the
+   background letterboxes and every table drifts by the same margin. */
+.plan.has-bg{aspect-ratio:1988/1406}
+/* The plan image lives INSIDE the zoom/pan canvas (not on .plan), so it scales
+   and moves together with the table markers — otherwise the two layers drift
+   apart the moment the canvas is zoomed, and the markers float off their boxes. */
+.plan.has-bg .plan__canvas::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background-image:var(--plan-bg);background-size:100% 100%;background-position:center;
+  background-repeat:no-repeat;opacity:.5}
+.plan__canvas{position:relative;z-index:1}
+/* A date on a phone is chosen, not typed: the native field stays (it opens
+   the OS picker) but what the owner reads is the day written out. The whole
+   thing is one control, so the toolbar's half-width button rule cannot break
+   it into separate rows. */
+.datepick{display:flex;align-items:center;gap:8px;flex:1 1 100%;flex-wrap:wrap}
+.datepick__group{display:flex;align-items:stretch;flex:1 1 250px;min-width:0;
+  border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}
+.datepick__group button{flex:0 0 44px;border:0;background:transparent;color:var(--ink);
+  font-size:20px;line-height:1;cursor:pointer;padding:0}
+.datepick__group button:active{background:var(--bone)}
+.datepick__field{position:relative;flex:1 1 auto;min-width:0;display:flex;align-items:center;
+  justify-content:center;padding:12px 6px;border-inline:1px solid var(--line);cursor:pointer}
+.datepick__field input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.datepick__field span{font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;text-transform:capitalize}
+.datepick__quick{flex:0 0 auto;padding:12px 16px;border-radius:12px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink);font-size:13.5px;font-weight:600;cursor:pointer}
+.datepick__quick:active{background:var(--bone)}
+/* ---- plan de salle ---- */
+.plan{position:relative;width:100%;aspect-ratio:16/10;background:
+  linear-gradient(#efe9dd 1px,transparent 1px) 0 0/100% 5%,
+  linear-gradient(90deg,#efe9dd 1px,transparent 1px) 0 0/5% 100%,#f7f3ea;
+  border:1px solid #e2dccf;border-radius:12px;overflow:hidden;touch-action:none;min-height:300px;
+  container-type:inline-size}
+.plan__canvas{position:absolute;inset:0;transform-origin:50% 50%;will-change:transform}
+.plan.panning{cursor:grabbing}
+.plan__zoom{position:absolute;right:10px;bottom:10px;z-index:6;display:flex;flex-direction:column;gap:6px}
+.plan__zoom button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
+  background:rgba(255,255,255,.94);backdrop-filter:blur(6px);color:var(--ink);font-size:17px;
+  font-weight:600;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.1);display:flex;
+  align-items:center;justify-content:center}
+.plan__zoom button:active{background:var(--card-2,#efe9dd)}
+/* markers scale with the plan width (container units) so they keep the PDF's
+   proportions on any screen — fixed px piled up on a narrow phone. */
+.tbl{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;cursor:grab;user-select:none;
+  width:clamp(24px,6.8cqw,62px);height:clamp(24px,6.8cqw,62px);
+  border:2px solid #1f473f;background:#fff;color:#17150f;transition:box-shadow .2s,border-color .2s}
+.tbl--round{border-radius:50%}
+.tbl--square{border-radius:6px}
+.tbl--rect{border-radius:6px;width:clamp(34px,9.6cqw,90px);height:clamp(22px,5.8cqw,54px)}
+.tbl.dragging{cursor:grabbing;box-shadow:0 10px 26px rgba(0,0,0,.22);z-index:5}
+.tbl__code{font-weight:700;font-size:clamp(11px,3cqw,14px);line-height:1}
+.tbl__seats{font-size:clamp(8px,2cqw,10px);color:#8b8271;margin-top:2px}
+/* below this the marker is too small for the seat count — keep just the number */
+@container (max-width: 460px){ .tbl__seats{display:none} }
+.tbl--busy{border-color:#a4552f;background:#fdf1ea}
+.tbl--busy .tbl__seats{color:#a4552f}
+.tbl--off{border-color:#c9c2b3;background:#f0ece3;opacity:.65}
+.tbl--pick{cursor:pointer}
+.tbl--sel{box-shadow:0 0 0 3px rgba(31,71,63,.28)}
+.tbl__join{font-size:9px;color:#1f473f;font-weight:700;margin-top:1px}
+.tbl--joinsel{box-shadow:0 0 0 3px rgba(176,141,62,.55);border-color:#b08d3e}
+.plan.merging .tbl{cursor:crosshair}
+/* dense floor plans: keep the code readable, drop the detail until zoomed */
+.plan--dense .tbl{width:clamp(20px,5.6cqw,50px);height:clamp(20px,5.6cqw,50px);border-width:1.5px}
+.plan--dense .tbl--rect{width:clamp(30px,8cqw,72px);height:clamp(19px,5cqw,46px)}
+.plan--dense .tbl__code{font-size:clamp(10px,2.6cqw,12px)}
+.plan--dense .tbl__seats,.plan--dense .tbl__join{display:none}
+.plan--dense.zoomed .tbl__seats{display:block}
+.tbl--held{border-color:#b08d3e;background:#fdf6e6;border-style:dashed}
+.tbl--held .tbl__seats{color:#8a6d1f}
+.dot--held{border-color:#b08d3e;background:#fdf6e6}
+.legend2{display:flex;gap:18px;margin-top:10px;font-size:12px;color:#8b8271;flex-wrap:wrap}
+.legend2 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px;border:2px solid}
+.dot--free{border-color:#1f473f;background:#fff}
+.dot--busy{border-color:#a4552f;background:#fdf1ea}
+.dot--off{border-color:#c9c2b3;background:#f0ece3}
+.pill--expired{background:#f3ece2;color:#8a6d1f}
+.pill--cancelled{background:#f1eeea;color:#8b8271}
+.tag--walkin{background:#eaf3ef;color:#1f473f;border:1px solid #cfe3da}
+.tag--held{background:#fdf6e6;color:#8a6d1f;border:1px solid #e6d6ae}
+.tag{display:inline-block;font-size:10px;letter-spacing:.06em;padding:2px 7px;border-radius:100px;margin-left:6px;vertical-align:middle}
+.tag--table{background:#1f473f;color:#fff}
+.tag--late{background:#fdf1ea;color:#a4552f;border:1px solid #e8cbbb}
+.tag--ontime{background:#eaf3ef;color:#1f473f;border:1px solid #cfe3da}
+.tag--loyal{background:#f7efdc;color:#8a6d1f;border:1px solid #e6d6ae}
+.tag--wait{background:#fff4d6;color:#8a6d1f;border:1px solid #ecd9a4}
+.tag--own{background:#eee9dd;color:#726a5c}
+.tag--arr{background:#eaf3ef;color:#1f473f;border:1px solid #b7d6c8}
+.tag--mod{background:#fdf1ea;color:#a4552f;border:1px solid #e8cbbb;font-weight:600}
+.row__occ{margin-top:6px;font-size:13px;color:#8a6d1f;background:#faf5e6;border:1px solid #ecdfbf;border-radius:8px;padding:6px 10px;display:inline-block}
+.row__mod{margin-top:6px;font-size:12.5px;color:#a4552f}
+/* undo toast (#7) */
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(20px);z-index:200;
+  display:flex;align-items:center;gap:14px;max-width:calc(100vw - 32px);
+  background:#17150f;color:#f3efe6;padding:12px 14px 12px 18px;border-radius:12px;
+  box-shadow:0 12px 34px rgba(0,0,0,.34);opacity:0;visibility:hidden;transition:opacity .25s,transform .25s}
+.toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.toast__msg{font-size:14px}
+.toast__undo{flex:0 0 auto;background:transparent;border:1px solid rgba(243,239,230,.4);color:#f3efe6;
+  border-radius:8px;padding:8px 14px;font-weight:600;font-size:13px;cursor:pointer}
+.toast__undo:hover{background:rgba(243,239,230,.12)}
 @media(max-width:900px){ .kpis{grid-template-columns:repeat(3,1fr)} .grid2{grid-template-columns:1fr} }
 @media(max-width:600px){
-  .kpis{grid-template-columns:repeat(2,1fr)}
+  /* his three lines stay three lines on the phone — compact rather than split,
+     so the groups still read as groups and the bookings stay near the top */
+  .kpis{gap:6px;margin-bottom:14px}
+  .kpirow{gap:6px}
+  .kpi{padding:8px 6px;text-align:center;border-radius:10px;min-width:0}
+  .kpi .n{font-size:19px;line-height:1}
+  .kpi .l{font-size:8px;letter-spacing:.02em;margin-top:3px;line-height:1.2;
+    white-space:normal;overflow-wrap:anywhere}
   .menu-item{grid-template-columns:1fr 1fr;grid-auto-rows:auto}
   .menu-item .del{grid-column:2;justify-self:end}
   .f2{grid-template-columns:1fr}
-  .row{flex-wrap:wrap}
+
+  /* ---- reservation rows: stack instead of squeezing into columns ---- */
+  .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;
+    align-items:start;padding:16px 14px}
+  .row__main{grid-column:1;min-width:0}
+  .row > .pill{grid-column:2;justify-self:end;align-self:start}
+  .row__name{font-size:19px;line-height:1.2}
+  .row__when{font-size:15px;margin-top:7px}
+  .row__sub{font-size:12.5px;margin-top:5px}
+  /* actions become a full-width row of real touch targets */
+  .act{grid-column:1/-1;display:grid;gap:8px;
+    grid-template-columns:repeat(auto-fit,minmax(84px,1fr));margin-top:4px}
+  .act .btn{width:100%;padding:13px 8px;font-size:13.5px;font-weight:600;border-radius:10px}
+  .btn--ico .btn__lbl{display:inline}
+  .btn--ico .ico{width:17px;height:17px}
+
+  /* header, tabs and forms breathe */
+  .tabs{padding:0 12px 12px;gap:8px;scroll-snap-type:x proximity}
+  .tab{scroll-snap-align:start;padding:11px 18px;font-size:14px}
+  .tools{gap:8px}
+  .tools select,.tools input{flex:1 1 140px;min-width:0;padding:12px 10px;font-size:15px}
+  .tools .btn{flex:1 1 calc(50% - 4px);padding:13px 10px;font-size:13.5px}
+  .section-h{flex-wrap:wrap;gap:6px}
+  .plan{aspect-ratio:1/1}
+  .modal__box{padding:20px 18px calc(20px + env(safe-area-inset-bottom))}
+  .modal__row{flex-wrap:wrap;gap:8px}
+  .modal__row .btn{flex:1 1 100%}
+  .modal__box{max-height:88svh}
+  .modal__row{position:sticky;bottom:0;background:var(--card);padding-top:10px;margin-top:4px}
 }
 </style>
 </head>
@@ -152,7 +353,8 @@ a{color:inherit}
   <div class="login__box">
     <img src="/assets/logo-ink.png" alt="Les Émirs" />
     <p>Espace Direction</p>
-    <input id="code" type="password" placeholder="Code d'accès" autocomplete="off" />
+    <input id="code" type="password" placeholder="Code d'accès" autocomplete="off"
+           autocapitalize="off" autocorrect="off" spellcheck="false" />
     <button id="loginBtn">Entrer</button>
     <div class="login__err" id="loginErr"></div>
   </div>
@@ -172,30 +374,90 @@ a{color:inherit}
     </div>
     <div class="tabs" id="tabs">
       <div class="tab active" data-tab="demandes">Demandes <span class="badge hide" id="pendBadge">0</span></div>
+      <div class="tab" data-tab="salle">Plan de salle</div>
       <div class="tab" data-tab="messages">Messages <span class="badge hide" id="msgBadge">0</span></div>
+      <div class="tab" data-tab="emails">Emails <span class="badge hide" id="mailBadge">0</span></div>
       <div class="tab" data-tab="analytics">Analytics</div>
       <div class="tab" data-tab="clients">Clients</div>
       <div class="tab" data-tab="marketing">Marketing</div>
       <div class="tab" data-tab="site">Site</div>
       <div class="tab" data-tab="complet">Complet</div>
       <div class="tab" data-tab="blacklist">Blacklist</div>
+      <div class="tab" data-tab="envois">Envois</div>
     </div>
   </div>
 
   <div class="wrap">
     <div class="kpis" id="kpis"></div>
 
+    <!-- Plan de salle -->
+    <section data-panel="salle" class="hide">
+      <div class="section-h">
+        <h2>Plan de salle</h2>
+        <span class="muted" id="planHint">Glissez une table pour la déplacer · cliquez pour la modifier</span>
+      </div>
+      <div class="tools">
+        <select id="planZone"><option value="inside">Salle intérieure</option><option value="terrace">Terrasse</option></select>
+        <input type="date" id="planDate" />
+        <input type="time" id="planTime" step="900" />
+        <button class="btn btn--sm" id="tblAdd">+ Ajouter une table</button>
+        <button class="btn btn--sm btn--ghost" id="mergeMode">Joindre des tables</button>
+        <button class="btn btn--sm btn--ghost hide" id="planSave">Enregistrer les positions</button>
+        <button class="btn btn--sm btn--ghost" id="planBg" aria-pressed="true">Plan du restaurant</button>
+        <a class="btn btn--sm btn--ghost" href="/assets/plan/plan-de-salle.pdf" target="_blank" rel="noopener">PDF ↗</a>
+        <span class="muted" id="planCount"></span>
+      </div>
+      <div class="plan" id="plan"><div class="empty" style="padding:60px 0">Chargement…</div></div>
+      <div class="legend2">
+        <span><i class="dot dot--free"></i>Libre</span>
+        <span><i class="dot dot--busy"></i>Réservée</span>
+        <span><i class="dot dot--held"></i>Réservée maison</span>
+        <span><i class="dot dot--off"></i>Hors service</span>
+      </div>
+      <div class="section-h" style="margin-top:22px"><h2>En attente d'une table</h2><span class="muted" id="waitCount"></span></div>
+      <div class="panel" id="waitList"><div class="empty">Personne n'attend.</div></div>
+      <div class="section-h" style="margin-top:22px"><h2>Historique des tables</h2>
+        <button class="btn btn--sm btn--ghost" id="histRefresh">Actualiser</button></div>
+      <div class="panel" id="histList"><div class="empty">Chargement…</div></div>
+    </section>
+
+    <!-- Envois (test email / SMS) -->
+    <section data-panel="envois" class="hide">
+      <div class="section-h"><h2>Test d'envoi</h2><span class="muted">Vérifiez que les emails et SMS partent bien.</span></div>
+      <div class="panel" id="chanState"><div class="empty">Chargement…</div></div>
+      <div class="form" style="margin-top:14px">
+        <div class="f2">
+          <div class="fg"><label>Canal</label><select id="tnChannel">
+            <option value="email">Email</option><option value="sms">SMS</option><option value="whatsapp">WhatsApp</option>
+          </select></div>
+          <div class="fg"><label>Destinataire</label><input id="tnTo" placeholder="vous@exemple.com ou +216…" /></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn btn--m" id="tnSend">Envoyer un test</button>
+          <span id="tnMsg" class="muted"></span>
+        </div>
+      </div>
+    </section>
+
     <!-- Demandes -->
     <section data-panel="demandes">
       <div class="tools">
-        <select id="fStatus">
-          <option value="pending">En attente</option>
-          <option value="accepted">Acceptées</option>
-          <option value="">Toutes (récentes)</option>
-          <option value="declined">Refusées</option>
-          <option value="no_show">No-show</option>
-        </select>
-        <input type="date" id="fDate" />
+        <button class="btn btn--sm" id="resAdd">+ Nouvelle réservation</button>
+        <button class="btn btn--sm btn--ghost" id="walkinAdd">+ Sans réservation</button>
+        <button class="btn btn--sm" id="openScan">⛶ Scanner un QR</button>
+        <span class="filterchip" id="filterChip" role="button" tabindex="0" hidden></span>
+        <div class="datepick">
+          <div class="datepick__group">
+            <button type="button" data-day="-1" aria-label="Jour précédent">‹</button>
+            <label class="datepick__field">
+              <input type="date" id="fDate" />
+              <span id="fDateLabel">Toutes les dates</span>
+            </label>
+            <button type="button" data-day="1" aria-label="Jour suivant">›</button>
+          </div>
+          <button type="button" class="datepick__quick" id="fToday">Aujourd’hui</button>
+          <button type="button" class="datepick__quick hide" id="fClear">Tout voir</button>
+        </div>
         <span class="muted" id="listCount"></span>
       </div>
       <div class="panel" id="resList"><div class="empty">Chargement…</div></div>
@@ -203,9 +465,45 @@ a{color:inherit}
 
     <!-- Messages -->
     <section data-panel="messages" class="hide">
-      <div class="section-h"><h2>Boîte de réception</h2><button class="btn btn--sm btn--ghost" id="readAll">Tout marquer lu</button></div>
+      <div class="section-h"><h2>Boîte de réception</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn btn--sm btn--ghost" href="https://ssl0.ovh.net/" target="_blank" rel="noopener">Webmail contact@lesemirs.com ↗</a>
+          <button class="btn btn--sm btn--ghost" id="readAll">Tout marquer lu</button>
+        </div>
+      </div>
+      <p class="hint" style="margin:0 0 12px">Les messages envoyés depuis le site arrivent ici. Les emails écrits directement à contact@lesemirs.com se lisent dans la webmail.</p>
       <div class="panel" id="msgList"><div class="empty">Chargement…</div></div>
     </section>
+
+    <!-- Emails reçus -->
+    <section data-panel="emails" class="hide">
+      <div class="section-h"><h2>Emails</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn--sm" id="mailCompose">✎ Écrire un email</button>
+          <button class="btn btn--sm btn--ghost" id="mailReadAll">Tout marquer lu</button>
+        </div>
+      </div>
+      <p class="hint" style="margin:0 0 12px">Vous recevez et envoyez depuis <b>contact@lesemirs.tn</b>. Les réponses reviennent ici.</p>
+      <div class="panel" id="mailList"><div class="empty">Chargement…</div></div>
+    </section>
+
+    <!-- Compose / reply email -->
+    <div class="modal" id="composeModal">
+      <div class="modal__box">
+        <h3 id="composeTitle">Écrire un email</h3>
+        <p class="ask__body">Envoyé depuis contact@lesemirs.tn. La réponse du client reviendra ici.</p>
+        <div class="form">
+          <div class="fg"><label>Destinataire</label><input id="cmTo" type="email" placeholder="client@email.com" /></div>
+          <div class="fg"><label>Objet</label><input id="cmSubject" type="text" placeholder="Objet du message" /></div>
+          <div class="fg"><label>Message</label><textarea id="cmBody" rows="7" placeholder="Votre message…"></textarea></div>
+          <span id="cmMsg" class="muted"></span>
+        </div>
+        <div class="modal__row">
+          <button class="btn btn--ghost" data-compose-close>Annuler</button>
+          <button class="btn btn--m" id="cmSend">Envoyer</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Analytics -->
     <section data-panel="analytics" class="hide">
@@ -301,6 +599,137 @@ a{color:inherit}
   </div>
 </div>
 
+<!-- walk-in -->
+<!-- QR scanner (owner's own camera) -->
+<div class="scan" id="scanView" aria-hidden="true">
+  <div class="scan__head">
+    <button class="scan__x" id="scanClose" aria-label="Fermer">&times;</button>
+    <span>Scanner le code du client</span>
+  </div>
+  <div class="scan__stage">
+    <video id="scanVideo" playsinline muted></video>
+    <div class="scan__frame"></div>
+    <div class="scan__hint" id="scanHint">Démarrage de la caméra…</div>
+  </div>
+  <div class="scan__result" id="scanResult"></div>
+  <div class="scan__manual">
+    <input id="scanRef" placeholder="Ou saisir la référence (LE-XXXXXX)" autocapitalize="characters" autocomplete="off" />
+    <button id="scanRefGo">OK</button>
+  </div>
+</div>
+
+<div class="modal" id="walkinModal">
+  <div class="modal__box">
+    <h3>Client sans réservation</h3>
+    <p class="ask__body">Il est déjà là. Notez-le pour qu'il compte dans le service et occupe sa table.</p>
+    <div class="form">
+      <div class="f2">
+        <div class="fg"><label>Nom (facultatif)</label><input id="wkName" placeholder="Client sans réservation" /></div>
+        <div class="fg"><label>Couverts</label><input id="wkParty" type="number" min="1" max="40" value="2" /></div>
+      </div>
+      <div class="f2">
+        <div class="fg"><label>Place</label><select id="wkSeat"><option value="inside">Salle intérieure</option><option value="terrace">Terrasse</option></select></div>
+        <div class="fg"><label>Table</label><select id="wkTable"></select></div>
+      </div>
+      <span id="wkMsg" class="muted"></span>
+    </div>
+    <div class="modal__row">
+      <button class="btn btn--ghost" id="wkCancel">Annuler</button>
+      <button class="btn btn--m" id="wkSave">Installer</button>
+    </div>
+  </div>
+</div>
+
+<!-- yes / no confirmation -->
+<div class="modal" id="askModal">
+  <div class="modal__box modal__box--ask">
+    <h3 id="askTitle">Confirmer</h3>
+    <p class="ask__body" id="askBody"></p>
+    <div class="fg hide" id="askReasonWrap"><label>Motif</label>
+      <input id="askReason" placeholder="retard, no-show, changement de table…" /></div>
+    <div class="modal__row">
+      <button class="btn btn--ghost" id="askNo">Non</button>
+      <button class="btn btn--m" id="askYes">Oui</button>
+    </div>
+  </div>
+</div>
+
+<!-- table editor -->
+<div class="modal" id="tblModal">
+  <div class="modal__box">
+    <h3 id="tblTitle">Table</h3>
+    <div class="form">
+      <div class="f2">
+        <div class="fg"><label>Nom / numéro</label><input id="tblCode" placeholder="T1, Terrasse 3…" /></div>
+        <div class="fg"><label>Couverts</label><input id="tblSeats" type="number" min="1" max="30" value="2" /></div>
+      </div>
+      <div class="f2">
+        <div class="fg"><label>Zone</label><select id="tblZone"><option value="inside">Salle intérieure</option><option value="terrace">Terrasse</option></select></div>
+        <div class="fg"><label>Forme</label><select id="tblShape"><option value="round">Ronde</option><option value="square">Carrée</option><option value="rect">Rectangulaire</option></select></div>
+      </div>
+      <div class="fg"><label><input type="checkbox" id="tblActive" checked style="width:auto;margin-right:8px" />En service</label></div>
+      <div class="fg"><label><input type="checkbox" id="tblBlocked" style="width:auto;margin-right:8px" />Réservée à la maison (privée)</label></div>
+      <div class="fg" id="tblNoteWrap"><label>Pour qui / pourquoi</label><input id="tblNote" placeholder="Famille, amis, table du patron…" /></div>
+      <span id="tblMsg" class="muted"></span>
+    </div>
+    <div class="modal__row">
+      <button class="btn btn--sm btn--ghost hide" id="tblSplit">Séparer</button>
+      <button class="btn btn--no btn--sm hide" id="tblDelete">Supprimer</button>
+      <button class="btn btn--ghost" id="tblCancel">Annuler</button>
+      <button class="btn btn--m" id="tblSave">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- table picker (on accepting a booking) -->
+<div class="modal" id="pickModal">
+  <div class="modal__box">
+    <h3>Choisir une table</h3>
+    <div class="who" id="pickWho"></div>
+    <div class="tools" style="margin:10px 0">
+      <select id="pickZone"><option value="inside">Salle intérieure</option><option value="terrace">Terrasse</option></select>
+      <span class="muted" id="pickHint">Les tables en rouge sont déjà prises sur ce créneau.</span>
+    </div>
+    <div class="plan" id="pickPlan" style="aspect-ratio:16/9"></div>
+    <div class="modal__row">
+      <button class="btn btn--ghost" id="pickSkip">Sans table pour l'instant</button>
+      <button class="btn btn--m" id="pickConfirm" disabled>Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- new reservation (owner adds a friend / a phone booking) -->
+<div class="modal" id="newModal">
+  <div class="modal__box">
+    <h3>Nouvelle réservation</h3>
+    <div class="form">
+      <div class="f2">
+        <div class="fg"><label>Nom</label><input id="nrName" placeholder="Nom du client" /></div>
+        <div class="fg"><label>Téléphone</label><input id="nrPhone" placeholder="+216…" /></div>
+      </div>
+      <div class="f2">
+        <div class="fg"><label>Date</label><input id="nrDate" type="date" /></div>
+        <div class="fg"><label>Heure</label><input id="nrTime" type="time" step="900" /></div>
+      </div>
+      <div class="f2">
+        <div class="fg"><label>Couverts</label><input id="nrParty" type="number" min="1" max="40" value="2" /></div>
+        <div class="fg"><label>Place</label><select id="nrSeat"><option value="inside">Salle intérieure</option><option value="terrace">Terrasse</option></select></div>
+      </div>
+      <div class="f2">
+        <div class="fg"><label>Email (facultatif)</label><input id="nrEmail" type="email" placeholder="Pour la confirmation" /></div>
+        <div class="fg"><label>Table (facultatif)</label><select id="nrTable"><option value="">— choisir plus tard —</option></select></div>
+      </div>
+      <div class="fg"><label>Note (facultatif)</label><input id="nrNote" placeholder="Ami de la maison, anniversaire…" /></div>
+      <div class="fg"><label><input type="checkbox" id="nrNotify" style="width:auto;margin-right:8px" />Prévenir le client (email / SMS)</label></div>
+      <span id="nrMsg" class="muted"></span>
+    </div>
+    <div class="modal__row">
+      <button class="btn btn--ghost" id="nrCancel">Annuler</button>
+      <button class="btn btn--m" id="nrSave">Ajouter</button>
+    </div>
+  </div>
+</div>
+
 <!-- message modal -->
 <div class="modal" id="modal">
   <div class="modal__box">
@@ -320,6 +749,15 @@ a{color:inherit}
   "use strict";
   var TOKEN=null; try{ TOKEN=localStorage.getItem('emirs_admin_token'); }catch(e){}
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  var CUR_FILTER='pending';
+  var FILTER_LABELS={
+    'pending':'En attente', 'accepted':'Acceptées', 'declined':'Refusées', 'no_show':'No-shows',
+    'expired':'Expirées', 'cancelled':'Annulées',
+    '@accepted':'Acceptées', '@no_table':'Sans table', '@with_table':'Avec table', '@arrived':'Arrivés',
+    '@not_arrived':'Pas encore arrivés', '@walkins':'Sans réservation',
+    '@waiting':"En attente d'une table", '@today':"Tout aujourd'hui"
+  };
+  function show(id,on){ var m=document.getElementById(id); if(m) m.classList.toggle('open',!!on); }
   async function api(path, opts){
     opts=opts||{}; var h={'content-type':'application/json'};
     if(opts.auth!==false && TOKEN) h['authorization']='Bearer '+TOKEN;
@@ -349,7 +787,8 @@ a{color:inherit}
     var code=document.getElementById('code').value.trim(), err=document.getElementById('loginErr'); if(!code) return;
     try{ var res=await api('auth',{method:'POST',auth:false,body:{code:code}});
       if(res.status===200 && res.data.token && res.data.role==='owner'){ TOKEN=res.data.token; try{localStorage.setItem('emirs_admin_token',TOKEN);}catch(e){} showApp(); }
-      else err.textContent = (res.data.role && res.data.role!=='owner') ? "Ce code n'est pas un code Direction." : "Code invalide.";
+      else err.textContent = (res.data.role && res.data.role!=='owner') ? "Ce code n'est pas un code Direction."
+        : ((res.data && res.data.error) ? res.data.error : "Code invalide.");
     }catch(e){ err.textContent="Connexion impossible."; }
   }
   document.getElementById('loginBtn').addEventListener('click', doLogin);
@@ -363,11 +802,14 @@ a{color:inherit}
       var n=t.getAttribute('data-tab');
       document.querySelectorAll('[data-panel]').forEach(function(p){ p.classList.toggle('hide', p.getAttribute('data-panel')!==n); });
       if(n==='messages') loadMessages();
+      if(n==='emails') loadEmails();
       if(n==='marketing') loadAudience();
       if(n==='site') loadCms();
       if(n==='clients') loadClients();
       if(n==='blacklist') loadBlacklist();
       if(n==='complet') loadBlocks();
+      if(n==='salle'){ if(!document.getElementById('planDate').value) document.getElementById('planDate').value=todayStr(); loadTables(); loadHistory(); }
+      if(n==='envois') loadChannels();
     });
   });
 
@@ -376,39 +818,269 @@ a{color:inherit}
   function fdate(d){ var x=new Date(d+'T00:00:00'); return DOW[x.getDay()]+' '+x.getDate()+' '+MON[x.getMonth()]; }
   function ftime(t){ return String(t||'').slice(0,5); }
   function seat(s){ return s==='terrace'?'Terrasse':'Intérieur'; }
-  function statusFr(s){ return ({pending:'En attente',accepted:'Acceptée',declined:'Refusée',arrived:'Arrivé',seated:'Installé',no_show:'No-show',cancelled:'Annulée'})[s]||s; }
+  function statusFr(s){ return ({pending:'En attente',accepted:'Acceptée',declined:'Refusée',arrived:'Arrivé',seated:'Arrivée',no_show:'No-show',cancelled:'Annulée',expired:'Expirée'})[s]||s; }
+  /* badges: where they sit, how they behave, how loyal they are */
+  function tableLabel(r){
+    if(!r.table_code) return '';
+    return esc(r.table_code) + (r.merged_codes ? ' +'+esc(String(r.merged_codes).split(',').join(' +')) : '');
+  }
+  function tags(r){
+    var t='';
+    if(r.table_code) t+='<span class="tag tag--table">'+tableLabel(r)+'</span>';
+    if(r.arrived_at) t+='<span class="tag tag--arr">arrivé</span>';            /* stays visible while Accepté (#2) */
+    if(r.modified) t+='<span class="tag tag--mod">modifiée · à revoir</span>';  /* client change awaiting review (#4) */
+    if(r.waiting) t+='<span class="tag tag--wait">attend une table</span>';
+    if(r.late_minutes>0) t+='<span class="tag tag--late">'+r.late_minutes+' min de retard</span>';
+    else if(r.late_minutes===0 && r.arrived_at) t+='<span class="tag tag--ontime">à l\'heure</span>';
+    if((r.bookings_completed||0)>=5) t+='<span class="tag tag--loyal">fidèle · '+r.bookings_completed+' visites</span>';
+    if(r.source==='owner') t+='<span class="tag tag--own">ajoutée par la direction</span>';
+    if(r.source==='walkin') t+='<span class="tag tag--walkin">sans réservation</span>';
+    return t;
+  }
+  /* the guest's special-occasion note, shown to owner and reception (#1) */
+  function occasion(r){
+    if(!r.note) return '';
+    return '<div class="row__occ">✎ '+esc(r.note)+'</div>';
+  }
+  /* the guest's track record, so the owner can judge at a glance */
+  function history(r){
+    if(r.bookings_total==null) return '';
+    var bits=[];
+    if(r.on_time) bits.push(r.on_time+'× à l\'heure');
+    if(r.late_count) bits.push(r.late_count+'× en retard');
+    if(r.no_shows) bits.push(r.no_shows+'× no-show');
+    return bits.length ? ' · <span style="color:#8b8271">'+bits.join(' · ')+'</span>' : '';
+  }
   function ago(ts){ var s=(Date.now()-new Date(ts).getTime())/1000; if(s<60)return "à l'instant"; if(s<3600)return Math.floor(s/60)+' min'; if(s<86400)return Math.floor(s/3600)+' h'; return Math.floor(s/86400)+' j'; }
+
+  /* ---------- toast with Undo (#7) ---------- */
+  var _toastEl=null, _toastTimer=null;
+  function toast(msg, onUndo){
+    if(!_toastEl){
+      _toastEl=document.createElement('div'); _toastEl.className='toast';
+      _toastEl.innerHTML='<span class="toast__msg"></span><button class="toast__undo" type="button">Annuler</button>';
+      document.body.appendChild(_toastEl);
+    }
+    _toastEl.querySelector('.toast__msg').textContent=msg;
+    var btn=_toastEl.querySelector('.toast__undo');
+    btn.style.display=onUndo?'':'none';
+    var fresh=btn.cloneNode(true); btn.parentNode.replaceChild(fresh,btn);   /* drop old listeners */
+    if(onUndo) fresh.addEventListener('click', async function(){ hideToast(); try{ await onUndo(); }catch(e){} });
+    _toastEl.classList.add('show');
+    clearTimeout(_toastTimer); _toastTimer=setTimeout(hideToast, onUndo?7000:3500);
+  }
+  function hideToast(){ if(_toastEl) _toastEl.classList.remove('show'); }
+  /* capture the fields Undo needs to put a booking back exactly as it was */
+  function snap(r){ return {status:r.status, table_id:r.table_id, waiting:r.waiting?1:0,
+    arrived_at:r.arrived_at||null, seated_at:r.seated_at||null, late_minutes:r.late_minutes==null?null:r.late_minutes}; }
+  async function undo(id, type, snapshot){
+    await api('reservation-restore',{method:'POST',body:{id:id,type:type,snapshot:snapshot}});
+    await loadReservations(); await loadStats();
+  }
 
   /* KPIs */
   function renderKpis(s){
-    var t=s.totals||{};
-    var k=[{n:t.pending||0,l:'En attente',a:(t.pending||0)>0},{n:t.accepted||0,l:'Acceptées'},{n:t.covers||0,l:'Couverts'},{n:t.no_shows||0,l:'No-shows'},{n:s.clients||0,l:'Clients'},{n:(s.visitors&&s.visitors.visitors)||0,l:'Visiteurs 30j'}];
-    document.getElementById('kpis').innerHTML=k.map(function(x){return '<div class="kpi'+(x.a?' kpi--a':'')+'"><div class="n">'+x.n+'</div><div class="l">'+x.l+'</div></div>';}).join('');
-    var pend=t.pending||0, b=document.getElementById('pendBadge'); b.textContent=pend; b.classList.toggle('hide',pend===0);
+    var t=s.totals||{}, d=s.today||{};
+    /* Grouped exactly as he reads a service: what needs a decision, then where
+       people are seated, then who is actually in the room. */
+    var rows=[
+      [ {n:d.pending||0,   l:'En attente', f:'status:pending', a:(d.pending||0)>0},
+        {n:d.accepted||0,  l:'Acceptées',  f:'scope:accepted'},
+        {n:d.covers||0,    l:'Couverts'},
+        {n:d.cancelled||0, l:'Annulées',   f:'status:cancelled'} ],
+      [ {n:d.no_table||0,  l:'Sans table',       f:'scope:no_table', a:(d.no_table||0)>0},
+        {n:d.with_table||0,l:'Avec table',       f:'scope:with_table'},
+        {n:d.walkins||0,   l:'Sans réservation', f:'scope:walkins'} ],
+      [ {n:d.not_arrived||0, l:'Pas encore arrivés', f:'scope:not_arrived', a:(d.not_arrived||0)>0},
+        {n:d.arrived||0,     l:'Arrivés',            f:'scope:arrived'},
+        {n:d.expired||0,     l:'Expirées',           f:'status:expired'},
+        {n:d.no_shows||0,    l:'No-shows',           f:'status:no_show'} ]
+    ];
+    document.getElementById('kpis').innerHTML=rows.map(function(row){
+      return '<div class="kpirow kpirow--'+row.length+'">'+row.map(function(x){
+        return '<'+(x.f?'button':'div')+' class="kpi'+(x.a?' kpi--a':'')+(x.f?' kpi--go':'')+'"'+
+          (x.f?' data-kpi="'+x.f+'" aria-label="'+x.l+' : '+x.n+'"':'')+'>'+
+          '<div class="n">'+x.n+'</div><div class="l">'+x.l+'</div></'+(x.f?'button':'div')+'>';
+      }).join('')+'</div>';
+    }).join('');
+    document.querySelectorAll('[data-kpi]').forEach(function(b){
+      b.addEventListener('click', function(){ applyKpiFilter(b.getAttribute('data-kpi')); });
+    });
+    var pend=d.pending||0, b=document.getElementById('pendBadge'); b.textContent=pend; b.classList.toggle('hide',pend===0);
   }
+
+  /* a KPI box either switches tab, or filters the reservation list */
+  function applyKpiFilter(f){
+    var kind=f.split(':')[0], val=f.split(':')[1];
+    if(kind==='tab'){ var tb=[...document.querySelectorAll('.tab')].find(function(t){return t.getAttribute('data-tab')===val;}); if(tb) tb.click(); return; }
+    var tb=[...document.querySelectorAll('.tab')].find(function(t){return t.getAttribute('data-tab')==='demandes';});
+    if(tb) tb.click();
+    setFilter(kind==='status' ? val : ('@'+val));
+    document.querySelector('[data-panel="demandes"]').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
 
   /* reservations */
   async function loadReservations(){
-    var status=document.getElementById('fStatus').value, date=document.getElementById('fDate').value;
-    var q=[]; if(status)q.push('status='+status); if(date)q.push('date='+date);
+    var status=CUR_FILTER, date=document.getElementById('fDate').value;
+    var q=[];
+    if(status.charAt(0)==='@') q.push('scope='+status.slice(1));   // scope filters
+    else if(status) q.push('status='+status);
+    if(date) q.push('date='+date);
     var res=await api('reservations'+(q.length?'?'+q.join('&'):'')); var list=res.data.reservations||[];
     document.getElementById('listCount').textContent=list.length+' réservation'+(list.length>1?'s':'');
     var el=document.getElementById('resList');
     if(!list.length){ el.innerHTML='<div class="empty">Aucune réservation.</div>'; return; }
     el.innerHTML=list.map(function(r){
+      /* the owner runs the door himself during a rush, so he gets the same
+         controls the reception app has, plus a one-tap call */
+      var call='<a class="btn btn--sm btn--ghost btn--ico" href="tel:'+esc(r.phone)+'" aria-label="Appeler '+esc(r.name)+'" title="Appeler le client">'+
+        '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+
+        '<path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1.2 1.2 0 0 1 1.2-.3 13 13 0 0 0 4 .7 1.2 1.2 0 0 1 1.2 1.2V20a1.2 1.2 0 0 1-1.2 1.2A17.5 17.5 0 0 1 2.8 3.7 1.2 1.2 0 0 1 4 2.5h3.2a1.2 1.2 0 0 1 1.2 1.2 13 13 0 0 0 .7 4 1.2 1.2 0 0 1-.3 1.2z"/></svg>'+
+        '<span class="btn__lbl">Appeler</span></a>';
+      /* table controls stay available through arrival and seating (#6, #8) */
+      var tableBtns=
+        '<button class="btn btn--sm btn--ghost" data-pick="'+r.id+'">'+(r.table_code?'Changer de table':'Placer')+'</button>'+
+        (r.table_code?'<button class="btn btn--sm btn--ghost" data-addtbl="'+r.id+'">+ Table</button>':'')+
+        (r.table_code?'<button class="btn btn--sm btn--ghost" data-free="'+r.id+'">Libérer '+esc(r.table_code)+'</button>':'');
       var a='';
-      if(r.status==='pending') a='<button class="btn btn--ok btn--sm" data-act="accepted" data-id="'+r.id+'">Accepter</button><button class="btn btn--no btn--sm" data-act="declined" data-id="'+r.id+'">Refuser</button>';
-      else if(r.status==='accepted') a='<button class="btn btn--sm" data-act="seated" data-id="'+r.id+'">Installé</button><button class="btn btn--no btn--sm" data-act="no_show" data-id="'+r.id+'">No-show</button>';
-      a+='<button class="btn btn--sm btn--ghost" data-msg="'+r.id+'" data-nm="'+esc(r.name)+'" data-ph="'+esc(r.phone)+'" data-em="'+esc(r.email||'')+'">✉︎</button>';
-      return '<div class="row"><div class="row__main"><div class="row__name">'+esc(r.name)+' · <span class="pill pill--'+r.seating+'">'+seat(r.seating)+'</span></div>'+
-        '<div class="row__sub">'+fdate(r.res_date)+' · '+ftime(r.res_time)+' · '+r.party_size+' couv. · <a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a>'+(r.email?' · '+esc(r.email):'')+' · réf '+esc(r.reference)+'</div></div>'+
-        '<span class="pill pill--'+r.status+'">'+statusFr(r.status)+'</span><div class="act">'+a+'</div></div>';
+      if(r.status==='pending'){
+        a='<button class="btn btn--ok btn--sm" data-pick="'+r.id+'">Accepter</button>'+
+          '<button class="btn btn--no btn--sm" data-act="declined" data-id="'+r.id+'">Refuser</button>'+call;
+      } else if(r.status==='accepted'){
+        a=tableBtns+
+          '<button class="btn btn--ok btn--sm" data-arr="'+r.id+'">Arrivé</button>'+
+          '<button class="btn btn--sm btn--warn" data-wait="'+r.id+'">Fait patienter</button>'+
+          '<button class="btn btn--no btn--sm" data-act="no_show" data-id="'+r.id+'">No-show</button>'+call;
+      } else if(r.status==='arrived'){
+        a=tableBtns+
+          '<button class="btn btn--sm" data-act="seated" data-id="'+r.id+'">Arrivée</button>'+
+          '<button class="btn btn--no btn--sm" data-act="no_show" data-id="'+r.id+'">No-show</button>'+call;
+      } else if(r.status==='seated'){
+        a=tableBtns+call;                                   /* table still editable after seating (#6) */
+      } else if(r.status==='no_show'){
+        a=call+(r.table_code?'<button class="btn btn--sm btn--ghost" data-free="'+r.id+'">Libérer '+esc(r.table_code)+'</button>':'');
+      } else { a=call; }
+      a+='<button class="btn btn--sm btn--ghost btn--ico" data-msg="'+r.id+'" data-nm="'+esc(r.name)+'" data-ph="'+esc(r.phone)+'" data-em="'+esc(r.email||'')+'" aria-label="Écrire à '+esc(r.name)+'" title="Écrire au client"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 7 8.2 5.6a1.5 1.5 0 0 0 1.6 0L21 7"/></svg><span class="btn__lbl">Message</span></button>';
+      return '<div class="row">'+
+        '<div class="row__main">'+
+          '<div class="row__name">'+esc(r.name)+'</div>'+
+          '<div class="row__tags"><span class="pill pill--'+r.seating+'">'+seat(r.seating)+'</span>'+tags(r)+'</div>'+
+          '<div class="row__when">'+fdate(r.res_date)+' · <b>'+ftime(r.res_time)+'</b> · '+r.party_size+' couv.</div>'+
+          '<div class="row__sub"><a href="tel:'+esc(r.phone)+'" class="nowrap">'+esc(r.phone)+'</a>'+
+            (r.email?' · <span class="brk">'+esc(r.email)+'</span>':'')+
+            ' · <span class="nowrap">réf '+esc(r.reference)+'</span>'+history(r)+'</div>'+
+          occasion(r)+
+          (r.modified&&r.mod_summary?'<div class="row__mod">Modifié par le client : '+esc(r.mod_summary)+'</div>':'')+
+        '</div>'+
+        '<span class="pill pill--'+r.status+'">'+statusFr(r.status)+(r.arrived_at&&r.status==='accepted'?' · arrivé':'')+'</span>'+
+        '<div class="act">'+a+'</div></div>';
     }).join('');
-    el.querySelectorAll('[data-act]').forEach(function(b){ b.addEventListener('click', async function(){ b.disabled=true; try{ await api('reservation-status',{method:'POST',body:{id:+b.getAttribute('data-id'),status:b.getAttribute('data-act')}}); }catch(e){} await loadReservations(); await loadStats(); }); });
+    el.querySelectorAll('[data-act]').forEach(function(b){ b.addEventListener('click', async function(){
+      var act=b.getAttribute('data-act');
+      if(act==='no_show'||act==='declined'||act==='cancelled'){
+        var r=list.find(function(x){ return x.id===+b.getAttribute('data-id'); });
+        var LBL={no_show:'Marquer comme no-show',declined:'Refuser la réservation',cancelled:'Annuler la réservation'};
+        var a=await ask(LBL[act], (r?r.name:'Ce client')+' — confirmer ?', {yes:'Oui', danger:true});
+        if(!a.ok) return;
+      }
+      b.disabled=true; try{ await api('reservation-status',{method:'POST',body:{id:+b.getAttribute('data-id'),status:b.getAttribute('data-act')}}); }catch(e){} await loadReservations(); await loadStats(); }); });
+    el.querySelectorAll('[data-arr]').forEach(function(b){ b.addEventListener('click', async function(){
+      var id=+b.getAttribute('data-arr');
+      var r=list.find(function(x){ return x.id===id; });
+      var before=r?snap(r):null;
+      b.disabled=true;
+      var res=await api('assign',{method:'POST',body:{id:id,action:'arrived'}});
+      if(res.status===200 && res.data.on_time===false) alert(res.data.late_minutes+' min de retard — noté au dossier du client.');
+      await loadReservations(); await loadStats();
+      toast('Arrivée enregistrée.', before?function(){ return undo(id,'arrived',before); }:null);
+    }); });
+    el.querySelectorAll('[data-wait]').forEach(function(b){ b.addEventListener('click', async function(){
+      var a=await ask('Faire patienter ?','Sa table sera libérée et il passera dans la liste d’attente.',{yes:'Oui'});
+      if(!a.ok) return;
+      var id=+b.getAttribute('data-wait');
+      var r=list.find(function(x){ return x.id===id; });
+      var before=r?snap(r):null;
+      b.disabled=true;
+      await api('assign',{method:'POST',body:{id:id,action:'wait'}});
+      await loadReservations(); await loadStats();
+      toast('Client en attente.', before?function(){ return undo(id,'wait',before); }:null);
+    }); });
+    el.querySelectorAll('[data-free]').forEach(function(b){ b.addEventListener('click', async function(){
+      var id=+b.getAttribute('data-free');
+      var r=list.find(function(x){ return x.id===id; });
+      var a=await ask('Libérer la table '+(r&&r.table_code||''),
+        (r?r.name:'Ce client')+' repassera dans « Acceptées sans table ». La table redevient libre immédiatement.',
+        {reason:true, reasonDefault:'retard', yes:'Oui, libérer', danger:true});
+      if(!a.ok) return;
+      var before=r?snap(r):null;
+      b.disabled=true;
+      await api('assign',{method:'POST',body:{id:id,action:'free',reason:a.reason||'—'}});
+      await loadReservations(); await loadStats(); if(typeof loadTables==='function') loadTables();
+      toast('Table libérée.', before?function(){ return undo(id,'free',before); }:null);
+    }); });
+    el.querySelectorAll('[data-addtbl]').forEach(function(b){ b.addEventListener('click', function(){
+      var r=list.find(function(x){ return x.id===+b.getAttribute('data-addtbl'); });
+      if(r) openAddTable(r);
+    }); });
+    el.querySelectorAll('[data-pick]').forEach(function(b){ b.addEventListener('click', function(){
+      var r=list.find(function(x){ return x.id===+b.getAttribute('data-pick'); });
+      r._acceptFirst = (r.status==='pending');       // accept and seat in one move
+      openPicker(r);
+    }); });
     el.querySelectorAll('[data-msg]').forEach(function(b){ b.addEventListener('click', function(){ openModal({reservationId:+b.getAttribute('data-msg'), name:b.getAttribute('data-nm'), phone:b.getAttribute('data-ph'), email:b.getAttribute('data-em')}); }); });
   }
-  document.getElementById('fStatus').addEventListener('change', loadReservations);
-  document.getElementById('fDate').addEventListener('change', loadReservations);
+  /* the stat boxes are the filter; this chip says which one is active and clears it */
+  function setFilter(v){
+    CUR_FILTER = v || '';
+    var chip=document.getElementById('filterChip');
+    var label=FILTER_LABELS[CUR_FILTER];
+    if(label){ chip.textContent=label+' ×'; chip.hidden=false; }
+    else chip.hidden=true;
+    loadReservations();
+  }
+  document.getElementById('filterChip').addEventListener('click', function(){ setFilter(''); });
+  document.getElementById('filterChip').addEventListener('keydown', function(e){
+    if(e.key==='Enter'||e.key===' '){ e.preventDefault(); setFilter(''); }
+  });
+  /* ---------- date filter, written out ---------- */
+  (function(){
+    var inp = document.getElementById('fDate');
+    var lab = document.getElementById('fDateLabel');
+    var clearBtn = document.getElementById('fClear');
+    if(!inp || !lab) return;
+
+    var DOW = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+    var MON = ['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.',
+               'ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
+
+    function iso(d){
+      return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    }
+    function label(){
+      var v = inp.value;
+      if(!v){ lab.textContent = 'Toutes les dates'; clearBtn.classList.add('hide'); return; }
+      var d = new Date(v+'T00:00:00');
+      var t = new Date(); t.setHours(0,0,0,0);
+      var diff = Math.round((d - t) / 86400000);
+      var name = diff === 0 ? "Aujourd\u2019hui" : diff === 1 ? 'Demain' : diff === -1 ? 'Hier' : DOW[d.getDay()];
+      lab.textContent = name + ' ' + d.getDate() + ' ' + MON[d.getMonth()];
+      clearBtn.classList.remove('hide');
+    }
+    function set(v){ inp.value = v; label(); loadReservations(); }
+
+    inp.addEventListener('change', function(){ label(); loadReservations(); });
+    document.querySelectorAll('[data-day]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var base = inp.value ? new Date(inp.value+'T00:00:00') : new Date();
+        base.setDate(base.getDate() + parseInt(b.getAttribute('data-day'), 10));
+        set(iso(base));
+      });
+    });
+    document.getElementById('fToday').addEventListener('click', function(){ set(iso(new Date())); });
+    clearBtn.addEventListener('click', function(){ set(''); });
+    label();
+  })();
 
   /* stats */
   async function loadStats(){ var res=await api('stats'); if(res.status!==200)return; renderKpis(res.data); renderCharts(res.data); }
@@ -440,8 +1112,106 @@ a{color:inherit}
     el.querySelectorAll('[data-read]').forEach(function(x){ x.addEventListener('click', async function(){ await api('messages',{method:'POST',body:{action:'read',id:+x.getAttribute('data-read')}}); loadMessages(); }); });
     el.querySelectorAll('[data-rep]').forEach(function(x){ x.addEventListener('click', function(){ openModal({name:x.getAttribute('data-nm'),phone:x.getAttribute('data-ph'),email:x.getAttribute('data-em')}); }); });
   }
+  /* ---------- emails reçus ---------- */
+  var mailOpen = null;                       /* id of the message shown in full */
+
+  async function loadEmails(){
+    var res = await api('emails');
+    var list = (res.data && res.data.emails) || [];
+    var b = document.getElementById('mailBadge');
+    b.textContent = (res.data && res.data.unread) || 0;
+    b.classList.toggle('hide', !(res.data && res.data.unread));
+
+    var el = document.getElementById('mailList');
+    if(!list.length){ el.innerHTML = '<div class="empty">Aucun email pour le moment.</div>'; return; }
+
+    el.innerHTML = list.map(function(m){
+      var out = m.direction === 'out';
+      var addr = out ? m.to_addr : m.from_addr;
+      var who = out ? ('Envoy\u00e9 \u00e0 ' + addr) : (m.from_name ? (m.from_name + ' <' + m.from_addr + '>') : m.from_addr);
+      var open = mailOpen === m.id;
+      return '<div class="row" style="'+(!out && !m.is_read?'background:#fbf6e9':'')+'">'+
+        '<div class="row__main">'+
+          '<div class="row__name">'+(out?'<span class="muted">\u2197 </span>':'')+esc(m.subject||'(sans objet)')+' <span class="muted">\u00b7 '+ago(m.created_at)+'</span></div>'+
+          '<div class="row__sub">'+esc(who)+'</div>'+
+          '<div style="margin-top:6px;white-space:pre-wrap" data-bodyfor="'+m.id+'">'+
+            esc(open ? (m.__body||'') : (m.snippet||''))+(open?'':'\u2026')+'</div>'+
+        '</div>'+
+        '<div class="act">'+
+          '<button class="btn btn--sm btn--ghost" data-mopen="'+m.id+'">'+(open?'R\u00e9duire':'Lire')+'</button>'+
+          (out ? '' : '<button class="btn btn--sm btn--m" data-mreply="'+m.id+'" data-addr="'+esc(m.from_addr)+'" data-subj="'+esc(m.subject||'')+'">R\u00e9pondre</button>')+
+          '<button class="btn btn--sm btn--ghost" data-mdel="'+m.id+'">Supprimer</button>'+
+        '</div></div>';
+    }).join('');
+
+    el.querySelectorAll('[data-mreply]').forEach(function(x){
+      x.addEventListener('click', function(){
+        var subj = x.getAttribute('data-subj') || '';
+        openCompose(x.getAttribute('data-addr'), /^re\s*:/i.test(subj) ? subj : ('Re: ' + subj));
+      });
+    });
+
+    el.querySelectorAll('[data-mopen]').forEach(function(x){
+      x.addEventListener('click', async function(){
+        var id = +x.getAttribute('data-mopen');
+        if(mailOpen === id){ mailOpen = null; loadEmails(); return; }
+        var full = await api('emails?id='+id);          /* body fetched on demand */
+        mailOpen = id;
+        var target = document.querySelector('[data-bodyfor="'+id+'"]');
+        if(target && full.data && full.data.email) target.textContent = full.data.email.body || '(vide)';
+        x.textContent = 'R\u00e9duire';
+        var r = x.closest('.row'); if(r) r.style.background = '';
+        pollUnread();
+      });
+    });
+    el.querySelectorAll('[data-mdel]').forEach(function(x){
+      x.addEventListener('click', async function(){
+        if(!(await ask('Supprimer cet email ?'))) return;
+        await api('emails', {method:'POST', body:{action:'delete', id:+x.getAttribute('data-mdel')}});
+        loadEmails();
+      });
+    });
+  }
+  document.getElementById('mailReadAll').addEventListener('click', async function(){
+    await api('emails',{method:'POST',body:{action:'read'}}); loadEmails();
+  });
+
+  /* ---------- compose / reply ---------- */
+  var composeModal = document.getElementById('composeModal');
+  function openCompose(to, subject){
+    document.getElementById('cmTo').value = to || '';
+    document.getElementById('cmSubject').value = subject || '';
+    document.getElementById('cmBody').value = '';
+    document.getElementById('cmMsg').textContent = '';
+    document.getElementById('composeTitle').textContent = to ? 'Répondre' : 'Écrire un email';
+    composeModal.classList.add('open');
+    (to ? document.getElementById('cmBody') : document.getElementById('cmTo')).focus();
+  }
+  function closeCompose(){ composeModal.classList.remove('open'); }
+  document.getElementById('mailCompose').addEventListener('click', function(){ openCompose('', ''); });
+  composeModal.querySelectorAll('[data-compose-close]').forEach(function(b){ b.addEventListener('click', closeCompose); });
+  composeModal.addEventListener('click', function(e){ if(e.target === composeModal) closeCompose(); });
+  document.getElementById('cmSend').addEventListener('click', async function(){
+    var to = document.getElementById('cmTo').value.trim();
+    var subject = document.getElementById('cmSubject').value.trim();
+    var body = document.getElementById('cmBody').value.trim();
+    var msg = document.getElementById('cmMsg');
+    if(!/.+@.+\..+/.test(to)){ msg.style.color='#a4552f'; msg.textContent='Adresse invalide.'; return; }
+    if(!body){ msg.style.color='#a4552f'; msg.textContent='Le message est vide.'; return; }
+    var btn = this; btn.disabled = true; msg.style.color='var(--mute)'; msg.textContent='Envoi…';
+    try{
+      var res = await api('emails', {method:'POST', body:{action:'send', to:to, subject:subject, body:body}});
+      if(res.data && res.data.ok){ msg.style.color='var(--green)'; msg.textContent='✔ Envoyé.'; setTimeout(function(){ closeCompose(); loadEmails(); }, 700); }
+      else { msg.style.color='#a4552f'; msg.textContent=(res.data && res.data.error) || 'Envoi impossible.'; }
+    }catch(e){ msg.style.color='#a4552f'; msg.textContent='Erreur réseau.'; }
+    btn.disabled = false;
+  });
+
   document.getElementById('readAll').addEventListener('click', async function(){ await api('messages',{method:'POST',body:{action:'read'}}); loadMessages(); });
-  async function pollUnread(){ try{ var r=await api('messages'); var b=document.getElementById('msgBadge'); b.textContent=r.data.unread||0; b.classList.toggle('hide',!(r.data.unread)); }catch(e){} }
+  async function pollUnread(){
+    try{ var r=await api('messages'); var b=document.getElementById('msgBadge'); b.textContent=r.data.unread||0; b.classList.toggle('hide',!(r.data.unread)); }catch(e){}
+    try{ var e2=await api('emails'); var mb=document.getElementById('mailBadge'); var n=(e2.data&&e2.data.unread)||0; mb.textContent=n; mb.classList.toggle('hide',!n); }catch(e){}
+  }
 
   /* modal (send message to client) */
   var modal=document.getElementById('modal'), modalTarget=null;
@@ -471,7 +1241,7 @@ a{color:inherit}
     el.innerHTML=list.map(function(c){
       return '<div class="row"><div class="row__main"><div class="row__name">'+esc(c.name)+(c.loyal?' <span class="loyal">★ Fidèle</span>':'')+(c.is_blocked?' <span class="pill pill--declined">Blacklist</span>':'')+'</div>'+
         '<div class="row__sub"><a href="tel:'+esc(c.phone)+'">'+esc(c.phone)+'</a>'+(c.email?' · '+esc(c.email):'')+' · '+c.bookings_completed+'/'+c.bookings_total+' honorées'+(c.no_shows?' · '+c.no_shows+' NS':'')+'</div></div>'+
-        '<div class="act">'+((c.phone||c.email)?'<button class="btn btn--sm btn--ghost" data-msg2 data-nm="'+esc(c.name)+'" data-ph="'+esc(c.phone)+'" data-em="'+esc(c.email||'')+'">✉︎</button>':'')+
+        '<div class="act">'+((c.phone||c.email)?'<button class="btn btn--sm btn--ghost btn--ico" data-msg2 data-nm="'+esc(c.name)+'" data-ph="'+esc(c.phone)+'" data-em="'+esc(c.email||'')+'" aria-label="Écrire à '+esc(c.name)+'" title="Écrire au client"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 7 8.2 5.6a1.5 1.5 0 0 0 1.6 0L21 7"/></svg><span class="btn__lbl">Message</span></button>':'')+
         (c.is_blocked?'':'<button class="btn btn--no btn--sm" data-bl="'+esc(c.phone)+'" data-nm="'+esc(c.name)+'">Blacklist</button>')+'</div></div>';
     }).join('');
     el.querySelectorAll('[data-bl]').forEach(function(b){ b.addEventListener('click', async function(){ if(!confirm('Blacklister '+b.getAttribute('data-nm')+' ?'))return; await api('blacklist',{method:'POST',body:{phone:b.getAttribute('data-bl'),name:b.getAttribute('data-nm'),reason:'Depuis la fiche client'}}); loadClients(); loadBlacklist(); }); });
@@ -551,11 +1321,737 @@ a{color:inherit}
     }catch(e){ alert('Activation impossible.'); }
   });
 
+
+  /* One styled yes/no dialog instead of the browser's prompt boxes — the owner
+     asked to be asked properly before anything destructive. */
+  var askResolve=null;
+  function ask(title, body, opts){
+    opts=opts||{};
+    document.getElementById('askTitle').textContent=title;
+    document.getElementById('askBody').textContent=body||'';
+    document.getElementById('askYes').textContent=opts.yes||'Oui';
+    document.getElementById('askNo').textContent=opts.no||'Non';
+    document.getElementById('askYes').classList.toggle('btn--no', !!opts.danger);
+    var wrap=document.getElementById('askReasonWrap'), inp=document.getElementById('askReason');
+    wrap.classList.toggle('hide', !opts.reason);
+    if(opts.reason){ inp.value=opts.reasonDefault||''; }
+    show('askModal',true);
+    setTimeout(function(){ (opts.reason?inp:document.getElementById('askYes')).focus(); },80);
+    return new Promise(function(res){ askResolve=res; });
+  }
+  function askClose(v){
+    show('askModal',false);
+    var reason=document.getElementById('askReason').value.trim();
+    if(askResolve){ askResolve(v ? {ok:true, reason:reason} : {ok:false}); askResolve=null; }
+  }
+  document.getElementById('askYes').addEventListener('click', function(){ askClose(true); });
+  document.getElementById('askNo').addEventListener('click', function(){ askClose(false); });
+  document.getElementById('askModal').addEventListener('keydown', function(e){
+    if(e.key==='Enter'){ e.preventDefault(); askClose(true); }
+    if(e.key==='Escape'){ askClose(false); }
+  });
+
+  /* ============================================================
+     PLAN DE SALLE — tables, drag & drop, occupancy
+     ============================================================ */
+  var TABLES=[], BUSY={}, planDirty=false;
+
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+  function planParams(){
+    var d=document.getElementById('planDate').value || todayStr();
+    var t=document.getElementById('planTime').value;
+    return 'date='+d+(t?'&time='+t:'');
+  }
+  async function loadTables(){
+    var res=await api('tables?'+planParams());
+    if(res.status!==200){ document.getElementById('plan').innerHTML='<div class="empty" style="padding:60px 0">Impossible de charger le plan.</div>'; return; }
+    TABLES=res.data.tables||[]; BUSY=res.data.busy||{};
+    renderPlan();
+    loadWaiting();
+  }
+  function tblClass(t){
+    var c='tbl tbl--'+t.shape;
+    if(!t.active) c+=' tbl--off';
+    else if(t.blocked) c+=' tbl--held';      // kept for the house
+    else if(BUSY[t.id]) c+=' tbl--busy';
+    return c;
+  }
+  /* one drawing per room, matching the zone being shown */
+  var PLAN_BG = { inside: '/assets/plan/salle.png', terrace: '/assets/plan/terrasse.png' };
+  var planBgOn = true;
+  function applyPlanBg(el){
+    var zone = (document.getElementById('planZone')||{}).value || 'inside';
+    el.style.setProperty('--plan-bg', 'url("'+(PLAN_BG[zone]||PLAN_BG.inside)+'")');
+    el.classList.toggle('has-bg', planBgOn);
+  }
+  (function(){
+    var b = document.getElementById('planBg');
+    if(!b) return;
+    b.addEventListener('click', function(){
+      planBgOn = !planBgOn;
+      b.setAttribute('aria-pressed', String(planBgOn));
+      b.textContent = planBgOn ? 'Plan du restaurant' : 'Afficher le plan';
+      var el = document.getElementById('plan'); if(el) applyPlanBg(el);
+    });
+  })();
+
+  function tblHtml(t,pick){
+    var b=BUSY[t.id];
+    var title=b ? (b.name+' · '+ftime(b.time)+' · '+b.party+' couv.')
+      : (!t.active ? 'Hors service'
+      : (t.blocked ? ('Réservée à la maison'+(t.blocked_note?' — '+t.blocked_note:'')) : 'Libre'));
+    return '<div class="'+tblClass(t)+(pick?' tbl--pick':'')+'" data-t="'+t.id+'" title="'+esc(title)+'" '+
+      'style="left:'+t.x+'%;top:'+t.y+'%">'+
+      '<span class="tbl__code">'+esc(t.code)+'</span>'+
+      '<span class="tbl__seats">'+(b? esc(b.name.split(' ')[0]) : (t.merged_seats||t.seats)+' pl.')+'</span>'+
+      ((t.merged_with&&t.merged_with.length)?'<span class="tbl__join">+'+esc(t.merged_with.join('+'))+'</span>':'')+
+      '</div>';
+  }
+  function renderPlan(){
+    var zone=document.getElementById('planZone').value;
+    var list=TABLES.filter(function(t){ return t.zone===zone && !t.merged_into; });
+    var el=document.getElementById('plan');
+    document.getElementById('planCount').textContent=list.length+' table'+(list.length>1?'s':'')+
+      ' · '+list.filter(function(t){return BUSY[t.id];}).length+' occupée(s)';
+    if(!list.length){ el.innerHTML='<div class="empty" style="padding:60px 0">Aucune table dans cette zone. Ajoutez-en une.</div>'; return; }
+    /* tables live on an inner canvas so the whole plan can be panned and pinched
+       without touching each table's stored position */
+    applyPlanBg(el);
+    el.innerHTML='<div class="plan__canvas" id="planCanvas">'+list.map(function(t){ return tblHtml(t,false); }).join('')+'</div>'+
+      '<div class="plan__zoom">'+
+        '<button data-zoom="out" aria-label="Zoom arrière">−</button>'+
+        '<button data-zoom="fit" aria-label="Tout afficher">⤢</button>'+
+        '<button data-zoom="in" aria-label="Zoom avant">+</button>'+
+      '</div>';
+    el.classList.toggle('plan--dense', list.length>24);
+    var canvas=document.getElementById('planCanvas');
+    list.forEach(function(t){ wireDrag(canvas.querySelector('[data-t="'+t.id+'"]'), t); });
+    initPlanZoom(el, canvas, list);
+  }
+
+  /* ---- plan zoom & pan ----
+     80 tables do not fit a phone screen, so the plan is a viewport onto a
+     canvas you can pinch, wheel, drag and fit. Table positions stay in % of the
+     canvas, so zooming never rewrites any data. */
+  var PLAN = { k:1, tx:0, ty:0, pointers:new Map(), canvas:null, el:null };
+  var PLAN_MIN=0.35, PLAN_MAX=5;
+
+  function planApply(){
+    if(!PLAN.canvas) return;
+    PLAN.canvas.style.transform='translate('+PLAN.tx+'px,'+PLAN.ty+'px) scale('+PLAN.k+')';
+    PLAN.el.classList.toggle('zoomed', PLAN.k>1.6);   // only show the detail once genuinely zoomed in
+  }
+  function planClamp(){
+    PLAN.k=Math.max(PLAN_MIN,Math.min(PLAN_MAX,PLAN.k));
+    var r=PLAN.el.getBoundingClientRect();
+    var w=r.width*PLAN.k, h=r.height*PLAN.k;
+    var mx=Math.max(0,(w-r.width)), my=Math.max(0,(h-r.height));
+    PLAN.tx=Math.max(-mx,Math.min(mx,PLAN.tx));
+    PLAN.ty=Math.max(-my,Math.min(my,PLAN.ty));
+  }
+  /* zoom about a screen point so the spot under the fingers stays put */
+  function planZoomAt(factor, cx, cy){
+    var r=PLAN.el.getBoundingClientRect();
+    var px=cx-r.left-r.width/2, py=cy-r.top-r.height/2;
+    var k0=PLAN.k;
+    PLAN.k=Math.max(PLAN_MIN,Math.min(PLAN_MAX,PLAN.k*factor));
+    var s=PLAN.k/k0;
+    PLAN.tx=px-(px-PLAN.tx)*s;
+    PLAN.ty=py-(py-PLAN.ty)*s;
+    planClamp(); planApply();
+  }
+  function planFit(){
+    /* Tables now sit at their true positions across the whole plan, so 1:1
+       shows the entire room aligned with the background image. The owner
+       pinches (or +/−) to zoom in for detail. */
+    PLAN.k=1; PLAN.tx=0; PLAN.ty=0;
+    planClamp(); planApply();
+  }
+
+  function initPlanZoom(el, canvas, list){
+    PLAN.el=el; PLAN.canvas=canvas; PLAN.pointers=new Map();
+    if(PLAN._wired!==el){                 // wire the viewport once
+      PLAN._wired=el;
+
+      el.addEventListener('wheel', function(e){
+        e.preventDefault();
+        planZoomAt(e.deltaY<0?1.12:1/1.12, e.clientX, e.clientY);
+      }, {passive:false});
+
+      var panning=false, lastX=0, lastY=0, pinchDist=0;
+
+      el.addEventListener('pointerdown', function(e){
+        if(e.target.closest('.tbl') || e.target.closest('.plan__zoom')) return;
+        PLAN.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+        if(PLAN.pointers.size===1){ panning=true; lastX=e.clientX; lastY=e.clientY; el.classList.add('panning'); }
+        else if(PLAN.pointers.size===2){
+          panning=false;
+          var p=[...PLAN.pointers.values()];
+          pinchDist=Math.hypot(p[0].x-p[1].x, p[0].y-p[1].y);
+        }
+        try{ el.setPointerCapture(e.pointerId); }catch(err){}
+      });
+
+      el.addEventListener('pointermove', function(e){
+        if(!PLAN.pointers.has(e.pointerId)) return;
+        PLAN.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+        if(PLAN.pointers.size===2){
+          var p=[...PLAN.pointers.values()];
+          var d=Math.hypot(p[0].x-p[1].x, p[0].y-p[1].y);
+          if(pinchDist>0 && d>0){
+            planZoomAt(d/pinchDist, (p[0].x+p[1].x)/2, (p[0].y+p[1].y)/2);
+          }
+          pinchDist=d;
+        } else if(panning){
+          PLAN.tx += e.clientX-lastX; PLAN.ty += e.clientY-lastY;
+          lastX=e.clientX; lastY=e.clientY;
+          planClamp(); planApply();
+        }
+      });
+
+      function endPtr(e){
+        PLAN.pointers.delete(e.pointerId);
+        if(PLAN.pointers.size<2) pinchDist=0;
+        if(PLAN.pointers.size===0){ panning=false; el.classList.remove('panning'); }
+        try{ el.releasePointerCapture(e.pointerId); }catch(err){}
+      }
+      el.addEventListener('pointerup', endPtr);
+      el.addEventListener('pointercancel', endPtr);
+
+      el.addEventListener('dblclick', function(e){
+        if(e.target.closest('.tbl')) return;
+        planZoomAt(PLAN.k>1.5?1/PLAN.k:1.8, e.clientX, e.clientY);
+      });
+
+      el.addEventListener('click', function(e){
+        var b=e.target.closest('[data-zoom]'); if(!b) return;
+        var r=el.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
+        var z=b.getAttribute('data-zoom');
+        if(z==='in') planZoomAt(1.35,cx,cy);
+        else if(z==='out') planZoomAt(1/1.35,cx,cy);
+        else planFit(PLAN.list);
+      });
+    }
+    PLAN.list=list;
+    planFit(list);
+  }
+
+  /* drag a table around the plan; positions are % so the plan stays responsive */
+  function wireDrag(node,t){
+    if(!node) return;
+    var down=false, moved=0, box=null;
+    node.addEventListener('pointerdown', function(e){
+      if(PLAN.pointers && PLAN.pointers.size>0) return;   // a pinch is in progress
+      down=true; moved=0; box=document.getElementById('planCanvas').getBoundingClientRect();
+      node.setPointerCapture(e.pointerId); node.classList.add('dragging'); e.preventDefault();
+    });
+    node.addEventListener('pointermove', function(e){
+      if(!down) return;
+      moved++;
+      var x=((e.clientX-box.left)/box.width)*100, y=((e.clientY-box.top)/box.height)*100;
+      t.x=Math.max(2,Math.min(98,x)); t.y=Math.max(3,Math.min(97,y));
+      node.style.left=t.x+'%'; node.style.top=t.y+'%';
+      planDirty=true; document.getElementById('planSave').classList.remove('hide');
+    });
+    function up(e){
+      if(!down) return;
+      down=false; node.classList.remove('dragging');
+      try{ node.releasePointerCapture(e.pointerId); }catch(err){}
+      if(moved>=3){
+        /* dropped on top of another table? join them — 2 + 3 becomes one "2" */
+        var hit=tableUnder(node);
+        if(hit) offerJoin(t, hit);
+        return;
+      }
+      if(merging){                        // tap = pick for a join
+        var i=mergePick.indexOf(t.id);
+        if(i>=0) mergePick.splice(i,1); else mergePick.push(t.id);
+        node.classList.toggle('tbl--joinsel', mergePick.indexOf(t.id)>=0);
+        updateMergeBtn();
+        return;
+      }
+      openTable(t);                       // a tap → edit it
+    }
+    node.addEventListener('pointerup', up);
+    node.addEventListener('pointercancel', up);
+  }
+  document.getElementById('planSave').addEventListener('click', async function(){
+    var b=this; b.disabled=true;
+    var res=await api('tables',{method:'POST',body:{tables:TABLES.map(function(t){return {id:t.id,x:t.x,y:t.y,rot:t.rot||0};})}});
+    b.disabled=false;
+    if(res.status===200){ planDirty=false; b.classList.add('hide'); }
+  });
+  document.getElementById('planZone').addEventListener('change', renderPlan);
+  document.getElementById('planDate').addEventListener('change', loadTables);
+  document.getElementById('planTime').addEventListener('change', loadTables);
+
+
+  /* ---- joining tables: 27 + 28 become one "27" for 8 ----
+     Tap the tables that go together; the first one keeps its name. */
+  var merging=false, mergePick=[];
+  function updateMergeBtn(){
+    var b=document.getElementById('mergeMode');
+    b.textContent = merging
+      ? (mergePick.length>=2 ? 'Joindre ('+mergePick.length+') ✓' : 'Choisissez les tables… (annuler)')
+      : 'Joindre des tables';
+    b.classList.toggle('btn--ghost', !merging);
+  }
+  document.getElementById('mergeMode').addEventListener('click', async function(){
+    if(merging && mergePick.length>=2){
+      var res=await api('tables',{method:'POST',body:{action:'merge',parent:mergePick[0],children:mergePick.slice(1)}});
+      if(res.status!==200){ alert((res.data&&res.data.error)||'Impossible de joindre ces tables.'); return; }
+      merging=false; mergePick=[]; updateMergeBtn();
+      document.getElementById('plan').classList.remove('merging');
+      loadTables(); return;
+    }
+    merging=!merging; mergePick=[];
+    document.getElementById('plan').classList.toggle('merging', merging);
+    document.getElementById('planHint').textContent = merging
+      ? 'Touchez les tables à joindre — la première donne son nom au groupe.'
+      : 'Glissez une table pour la déplacer · cliquez pour la modifier';
+    updateMergeBtn(); renderPlan();
+  });
+
+
+  /* which other table is this one sitting on top of? */
+  function tableUnder(node){
+    var a=node.getBoundingClientRect();
+    var best=null, bestOverlap=0;
+    document.querySelectorAll('#planCanvas .tbl').forEach(function(o){
+      if(o===node) return;
+      var b=o.getBoundingClientRect();
+      var w=Math.min(a.right,b.right)-Math.max(a.left,b.left);
+      var h=Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top);
+      if(w<=0||h<=0) return;
+      var overlap=(w*h)/Math.min(a.width*a.height, b.width*b.height);
+      if(overlap>0.35 && overlap>bestOverlap){ bestOverlap=overlap; best=o; }
+    });
+    return best;
+  }
+  async function offerJoin(dragged, targetNode){
+    var targetId=+targetNode.getAttribute('data-t');
+    var target=TABLES.find(function(x){return x.id===targetId;});
+    if(!target) return;
+    var seats=(dragged.seats||0)+(target.merged_seats||target.seats||0);
+    if(!confirm('Joindre '+dragged.code+' et '+target.code+' ? Elles deviendront '+
+       'une seule table « '+target.code+' » de '+seats+' couverts.')){
+      loadTables(); return;                       // put it back where it was
+    }
+    var res=await api('tables',{method:'POST',body:{action:'merge',parent:target.id,children:[dragged.id]}});
+    if(res.status!==200) alert((res.data&&res.data.error)||'Impossible de joindre ces tables.');
+    loadTables();
+  }
+
+  /* table editor */
+  var editingTable=null;
+  function openTable(t){
+    editingTable=t||null;
+    document.getElementById('tblTitle').textContent=t?('Table '+t.code):'Nouvelle table';
+    document.getElementById('tblCode').value=t?t.code:'';
+    document.getElementById('tblSeats').value=t?t.seats:2;
+    document.getElementById('tblZone').value=t?t.zone:document.getElementById('planZone').value;
+    document.getElementById('tblShape').value=t?t.shape:'round';
+    document.getElementById('tblActive').checked=t?!!t.active:true;
+    document.getElementById('tblBlocked').checked=t?!!t.blocked:false;
+    document.getElementById('tblNote').value=(t&&t.blocked_note)||'';
+    document.getElementById('tblDelete').classList.toggle('hide',!t);
+    var joined = t && t.merged_with && t.merged_with.length;
+    document.getElementById('tblSplit').classList.toggle('hide', !joined);
+    if(joined) document.getElementById('tblSplit').textContent='Séparer ('+t.merged_with.join(' + ')+')';
+    document.getElementById('tblMsg').textContent='';
+    show('tblModal',true);
+  }
+  document.getElementById('tblAdd').addEventListener('click', function(){ openTable(null); });
+  document.getElementById('tblCancel').addEventListener('click', function(){ show('tblModal',false); });
+  document.getElementById('tblSave').addEventListener('click', async function(){
+    var body={
+      code:document.getElementById('tblCode').value.trim(),
+      seats:+document.getElementById('tblSeats').value||2,
+      zone:document.getElementById('tblZone').value,
+      shape:document.getElementById('tblShape').value,
+      active:document.getElementById('tblActive').checked
+    };
+    if(editingTable){ body.id=editingTable.id; body.x=editingTable.x; body.y=editingTable.y; }
+    else { body.x=50; body.y=50; }
+    if(!body.code){ document.getElementById('tblMsg').textContent='Donnez un nom à la table.'; return; }
+    var res=await api('tables',{method:'POST',body:body});
+    if(res.status!==200){ document.getElementById('tblMsg').textContent=(res.data&&res.data.error)||'Erreur.'; return; }
+    var tid=(res.data&&res.data.table&&res.data.table.id)||(editingTable&&editingTable.id);
+    if(tid){
+      await api('tables',{method:'POST',body:{action:'block', id:tid,
+        blocked:document.getElementById('tblBlocked').checked,
+        note:document.getElementById('tblNote').value.trim()||null}});
+    }
+    show('tblModal',false); loadTables();
+  });
+  document.getElementById('tblSplit').addEventListener('click', async function(){
+    if(!editingTable) return;
+    await api('tables',{method:'POST',body:{action:'split',parent:editingTable.id}});
+    show('tblModal',false); loadTables();
+  });
+  document.getElementById('tblDelete').addEventListener('click', async function(){
+    if(!editingTable) return;
+    if(!confirm('Supprimer la table '+editingTable.code+' ?')) return;
+    await api('tables?id='+editingTable.id,{method:'DELETE'});
+    show('tblModal',false); loadTables();
+  });
+
+  /* waiting list — late guests parked by the reception */
+  async function loadWaiting(){
+    var res=await api('reservations?scope=waiting');
+    var list=(res.data&&res.data.reservations)||[]; var el=document.getElementById('waitList');
+    document.getElementById('waitCount').textContent=list.length?(list.length+' en attente'):'';
+    if(!list.length){ el.innerHTML='<div class="empty">Personne n\'attend.</div>'; return; }
+    el.innerHTML=list.map(function(r){
+      return '<div class="row"><div class="row__main"><div class="row__name">'+esc(r.name)+
+        '<span class="tag tag--wait">en attente</span>'+(r.late_minutes?'<span class="tag tag--late">'+r.late_minutes+' min de retard</span>':'')+'</div>'+
+        '<div class="row__sub">'+ftime(r.res_time)+' · '+r.party_size+' couv. · '+seat(r.seating)+' · <a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a></div></div>'+
+        '<div class="act"><button class="btn btn--sm" data-place="'+r.id+'">Placer</button></div></div>';
+    }).join('');
+    el.querySelectorAll('[data-place]').forEach(function(b){
+      b.addEventListener('click', function(){
+        var r=list.find(function(x){ return x.id===+b.getAttribute('data-place'); });
+        openPicker(r);
+      });
+    });
+  }
+
+
+  /* who freed which table, when and why — the trail he asked for after a
+     no-show or a late arrival */
+  async function loadHistory(){
+    var el=document.getElementById('histList'); if(!el) return;
+    var res=await api('history?limit=40');
+    var list=(res.data&&res.data.history)||[];
+    if(!list.length){ el.innerHTML='<div class="empty">Aucun mouvement de table pour le moment.</div>'; return; }
+    var KIND={assign:'attribuée', free:'libérée'};
+    el.innerHTML=list.map(function(h){
+      var when=String(h.at||'').replace('T',' ').slice(0,16);
+      return '<div class="row"><div class="row__main">'+
+        '<div class="row__name">'+esc(h.table_code)+' · '+(KIND[h.kind]||esc(h.kind))+
+          (h.guest?' <span class="muted">— '+esc(h.guest)+'</span>':'')+'</div>'+
+        '<div class="row__sub">'+esc(when)+' · par '+(h.by==='owner'?'la direction':'la réception')+
+          (h.reason?' · motif : '+esc(h.reason):'')+'</div>'+
+      '</div></div>';
+    }).join('');
+  }
+  document.getElementById('histRefresh').addEventListener('click', loadHistory);
+
+  /* ---- table picker (used when accepting, and to re-seat) ---- */
+  var pickRes=null, pickSel=null, pickAdd=false;
+  async function openPicker(r){
+    pickAdd=false; pickRes=r; pickSel=null;
+    document.getElementById('pickWho').textContent=r.name+' · '+fdate(r.res_date)+' '+ftime(r.res_time)+' · '+r.party_size+' couverts';
+    document.getElementById('pickZone').value=r.seating==='terrace'?'terrace':'inside';
+    document.getElementById('pickConfirm').disabled=true;
+    document.getElementById('pickConfirm').textContent='Attribuer';
+    var sk=document.getElementById('pickSkip'); if(sk) sk.style.display='';
+    show('pickModal',true);
+    var res=await api('tables?date='+r.res_date+'&time='+ftime(r.res_time));
+    TABLES=res.data.tables||[]; BUSY=res.data.busy||{};
+    delete BUSY[r.table_id];                    // its own table is not a clash
+    renderPicker();
+  }
+  /* #8 — add a SECOND (or third…) table to a booking that already has one.
+     Reuses the picker modal; the chosen table is merged onto the primary. */
+  async function openAddTable(r){
+    pickAdd=true; pickRes=r; pickSel=null;
+    document.getElementById('pickWho').textContent='Ajouter une table à '+r.name+' · déjà en '+(r.table_code||'—');
+    document.getElementById('pickZone').value=r.seating==='terrace'?'terrace':'inside';
+    document.getElementById('pickConfirm').disabled=true;
+    document.getElementById('pickConfirm').textContent='Ajouter cette table';
+    var sk=document.getElementById('pickSkip'); if(sk) sk.style.display='none';
+    show('pickModal',true);
+    var res=await api('tables?date='+r.res_date+'&time='+ftime(r.res_time));
+    TABLES=res.data.tables||[]; BUSY=res.data.busy||{};
+    delete BUSY[r.table_id];                    // its own primary is not a clash
+    renderPicker();
+  }
+  function renderPicker(){
+    var zone=document.getElementById('pickZone').value;
+    var list=TABLES.filter(function(t){ return t.zone===zone && !t.merged_into; });
+    var el=document.getElementById('pickPlan');
+    if(!list.length){ el.innerHTML='<div class="empty" style="padding:40px 0">Aucune table dans cette zone.</div>'; return; }
+    el.innerHTML=list.map(function(t){ return tblHtml(t,true); }).join('');
+    el.querySelectorAll('.tbl').forEach(function(n){
+      n.addEventListener('click', function(){
+        var id=+n.getAttribute('data-t'); var t=TABLES.find(function(x){return x.id===id;});
+        if(!t.active) return;
+        if(t.blocked){
+          ask('Table réservée à la maison', esc(t.code)+' est gardée pour la maison'+
+            (t.blocked_note?' ('+t.blocked_note+')':'')+'. L’attribuer quand même ?', {yes:'Oui'})
+            .then(function(a){ if(a.ok) pickChoose(n, id); });
+          return;
+        }
+        if(BUSY[id]){
+          ask('Table déjà prise', 'Cette table est occupée sur ce créneau. La réattribuer quand même ?', {yes:'Oui', danger:true})
+            .then(function(a){ if(a.ok) pickChoose(n, id); });
+          return;
+        }
+        pickChoose(n, id); return;
+      });
+    });
+  }
+  function pickChoose(node, id){
+    document.getElementById('pickPlan').querySelectorAll('.tbl').forEach(function(x){ x.classList.remove('tbl--sel'); });
+    node.classList.add('tbl--sel'); pickSel=id;
+    document.getElementById('pickConfirm').disabled=false;
+  }
+  document.getElementById('pickZone').addEventListener('change', renderPicker);
+  document.getElementById('pickSkip').addEventListener('click', async function(){
+    if(pickRes && pickRes._acceptFirst) await api('reservation-status',{method:'POST',body:{id:pickRes.id,status:'accepted'}});
+    show('pickModal',false); loadReservations(); loadTables();
+  });
+  document.getElementById('pickConfirm').addEventListener('click', async function(){
+    var b=this; b.disabled=true;
+    if(pickAdd){
+      /* snapshot the child's current merge state so Undo can detach it exactly */
+      var child=TABLES.find(function(x){ return x.id===pickSel; });
+      var res=await api('assign',{method:'POST',body:{id:pickRes.id, action:'add_table', add_table_id:pickSel}});
+      b.disabled=false;
+      if(res.status!==200){ alert((res.data&&res.data.error)||'Impossible d\'ajouter cette table.'); return; }
+      show('pickModal',false); await loadReservations(); loadTables(); loadStats();
+      var rid=pickRes.id, cid=pickSel, back=child?child.merged_into:null, prevTbl=pickRes.table_id;
+      toast('Table ajoutée.', function(){ return undo(rid,'add_table',{child_table_id:cid, child_merged_into:back, table_id:prevTbl}); });
+      return;
+    }
+    if(pickRes._acceptFirst) await api('reservation-status',{method:'POST',body:{id:pickRes.id,status:'accepted'}});
+    var res=await api('assign',{method:'POST',body:{id:pickRes.id, table_id:pickSel}});
+    b.disabled=false;
+    if(res.status!==200){ alert((res.data&&res.data.error)||'Impossible d\'attribuer cette table.'); return; }
+    show('pickModal',false); loadReservations(); loadTables();
+  });
+
+  /* ---- new reservation (owner) ---- */
+  document.getElementById('resAdd').addEventListener('click', async function(){
+    document.getElementById('nrDate').value=todayStr();
+    document.getElementById('nrMsg').textContent='';
+    ['nrName','nrPhone','nrEmail','nrNote'].forEach(function(id){ document.getElementById(id).value=''; });
+    var res=await api('tables?date='+todayStr());
+    var opts='<option value="">— choisir plus tard —</option>'+((res.data&&res.data.tables)||[])
+      .filter(function(t){return t.active;})
+      .map(function(t){ return '<option value="'+t.id+'">'+esc(t.code)+' · '+t.seats+' pl. · '+seat(t.zone)+'</option>'; }).join('');
+    document.getElementById('nrTable').innerHTML=opts;
+    show('newModal',true);
+  });
+  document.getElementById('nrCancel').addEventListener('click', function(){ show('newModal',false); });
+  document.getElementById('nrSave').addEventListener('click', async function(){
+    var b=this, m=document.getElementById('nrMsg');
+    var body={
+      name:document.getElementById('nrName').value.trim(),
+      phone:document.getElementById('nrPhone').value.trim(),
+      email:document.getElementById('nrEmail').value.trim()||null,
+      date:document.getElementById('nrDate').value,
+      time:document.getElementById('nrTime').value,
+      party:+document.getElementById('nrParty').value||2,
+      seating:document.getElementById('nrSeat').value,
+      note:document.getElementById('nrNote').value.trim()||null,
+      table_id:document.getElementById('nrTable').value||null,
+      notify:document.getElementById('nrNotify').checked
+    };
+    if(!body.name||!body.phone||!body.date||!body.time){ m.textContent='Nom, téléphone, date et heure sont requis.'; return; }
+    b.disabled=true; m.textContent='Enregistrement…';
+    var res=await api('reservations',{method:'POST',body:body});
+    b.disabled=false;
+    if(res.status!==200||!res.data.ok){ m.textContent=(res.data&&res.data.error)||'Erreur.'; return; }
+    show('newModal',false); loadReservations(); loadTables(); loadStats();
+  });
+
+
+  /* ---- walk-in: someone at the door with no booking ---- */
+  document.getElementById('walkinAdd').addEventListener('click', async function(){
+    var res=await api('tables?date='+todayStr());
+    var free=((res.data&&res.data.tables)||[]).filter(function(t){
+      return t.active && !t.merged_into && !t.blocked && !(res.data.busy||{})[t.id];
+    });
+    var opts='<option value="">— sans table pour l’instant —</option>'+free.map(function(t){
+      return '<option value="'+t.id+'">'+esc(t.code)+' · '+(t.merged_seats||t.seats)+' pl. · '+seat(t.zone)+'</option>';
+    }).join('');
+    document.getElementById('wkTable').innerHTML=opts;
+    document.getElementById('wkName').value='';
+    document.getElementById('wkParty').value='2';
+    document.getElementById('wkMsg').textContent='';
+    show('walkinModal',true);
+  });
+  document.getElementById('wkCancel').addEventListener('click', function(){ show('walkinModal',false); });
+  document.getElementById('wkSave').addEventListener('click', async function(){
+    var b=this, m=document.getElementById('wkMsg');
+    b.disabled=true; m.textContent='Enregistrement…';
+    var res=await api('reservations',{method:'POST',body:{
+      walkin:true,
+      name:document.getElementById('wkName').value.trim()||null,
+      party:+document.getElementById('wkParty').value||2,
+      seating:document.getElementById('wkSeat').value,
+      table_id:document.getElementById('wkTable').value||null
+    }});
+    b.disabled=false;
+    if(res.status!==200||!res.data.ok){ m.textContent=(res.data&&res.data.error)||'Erreur.'; return; }
+    show('walkinModal',false);
+    loadReservations(); loadStats(); loadTables();
+  });
+
+  /* ---- envois : channel status + live test ---- */
+  async function loadChannels(){
+    var res=await api('test-notify'); var el=document.getElementById('chanState');
+    if(res.status!==200){ el.innerHTML='<div class="empty">Indisponible.</div>'; return; }
+    var c=res.data.config;
+    function row(name,o,extra){
+      return '<div class="row"><div class="row__main"><div class="row__name">'+name+
+        ' <span class="pill pill--'+(o.ready?'accepted':'declined')+'">'+(o.ready?'Configuré':'Non configuré')+'</span></div>'+
+        '<div class="row__sub">'+esc(extra||'')+'</div></div></div>';
+    }
+    el.innerHTML=row('Email (Resend)',c.email,'Expéditeur : '+c.email.from+(c.email.inbox?' · copie interne : '+c.email.inbox:''))+
+      row('SMS (Twilio)',c.sms,c.sms.from?('Numéro : '+c.sms.from):'Ajoutez TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN et TWILIO_FROM.')+
+      row('WhatsApp (Twilio)',c.whatsapp,c.whatsapp.from?('Numéro : '+c.whatsapp.from):'Ajoutez TWILIO_WHATSAPP_FROM.');
+  }
+  document.getElementById('tnSend').addEventListener('click', async function(){
+    var b=this, m=document.getElementById('tnMsg');
+    var to=document.getElementById('tnTo').value.trim();
+    if(!to){ m.textContent='Indiquez un destinataire.'; return; }
+    b.disabled=true; m.textContent='Envoi…';
+    var res=await api('test-notify',{method:'POST',body:{channel:document.getElementById('tnChannel').value,to:to}});
+    b.disabled=false;
+    m.textContent = (res.status===200 && res.data.ok)
+      ? '✓ Envoyé à '+to+' ('+res.data.sent_at+'). Vérifiez la réception.'
+      : '✗ '+((res.data&&res.data.error)||'Échec de l\'envoi.');
+  });
+
+
+  /* Tapping the dimmed background closes whatever is open.
+     The press must START on the backdrop too — otherwise selecting text inside
+     the box and releasing outside would close it, which feels broken. */
+  (function(){
+    function closeBackdrop(m){
+      if(m.id==='askModal'){ askClose(false); return; }   // must settle its promise
+      if(m.id==='modal' && typeof closeModal==='function'){ closeModal(); return; }
+      m.classList.remove('open');
+    }
+    document.querySelectorAll('.modal').forEach(function(m){
+      m.addEventListener('pointerdown', function(e){ m._fromScrim = (e.target===m); });
+      m.addEventListener('click', function(e){
+        if(e.target!==m || !m._fromScrim) return;
+        m._fromScrim=false;
+        closeBackdrop(m);
+      });
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key!=='Escape') return;
+      var open=[...document.querySelectorAll('.modal.open')].pop();
+      if(open) closeBackdrop(open);
+    });
+  })();
+
   /* load + poll */
   async function loadAll(){ await Promise.all([loadStats(), loadReservations(), pollUnread()]); }
   document.getElementById('refreshBtn').addEventListener('click', loadAll);
   var poll=null;
-  function startPolling(){ if(poll)clearInterval(poll); poll=setInterval(function(){ loadStats(); pollUnread(); var d=document.querySelector('[data-panel="demandes"]'); if(d && !d.classList.contains('hide')) loadReservations(); var m=document.querySelector('[data-panel="messages"]'); if(m && !m.classList.contains('hide')) loadMessages(); }, 20000); }
+  function startPolling(){ if(poll)clearInterval(poll); poll=setInterval(function(){ loadStats(); pollUnread(); var d=document.querySelector('[data-panel="demandes"]'); if(d && !d.classList.contains('hide')) loadReservations(); var m=document.querySelector('[data-panel="messages"]'); if(m && !m.classList.contains('hide')) loadMessages(); var em=document.querySelector('[data-panel="emails"]'); if(em && !em.classList.contains('hide')) loadEmails(); }, 20000); }
+
+  /* ============================================================
+     QR SCANNER — the owner's own camera, in his dashboard.
+     BarcodeDetector where available (Android Chrome), jsQR fallback
+     (loaded only on demand). Same /api/scan endpoint as reception.
+     ============================================================ */
+  (function(){
+    var scanView=document.getElementById('scanView'), video=document.getElementById('scanVideo'),
+        hint=document.getElementById('scanHint'), result=document.getElementById('scanResult');
+    if(!scanView) return;
+    var stream=null, rafId=null, detector=null, jsqrReady=false, busy=false, lastRaw='', lastAt=0, lastPayload=null;
+
+    function loadJsQr(){
+      if(jsqrReady||window.jsQR) return Promise.resolve();
+      return new Promise(function(res,rej){
+        var s=document.createElement('script'); s.src='/assets/jsqr.js';
+        s.onload=function(){ jsqrReady=true; res(); }; s.onerror=rej;
+        document.head.appendChild(s);
+      });
+    }
+    async function openScan(){
+      scanView.classList.add('open'); scanView.setAttribute('aria-hidden','false');
+      result.innerHTML=''; hint.textContent='Démarrage de la caméra…';
+      try{
+        stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});
+        video.srcObject=stream; await video.play();
+        hint.textContent='Placez le QR code dans le cadre…';
+      }catch(e){ hint.textContent='Caméra indisponible — saisissez la référence ci-dessous.'; return; }
+      if('BarcodeDetector' in window){ try{ detector=new window.BarcodeDetector({formats:['qr_code']}); }catch(e){ detector=null; } }
+      if(!detector){ try{ await loadJsQr(); }catch(e){ hint.textContent='Lecteur indisponible — saisissez la référence.'; return; } }
+      tick();
+    }
+    function closeScan(){
+      scanView.classList.remove('open'); scanView.setAttribute('aria-hidden','true');
+      if(rafId) cancelAnimationFrame(rafId); rafId=null;
+      if(stream){ stream.getTracks().forEach(function(t){t.stop();}); stream=null; }
+      video.srcObject=null; result.innerHTML='';
+      var d=document.querySelector('[data-panel="demandes"]'); if(d && !d.classList.contains('hide')) loadReservations();
+    }
+    var cv=document.createElement('canvas'), cx=cv.getContext('2d',{willReadFrequently:true});
+    async function tick(){
+      rafId=requestAnimationFrame(tick);
+      if(busy || !video.videoWidth) return;
+      var raw='';
+      try{
+        if(detector){ var found=await detector.detect(video); if(found && found.length) raw=found[0].rawValue; }
+        else if(window.jsQR){
+          var w=Math.min(480, video.videoWidth), h=Math.round(video.videoHeight*(w/video.videoWidth));
+          cv.width=w; cv.height=h; cx.drawImage(video,0,0,w,h);
+          var img=cx.getImageData(0,0,w,h);
+          var got=window.jsQR(img.data,w,h,{inversionAttempts:'dontInvert'}); if(got) raw=got.data;
+        }
+      }catch(e){ return; }
+      if(!raw) return;
+      var now=Date.now(); if(raw===lastRaw && now-lastAt<2500) return;
+      lastRaw=raw; lastAt=now; if(navigator.vibrate) navigator.vibrate(40);
+      lookup({raw:raw});
+    }
+    async function lookup(payload){
+      busy=true; hint.textContent='Lecture…'; lastPayload=payload;
+      try{
+        var r=await api('scan',{method:'POST',body:payload});
+        if(r.status!==200 || !r.data.ok){
+          result.innerHTML='<div class="hit hit--bad"><div class="hit__name">Code non reconnu</div><div class="hit__msg">'+esc((r.data&&r.data.error)||'Réessayez.')+'</div></div>';
+        } else { renderHit(r.data.reservation); }
+      }catch(e){}
+      hint.textContent='Placez le QR code dans le cadre…'; busy=false;
+    }
+    function renderHit(v){
+      var cls = !v.is_today ? 'hit--bad' : (v.late_minutes>15 ? 'hit--late' : 'hit--ok');
+      var warn='';
+      if(!v.is_today) warn='<div class="hit__msg" style="color:#d97a6a">⚠ Prévue le '+esc(v.date)+', pas aujourd\'hui.</div>';
+      else if(v.already_arrived) warn='<div class="hit__msg">Déjà enregistré comme arrivé.</div>';
+      else if(v.late_minutes>15) warn='<div class="hit__msg" style="color:#d97a6a">En retard de '+v.late_minutes+' min — noté au dossier.</div>';
+      else warn='<div class="hit__msg" style="color:#4fae82">À l\'heure.</div>';
+      result.innerHTML='<div class="hit '+cls+'">'+
+        '<div class="hit__name">'+esc(v.name)+(v.loyal?' <span class="tag--loyal">Fidèle</span>':'')+'</div>'+
+        '<div class="hit__msg">Réf '+esc(v.reference)+' · '+esc(seat(v.seating))+'</div>'+
+        '<div class="hit__big">'+
+          '<div class="hit__cell"><div class="k">Heure</div><div class="v">'+esc(ftime(v.time))+'</div></div>'+
+          '<div class="hit__cell"><div class="k">Couverts</div><div class="v">'+v.party_size+'</div></div>'+
+          '<div class="hit__cell"><div class="k">Table</div><div class="v tbl">'+esc(v.table_code||'—')+'</div></div>'+
+        '</div>'+warn+
+        ((v.is_today && !v.already_arrived) ? '<button class="hit__go" data-confirm="'+v.id+'">Confirmer l\'arrivée</button>' : '')+
+      '</div>';
+      var go=result.querySelector('[data-confirm]');
+      if(go) go.addEventListener('click', async function(){
+        go.disabled=true; go.textContent='Enregistrement…';
+        var body=Object.assign({}, lastPayload, {confirm:true});
+        var r=await api('scan',{method:'POST',body:body});
+        if(r.status===200 && r.data.ok){
+          go.textContent = r.data.on_time===false ? '✓ Arrivé — '+r.data.late_minutes+' min de retard' : '✓ Arrivée enregistrée';
+          go.style.background='#3f8f79'; lastRaw='';
+        } else { go.disabled=false; go.textContent='Réessayer'; alert((r.data&&r.data.error)||'Erreur.'); }
+      });
+    }
+    document.getElementById('openScan').addEventListener('click', openScan);
+    document.getElementById('scanClose').addEventListener('click', closeScan);
+    document.getElementById('scanRefGo').addEventListener('click', function(){
+      var ref=document.getElementById('scanRef').value.trim(); if(ref) lookup({reference:ref});
+    });
+    document.getElementById('scanRef').addEventListener('keydown', function(e){
+      if(e.key==='Enter'){ var ref=this.value.trim(); if(ref) lookup({reference:ref}); }
+    });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape' && scanView.classList.contains('open')) closeScan(); });
+  })();
 
   if(TOKEN) showApp(); else document.getElementById('code').focus();
 })();

@@ -52,20 +52,72 @@ a{color:inherit}
 .card__name{font-family:var(--serif);font-size:22px}
 .card__time{font-family:var(--serif);font-size:22px;color:var(--gold)}
 .card__meta{color:var(--soft);font-size:14px;margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.card__occ{margin-top:8px;font-size:14px;color:#8a6d1f;background:#faf5e6;border:1px solid #ecdfbf;border-radius:8px;padding:6px 10px}
 .tag{font-size:12px;padding:3px 10px;border-radius:20px}
 .tag--inside{background:rgba(63,143,121,.18);color:var(--marine)}
 .tag--terrace{background:rgba(208,168,78,.18);color:var(--gold)}
 .tag--seated{background:rgba(79,174,130,.18);color:var(--green)}
 .tag--arrived{background:rgba(63,143,121,.2);color:var(--marine)}
 .tag--no_show{background:rgba(217,122,106,.18);color:var(--red)}
-.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.tag--table{background:rgba(63,143,121,.28);color:var(--marine);font-weight:700}
+.tag--notable{background:rgba(255,255,255,.06);color:var(--soft)}
+.tag--late{background:rgba(217,122,106,.18);color:var(--red)}
+.tag--ontime{background:rgba(63,143,121,.16);color:var(--marine)}
+.tag--wait{background:rgba(208,168,78,.2);color:var(--gold)}
+.tag--loyal{background:rgba(208,168,78,.16);color:var(--gold)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.actions .wt{background:transparent;color:var(--gold);border-color:rgba(208,168,78,.4)}
 .actions button{padding:14px 8px;border-radius:10px;font-weight:600;font-size:14px;border:1px solid var(--line);background:var(--card-2);color:var(--cream)}
 .actions .ar{background:var(--marine);color:#04110c;border-color:var(--marine)}
 .actions .st{background:var(--green);color:#04110c;border-color:var(--green)}
 .actions .ns{background:transparent;color:var(--red);border-color:rgba(217,122,106,.4)}
 .callbtn{margin-left:auto;font-size:13px;color:var(--marine);border:1px solid var(--line);border-radius:20px;padding:6px 12px}
 .empty{text-align:center;color:var(--soft);padding:60px 20px}
-.refresh{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--marine);color:#04110c;font-weight:600;padding:12px 22px;border-radius:30px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+/* one fixed bar holds both actions, so they can never overlap on any width */
+.fabbar{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;gap:12px;align-items:center;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top, var(--bg) 62%, transparent)}
+.refresh{flex:0 0 auto;background:var(--marine);color:#04110c;font-weight:600;padding:14px 20px;border:0;border-radius:30px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+
+/* ---- QR scanner ---- */
+.scanfab{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--gold);color:#161206;font-weight:700;padding:15px 20px;border:0;border-radius:30px;
+  box-shadow:0 8px 24px rgba(0,0,0,.45);font-size:16px}
+.scan{position:fixed;inset:0;z-index:90;background:#0b0f0d;display:flex;flex-direction:column;
+  opacity:0;visibility:hidden;transition:opacity .26s ease,visibility .26s}
+.scan.open{opacity:1;visibility:visible}
+.scan__head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);
+  font-size:14px;color:var(--soft)}
+.scan__x{background:none;border:0;color:var(--cream);font-size:30px;line-height:1;padding:0 6px}
+.scan__stage{position:relative;flex:1;min-height:0;background:#000;overflow:hidden}
+.scan__stage video{width:100%;height:100%;object-fit:cover;display:block}
+.scan__frame{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:min(66vw,260px);aspect-ratio:1;border:2px solid rgba(238,242,238,.85);border-radius:16px;
+  box-shadow:0 0 0 100vmax rgba(0,0,0,.45)}
+.scan__hint{position:absolute;left:0;right:0;bottom:18px;text-align:center;font-size:13px;color:var(--cream);
+  text-shadow:0 1px 6px rgba(0,0,0,.8);padding:0 20px}
+.scan__result{padding:0 16px;max-height:52vh;overflow:auto}
+.scan__result:empty{display:none}
+.scan__manual{display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.scan__manual input{flex:1;padding:13px;border:1px solid var(--line);border-radius:10px;background:var(--card);
+  color:var(--cream);font-size:15px}
+.scan__manual input:focus{outline:none;border-color:var(--marine)}
+.scan__manual button{padding:13px 18px;border:1px solid var(--line);border-radius:10px;background:var(--card-2);
+  color:var(--cream);font-weight:600}
+.hit{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
+.hit--ok{border-color:rgba(79,174,130,.5)}
+.hit--late{border-color:rgba(217,122,106,.55)}
+.hit--bad{border-color:rgba(217,122,106,.7)}
+.hit__name{font-family:var(--serif);font-size:22px}
+.hit__big{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.hit__cell{flex:1;min-width:90px;background:var(--card-2);border-radius:10px;padding:12px;text-align:center}
+.hit__cell .k{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+.hit__cell .v{font-family:var(--serif);font-size:26px;margin-top:4px}
+.hit__cell .v.tbl{color:var(--marine)}
+.hit__msg{font-size:14px;color:var(--soft);margin-top:6px}
+.hit__go{width:100%;margin-top:14px;padding:16px;border:0;border-radius:12px;background:var(--green);
+  color:#04110c;font-weight:700;font-size:16px}
+.hit__go[disabled]{opacity:.5}
 </style>
 </head>
 <body>
@@ -74,7 +126,8 @@ a{color:inherit}
   <div class="login__box">
     <div class="mark">Les <b>Émirs</b></div>
     <p>Réception</p>
-    <input id="code" type="password" inputmode="text" placeholder="Code réception" autocomplete="off" />
+    <input id="code" type="password" inputmode="text" placeholder="Code réception" autocomplete="off"
+           autocapitalize="off" autocorrect="off" spellcheck="false" />
     <button id="loginBtn">Entrer</button>
     <div class="login__err" id="loginErr"></div>
   </div>
@@ -90,7 +143,34 @@ a{color:inherit}
     <button data-scope="upcoming">À venir</button>
   </div>
   <div class="wrap" id="list"><div class="empty">Chargement…</div></div>
-  <button class="refresh" id="refreshBtn">↻ Actualiser</button>
+  <div class="fabbar">
+    <button class="refresh" id="refreshBtn">↻ Actualiser</button>
+    <button class="scanfab" id="scanBtn" aria-label="Scanner un QR code">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/>
+        <path d="M7 12h10"/>
+      </svg>
+      <span>Scanner</span>
+    </button>
+  </div>
+</div>
+
+<!-- QR scanner -->
+<div class="scan" id="scanView" aria-hidden="true">
+  <div class="scan__head">
+    <button class="scan__x" id="scanClose" aria-label="Fermer">&times;</button>
+    <span>Scanner le code du client</span>
+  </div>
+  <div class="scan__stage">
+    <video id="scanVideo" playsinline muted></video>
+    <div class="scan__frame"></div>
+    <div class="scan__hint" id="scanHint">Placez le QR code dans le cadre…</div>
+  </div>
+  <div class="scan__result" id="scanResult"></div>
+  <div class="scan__manual">
+    <input id="scanRef" placeholder="ou saisissez la référence (LE-XXXXXX)" autocapitalize="characters" />
+    <button id="scanRefGo">Chercher</button>
+  </div>
 </div>
 
 <script>
@@ -128,7 +208,7 @@ a{color:inherit}
     try{
       var res=await api('auth',{method:'POST',auth:false,body:{code:code}});
       if(res.status===200 && res.data.token){ TOKEN=res.data.token; try{localStorage.setItem('emirs_desk_token',TOKEN);}catch(e){} showApp(); }
-      else err.textContent='Code invalide.';
+      else err.textContent=(res.data && res.data.error) ? res.data.error : 'Code invalide.';
     }catch(e){ err.textContent='Connexion impossible.'; }
   }
   document.getElementById('loginBtn').addEventListener('click', doLogin);
@@ -163,17 +243,32 @@ a{color:inherit}
       if(SCOPE!=='today') html+='<div class="date-h">'+fdate(date)+'</div>';
       groups[date].forEach(function(r){
         var done=(r.status==='seated'||r.status==='no_show');
-        var statusTag = (r.status==='seated')?'<span class="tag tag--seated">Installé</span>':
-                        (r.status==='arrived')?'<span class="tag tag--arrived">Arrivé</span>':
+        // #2 arrival is tracked by arrived_at, not by a status change — a booking
+        // stays "accepted" AND shows as arrived once the client is here.
+        var statusTag = (r.status==='seated')?'<span class="tag tag--seated">Arrivée</span>':
+                        (r.arrived_at)?'<span class="tag tag--arrived">Arrivé</span>':
                         (r.status==='no_show')?'<span class="tag tag--no_show">No-show</span>':'';
+        // the table is the thing the floor staff actually needs at the door
+        var tblLabel = r.table_code ? (esc(r.table_code) + (r.merged_codes ? ' +'+esc(String(r.merged_codes).split(',').join(' +')) : '')) : '';
+        var tableTag = r.table_code
+          ? '<span class="tag tag--table">Table '+tblLabel+'</span>'
+          : '<span class="tag tag--notable">Sans table</span>';
+        var lateTag = r.waiting ? '<span class="tag tag--wait">En attente d\'une table</span>'
+                    : (r.late_minutes>0 ? '<span class="tag tag--late">'+r.late_minutes+' min de retard</span>'
+                    : (r.late_minutes===0 && r.arrived_at ? '<span class="tag tag--ontime">À l\'heure</span>' : ''));
+        var loyalTag = (r.bookings_completed||0)>=5 ? '<span class="tag tag--loyal">Fidèle</span>' : '';
+        // #1 special-occasion note, visible to the floor staff too
+        var occ = r.note ? '<div class="card__occ">✎ '+esc(r.note)+'</div>' : '';
         html+='<div class="card'+(done?' done':'')+'">'+
           '<div class="card__top"><div class="card__name">'+esc(r.name)+'</div><div class="card__time">'+ftime(r.res_time)+'</div></div>'+
           '<div class="card__meta"><span class="tag tag--'+r.seating+'">'+seat(r.seating)+'</span>'+
-            '<span>'+r.party_size+' couverts</span>'+statusTag+
+            '<span>'+r.party_size+' couverts</span>'+tableTag+statusTag+lateTag+loyalTag+
             '<a class="callbtn" href="tel:'+esc(r.phone)+'">Appeler</a></div>'+
+          occ+
           '<div class="actions">'+
-            '<button class="ar" data-id="'+r.id+'" data-s="arrived">Arrivé</button>'+
-            '<button class="st" data-id="'+r.id+'" data-s="seated">Installé</button>'+
+            '<button class="ar" data-id="'+r.id+'" data-a="arrived">Arrivé</button>'+
+            '<button class="st" data-id="'+r.id+'" data-a="seated">Arrivée</button>'+
+            '<button class="wt" data-id="'+r.id+'" data-a="wait">Fait patienter</button>'+
             '<button class="ns" data-id="'+r.id+'" data-s="no_show">No-show</button>'+
           '</div></div>';
       });
@@ -187,7 +282,167 @@ a{color:inherit}
         load();
       });
     });
+    /* arrival / seating / wait go through /api/assign, which is what records
+       lateness against the booked time */
+    el.querySelectorAll('[data-a]').forEach(function(b){
+      b.addEventListener('click', async function(){
+        var action=b.getAttribute('data-a');
+        if(action==='wait' && !confirm('Le client est en retard : le faire patienter le temps de libérer une table ?')) return;
+        b.disabled=true;
+        try{
+          var r=await api('assign',{method:'POST',body:{id:+b.getAttribute('data-id'),action:action}});
+          if(action==='arrived' && r.data && r.data.late_minutes>0){
+            alert(r.data.late_minutes+' min de retard — noté au dossier du client.');
+          }
+        }catch(e){}
+        load();
+      });
+    });
   }
+
+  /* ============================================================
+     QR SCANNER
+     Uses the native BarcodeDetector where it exists (Android Chrome);
+     falls back to jsQR, loaded only when actually needed so the app stays
+     light for the common case.
+     ============================================================ */
+  var scanView=document.getElementById('scanView'), video=document.getElementById('scanVideo'),
+      hint=document.getElementById('scanHint'), result=document.getElementById('scanResult');
+  var stream=null, rafId=null, detector=null, jsqrReady=false, busy=false, lastRaw='', lastAt=0;
+
+  function loadJsQr(){
+    if(jsqrReady||window.jsQR) return Promise.resolve();
+    return new Promise(function(res,rej){
+      var s=document.createElement('script'); s.src='/assets/jsqr.js';
+      s.onload=function(){ jsqrReady=true; res(); }; s.onerror=rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  async function openScan(){
+    scanView.classList.add('open'); scanView.setAttribute('aria-hidden','false');
+    result.innerHTML=''; hint.textContent='Démarrage de la caméra…';
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});
+      video.srcObject=stream; await video.play();
+      hint.textContent='Placez le QR code dans le cadre…';
+    }catch(e){
+      hint.textContent='Caméra indisponible — saisissez la référence ci-dessous.';
+      return;
+    }
+    if('BarcodeDetector' in window){
+      try{ detector=new window.BarcodeDetector({formats:['qr_code']}); }catch(e){ detector=null; }
+    }
+    if(!detector){ try{ await loadJsQr(); }catch(e){ hint.textContent='Lecteur indisponible — saisissez la référence.'; return; } }
+    tick();
+  }
+  function closeScan(){
+    scanView.classList.remove('open'); scanView.setAttribute('aria-hidden','true');
+    if(rafId) cancelAnimationFrame(rafId); rafId=null;
+    if(stream){ stream.getTracks().forEach(function(t){t.stop();}); stream=null; }
+    video.srcObject=null; result.innerHTML=''; load();
+  }
+
+  var cv=document.createElement('canvas'), cx=cv.getContext('2d',{willReadFrequently:true});
+  async function tick(){
+    rafId=requestAnimationFrame(tick);
+    if(busy || !video.videoWidth) return;
+    var raw='';
+    try{
+      if(detector){
+        var found=await detector.detect(video);
+        if(found && found.length) raw=found[0].rawValue;
+      } else if(window.jsQR){
+        var w=Math.min(480, video.videoWidth), h=Math.round(video.videoHeight*(w/video.videoWidth));
+        cv.width=w; cv.height=h; cx.drawImage(video,0,0,w,h);
+        var img=cx.getImageData(0,0,w,h);
+        var got=window.jsQR(img.data,w,h,{inversionAttempts:'dontInvert'});
+        if(got) raw=got.data;
+      }
+    }catch(e){ return; }
+    if(!raw) return;
+    var now=Date.now();
+    if(raw===lastRaw && now-lastAt<2500) return;   // same code still in frame
+    lastRaw=raw; lastAt=now;
+    if(navigator.vibrate) navigator.vibrate(40);
+    lookup({raw:raw});
+  }
+
+  var lastPayload=null;
+  async function lookup(payload){
+    busy=true; hint.textContent='Lecture…'; lastPayload=payload;
+    try{
+      var r=await api('scan',{method:'POST',body:payload});
+      if(r.status!==200 || !r.data.ok){
+        result.innerHTML='<div class="hit hit--bad"><div class="hit__name">Code non reconnu</div>'+
+          '<div class="hit__msg">'+esc((r.data&&r.data.error)||'Réessayez.')+'</div></div>';
+      } else {
+        renderHit(r.data.reservation);
+      }
+    }catch(e){}
+    hint.textContent='Placez le QR code dans le cadre…';
+    busy=false;
+  }
+
+  function renderHit(v){
+    var cls = !v.is_today ? 'hit--bad' : (v.late_minutes>15 ? 'hit--late' : 'hit--ok');
+    var warn='';
+    if(!v.is_today) warn='<div class="hit__msg" style="color:var(--red)">⚠ Réservation prévue le '+esc(v.date)+', pas aujourd\'hui.</div>';
+    else if(v.already_arrived) warn='<div class="hit__msg">Déjà enregistré comme arrivé.</div>';
+    else if(v.late_minutes>15) warn='<div class="hit__msg" style="color:var(--red)">En retard de '+v.late_minutes+' min — sera noté au dossier.</div>';
+    else warn='<div class="hit__msg" style="color:var(--green)">À l\'heure.</div>';
+
+    result.innerHTML =
+      '<div class="hit '+cls+'">'+
+        '<div class="hit__name">'+esc(v.name)+
+          (v.loyal?' <span class="tag tag--loyal">Fidèle</span>':'')+'</div>'+
+        '<div class="hit__msg">Réf '+esc(v.reference)+' · '+esc(seat(v.seating))+'</div>'+
+        '<div class="hit__big">'+
+          '<div class="hit__cell"><div class="k">Heure</div><div class="v">'+esc(ftime(v.time))+'</div></div>'+
+          '<div class="hit__cell"><div class="k">Couverts</div><div class="v">'+v.party_size+'</div></div>'+
+          '<div class="hit__cell"><div class="k">Table</div><div class="v tbl">'+esc(v.table_code||'—')+'</div></div>'+
+        '</div>'+
+        warn+
+        (v.history && (v.history.late||v.history.no_shows)
+          ? '<div class="hit__msg">Historique : '+v.history.on_time+'× à l\'heure · '+v.history.late+'× en retard'+
+            (v.history.no_shows?' · '+v.history.no_shows+'× no-show':'')+'</div>' : '')+
+        ((v.is_today && !v.already_arrived)
+          ? '<button class="hit__go" data-confirm="'+v.id+'">Confirmer l\'arrivée</button>' : '')+
+      '</div>';
+
+    var go=result.querySelector('[data-confirm]');
+    if(go) go.addEventListener('click', async function(){
+      go.disabled=true; go.textContent='Enregistrement…';
+      var body=Object.assign({}, lastPayload, {confirm:true});
+      var r=await api('scan',{method:'POST',body:body});
+      if(r.status===200 && r.data.ok){
+        go.textContent = r.data.on_time===false ? '✓ Arrivé — '+r.data.late_minutes+' min de retard' : '✓ Arrivée enregistrée';
+        go.style.background='var(--marine)';
+        lastRaw='';                     // let the same code be scanned again later
+      } else {
+        go.disabled=false; go.textContent='Réessayer';
+        alert((r.data&&r.data.error)||'Erreur.');
+      }
+    });
+  }
+
+  document.getElementById('scanBtn').addEventListener('click', openScan);
+  document.getElementById('scanClose').addEventListener('click', closeScan);
+  /* tap the empty area below the frame to dismiss */
+  scanView.addEventListener('pointerdown', function(e){ scanView._fromScrim = (e.target===scanView); });
+  scanView.addEventListener('click', function(e){
+    if(e.target===scanView && scanView._fromScrim){ scanView._fromScrim=false; closeScan(); }
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape' && scanView.classList.contains('open')) closeScan();
+  });
+  document.getElementById('scanRefGo').addEventListener('click', function(){
+    var ref=document.getElementById('scanRef').value.trim();
+    if(ref) lookup({reference:ref});
+  });
+  document.getElementById('scanRef').addEventListener('keydown', function(e){
+    if(e.key==='Enter'){ var ref=this.value.trim(); if(ref) lookup({reference:ref}); }
+  });
 
   var poll=null; function startPoll(){ if(poll)clearInterval(poll); poll=setInterval(load, 15000); }
 
