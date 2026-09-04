@@ -22,7 +22,14 @@ h1{font-family:var(--serif);font-weight:400;font-size:1.6rem;margin:0 0 6px}
 .fg input,.fg select{padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:16px;font-family:inherit;color:var(--ink)}
 .fg input:focus,.fg select:focus{outline:none;border-color:var(--marine)}
 .btn{width:100%;padding:15px;background:var(--marine);color:#fff;border:none;border-radius:12px;font-weight:600;font-family:inherit;font-size:15px;cursor:pointer}
+.btn:active{transform:scale(.99)}
 .btn:disabled{opacity:.5}
+.btn--ghost{background:#fff;color:var(--marine);border:1px solid var(--line)}
+.btn--danger{background:#fff;color:var(--red);border:1px solid #e3c4bb}
+.btn--danger-solid{background:var(--red);color:#fff;border:none}
+.btnrow{display:flex;gap:10px}
+.btnrow .btn{width:auto;flex:1}
+.hr{height:1px;background:var(--line);margin:22px 0}
 .msg{margin-top:14px;font-size:14px;min-height:1.2em;text-align:center}
 .note{color:var(--mute);font-size:12px;text-align:center;margin-top:14px}
 .center{text-align:center}
@@ -51,8 +58,48 @@ a.home{color:var(--marine);font-size:13px}
     .then(function(d){
       if(d.error){ fail(d.error); return; }
       var v=d.reservation;
+      var wantCancel=p.get('annuler')==='1';
+      var canCancel=(v.status==='pending'||v.status==='accepted');
       var head='<h1>Bonjour '+esc(v.name)+'</h1><div class="res">Réservation <b>'+esc(v.reference)+'</b><br>'+fdate(v.date)+' · <b>'+esc(v.time)+'</b> · '+v.party+' couverts · '+(v.seating==='terrace'?'Terrasse':'Salle intérieure')+'</div>';
-      if(!d.editable){ content.innerHTML=head+'<p class="center" style="color:var(--stone)">'+esc(d.reason||'Modification indisponible.')+'</p><p class="center note"><a class="home" href="/">Retour au site</a></p>'; return; }
+
+      /* Cancellation is always offered (even after the 3 h edit cutoff), because
+         freeing the table late still beats a no-show. Two-step to avoid an
+         accidental tap — and email link-prefetch can never cancel a booking. */
+      function cancelSection(){
+        if(!canCancel) return '';
+        return '<div class="hr"></div>'+
+          '<p style="color:var(--stone);font-size:13px;margin:0 0 12px">Un empêchement ? Vous pouvez annuler votre réservation.</p>'+
+          '<button class="btn btn--danger" id="cancelBtn">Annuler la réservation</button>'+
+          '<div id="cancelConfirm" style="display:none;margin-top:12px">'+
+            '<p style="color:var(--red);font-size:13px;margin:0 0 10px">Confirmer l’annulation de la réservation <b>'+esc(v.reference)+'</b> ?</p>'+
+            '<div class="btnrow"><button class="btn btn--ghost" id="cancelBack">Non, garder</button>'+
+            '<button class="btn btn--danger-solid" id="cancelYes">Oui, annuler</button></div>'+
+          '</div>'+
+          '<div class="msg" id="cmsg"></div>';
+      }
+      function bindCancel(){
+        var cb=document.getElementById('cancelBtn'); if(!cb) return;
+        var box=document.getElementById('cancelConfirm'), cmsg=document.getElementById('cmsg');
+        cb.addEventListener('click',function(){ cb.style.display='none'; box.style.display='block'; });
+        document.getElementById('cancelBack').addEventListener('click',function(){ box.style.display='none'; cb.style.display='block'; });
+        document.getElementById('cancelYes').addEventListener('click',function(){
+          var y=this; y.disabled=true; cmsg.style.color='var(--stone)'; cmsg.textContent='Annulation…';
+          fetch('/api/reservation-edit',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({r:r,t:t,cancel:true})})
+            .then(function(res){return res.json();})
+            .then(function(out){
+              if(out.ok&&out.cancelled){
+                content.innerHTML='<h1>Réservation annulée</h1><div class="res">Votre réservation <b>'+esc(v.reference)+'</b> a bien été annulée.<br>Le restaurant en est informé.</div><p class="center" style="color:var(--stone);font-size:14px">Au plaisir de vous accueillir une prochaine fois.</p><p class="center note"><a class="home" href="/">Retour au site</a></p>';
+              } else { cmsg.style.color='var(--red)'; cmsg.textContent=out.error||'Annulation impossible.'; y.disabled=false; }
+            })
+            .catch(function(){ cmsg.style.color='var(--red)'; cmsg.textContent='Erreur réseau.'; y.disabled=false; });
+        });
+        if(wantCancel){ cb.click(); box.scrollIntoView({behavior:'smooth',block:'center'}); }
+      }
+
+      if(!d.editable){
+        content.innerHTML=head+'<p style="color:var(--stone);font-size:13px">'+esc(d.reason||'Modification indisponible.')+'</p>'+cancelSection()+(canCancel?'':'<p class="center note"><a class="home" href="/">Retour au site</a></p>');
+        bindCancel(); return;
+      }
       /* same window the booking form offers, so a guest can never pick an
          hour the restaurant does not take */
       var hopts='';
@@ -61,7 +108,7 @@ a.home{color:var(--marine);font-size:13px}
         hopts+='<option value="'+val+'"'+(val===v.time?' selected':'')+'>'+hh+'h'+mm+'</option>';
       }
       var popts='';
-      for(var p=1;p<=20;p++){ popts+='<option value="'+p+'"'+(p===Number(v.party)?' selected':'')+'>'+p+' couvert'+(p>1?'s':'')+'</option>'; }
+      for(var np=1;np<=20;np++){ popts+='<option value="'+np+'"'+(np===Number(v.party)?' selected':'')+'>'+np+' couvert'+(np>1?'s':'')+'</option>'; }
       content.innerHTML=head+
         '<p style="color:var(--stone);font-size:13px;margin:0 0 16px">Vous pouvez modifier l’heure, la place et le nombre de couverts (jusqu’à 3 h avant). Toute modification est renvoyée au restaurant pour confirmation.</p>'+
         '<div class="fg"><label for="time">Heure</label><select id="time">'+hopts+'</select></div>'+
@@ -71,7 +118,9 @@ a.home{color:var(--marine);font-size:13px}
           '<option value="inside"'+(v.seating!=='terrace'?' selected':'')+'>Salle intérieure</option>'+
           '<option value="terrace"'+(v.seating==='terrace'?' selected':'')+'>Terrasse</option></select></div>'+
         '<button class="btn" id="save">Enregistrer les modifications</button>'+
-        '<div class="msg" id="msg"></div>';
+        '<div class="msg" id="msg"></div>'+
+        cancelSection();
+      bindCancel();
       document.getElementById('save').addEventListener('click',function(){
         var btn=this,msg=document.getElementById('msg');
         var pv=document.getElementById('party').value;

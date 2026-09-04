@@ -83,6 +83,7 @@ async function reachClient(r, subject, html, smsText) {
   await Promise.allSettled(jobs);
 }
 function editLink(r) { return r && r.id ? `${base()}/modifier?r=${r.id}&t=${editToken(r.id)}` : ""; }
+function cancelLink(r) { return r && r.id ? `${base()}/modifier?r=${r.id}&t=${editToken(r.id)}&annuler=1` : ""; }
 function passLink(r) { return r && r.id ? `${base()}/pass?r=${r.id}&t=${passToken(r.id)}` : ""; }
 
 /* The QR block for the guest's email. Points at /api/qr rather than embedding
@@ -91,13 +92,13 @@ function passBlock(r) {
   if (!r || !r.id) return "";
   const t = passToken(r.id);
   const img = `${base()}/api/qr?r=${r.id}&t=${t}`;
-  return `<div style="margin:24px 0;padding:20px;background:#fff;border:1px solid #e2dccf;border-radius:8px;text-align:center">
-      <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8b8271;margin-bottom:14px">Votre code d'accueil</div>
+  return `<div style="margin:24px 0;padding:22px;background:#fff;border:1px solid #e2dccf;border-radius:8px;text-align:center">
       <img src="${img}" width="220" height="220" alt="Code de réservation ${r.reference}"
            style="display:block;margin:0 auto;width:220px;height:220px;image-rendering:pixelated" />
-      <div style="font-family:Georgia,serif;font-size:15px;color:#17150f;margin-top:14px">${r.reference}</div>
-      <div style="font-size:12px;color:#8b8271;margin-top:6px">À présenter à l'accueil en arrivant</div>
-      <a href="${passLink(r)}" style="display:inline-block;margin-top:14px;font-size:12px;color:#1f473f">Ouvrir ma réservation</a>
+      <div style="font-size:13px;color:#3b352b;margin-top:14px">Présentez ce code à l'accueil.</div>
+      <div style="font-family:Georgia,serif;font-size:17px;color:#17150f;margin-top:16px;letter-spacing:.04em">${r.reference}</div>
+      <div style="font-size:12px;color:#8b8271;margin-top:4px">à présenter à l'arrivée</div>
+      <a href="${passLink(r)}" style="display:inline-block;margin-top:16px;font-size:12px;color:#1f473f">Ouvrir ma réservation</a>
     </div>`;
 }
 
@@ -168,8 +169,9 @@ export function shell(inner) {
     <table role="presentation" width="520" cellpadding="0" cellspacing="0" style="background:#fff;border:1px solid #e2dccf;border-radius:8px;overflow:hidden">
       <tr><td style="height:4px;background:#1f473f"></td></tr>
       <tr><td style="padding:26px 30px">
-        <div style="font-family:Georgia,serif;font-size:22px;color:#17150f">Les <b>Émirs</b></div>
-        <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8b8271;margin-top:2px">Port El Kantaoui · Sousse</div>
+        <img src="${base()}/assets/logo-ink.png" alt="Les Émirs" width="196" height="44"
+             style="display:block;width:196px;height:auto;max-width:60%" />
+        <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8b8271;margin-top:8px">Port El Kantaoui · Sousse</div>
         <div style="height:1px;background:#e2dccf;margin:18px 0"></div>
         <div style="font-size:15px;line-height:1.7;color:#3b352b">${inner}</div>
       </td></tr>
@@ -187,10 +189,13 @@ export function shell(inner) {
    "Vendredi 4 Septembre") and write the hour as 20h00, exactly the format the
    restaurant asked to send its guests. */
 function frDateLong(d) {
-  return fmtDate(d).replace(/([a-zà-ÿ])([a-zà-ÿ']*)/gi, (m, a, b) => a.toUpperCase() + b);
+  const dt = typeof d === "string" ? new Date(d + "T00:00:00") : new Date(d);
+  const s = dt.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long" });
+  return s.replace(/([a-zà-ÿ])([a-zà-ÿ']*)/gi, (m, a, b) => a.toUpperCase() + b);   // "Vendredi 04 Septembre"
 }
 function frHour(t) { return fmtTime(t).replace(":", "h"); }
 function seatPhrase(s) { return s === "terrace" ? "terrasse" : "salle intérieure"; }
+function seatPhraseCap(s) { const p = seatPhrase(s); return p.charAt(0).toUpperCase() + p.slice(1); }
 
 export async function notifyClientReceived(r) {
   const when = `${frDateLong(r.res_date)} ${frHour(r.res_time)}`;
@@ -213,14 +218,33 @@ export async function notifyClientDecision(r) {
   const when = `${fmtDate(r.res_date)} à ${fmtTime(r.res_time)}`;
   if (r.status === "accepted") {
     const link = editLink(r);
+    const cancel = cancelLink(r);
+    const btn = (href, label, primary) =>
+      `<a href="${href}" style="display:inline-block;margin:6px 6px 0 0;padding:12px 18px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;` +
+      (primary ? `background:#1f473f;color:#fff` : `background:#fff;color:#1f473f;border:1px solid #cdbfa3`) + `">${label}</a>`;
     const html = shell(
-      `Bonjour ${r.name},<br><br>Votre table est <b style="color:#1f473f">confirmée</b> :<br><br>
-       <b>${when}</b> · ${r.party_size} couverts · ${seatFr(r.seating)}<br>
-       Référence : <b>${r.reference}</b><br><br>Au plaisir de vous accueillir au bord du port.` +
+      `Bonjour Mr ${r.name},<br><br>` +
+      `<div style="font-family:Georgia,serif;font-size:21px;color:#1f473f;margin:2px 0 18px">Votre réservation est confirmée</div>` +
+      `<b>${frDateLong(r.res_date)} · ${frHour(r.res_time)}</b> · ${r.party_size} personne${r.party_size > 1 ? "s" : ""}<br>` +
+      `${seatPhraseCap(r.seating)}<br>` +
+      `Référence : <b>${r.reference}</b>` +
       passBlock(r) +
-      (link ? `<br><br>Un empêchement ?<br><a href="${link}">Modifier l’heure ou la place</a> <span style="color:#8b8271">(jusqu’à 3 h avant — ce lien est personnel.)</span>` : "")
+      `<div style="margin-top:4px">Au plaisir de vous accueillir.</div>` +
+      (link || cancel
+        ? `<div style="height:1px;background:#e2dccf;margin:22px 0"></div>` +
+          `Vous avez toujours la possibilité de modifier ou d'annuler votre réservation.<br>` +
+          `<div style="margin-top:10px">` +
+          (link ? btn(link, "Modifier la réservation", true) : "") +
+          (cancel ? btn(cancel, "Annuler la réservation", false) : "") +
+          `</div>`
+        : "") +
+      `<div style="margin-top:22px;padding:14px 16px;background:#fdf6e6;border:1px solid #ecdfbf;border-radius:8px;font-size:12.5px;color:#7a5f16;line-height:1.6">` +
+      `La durée de retard tolérée est de <b>30 minutes maximum</b>. Une fois ce délai expiré, nous nous réservons le droit de libérer la table et d'y installer d'autres clients.` +
+      `</div>`
     );
-    const sms = `Les Emirs: reservation CONFIRMEE ${when} (${r.party_size}p). Ref ${r.reference}. Votre code: ${passLink(r)}` + (link ? ` Modifier l'heure/la place: ${link}` : "");
+    const sms = `Les Emirs: reservation CONFIRMEE ${frDateLong(r.res_date)} ${frHour(r.res_time)} (${r.party_size}p). Ref ${r.reference}. Code: ${passLink(r)}`
+      + (link ? ` Modifier: ${link}` : "") + (cancel ? ` Annuler: ${cancel}` : "")
+      + ` Retard tolere 30 min max.`;
     await reachClient(r, "Réservation confirmée — Les Émirs", html, sms);
     return;
   }
@@ -277,6 +301,25 @@ export async function notifyOwnerChange(sql, r, before) {
   await pushOwners(sql, {
     title: `Réservation ${r.reference} modifiée — à revoir`,
     body: `${r.name} · ${plain}`,
+    url: "/admin",
+  });
+}
+
+/* The guest cancelled online — the owner must know so the table (if any) can
+   be given to someone else. */
+export async function notifyOwnerCancel(sql, r, before) {
+  const head = `${r.name} (${r.phone}) · ${fmtDate(r.res_date)} ${fmtTime(r.res_time)} · ${r.party_size} couverts · Réf ${r.reference}`;
+  const re = restaurantEmail();
+  if (re) {
+    await sendEmail(re, `❌ Réservation ${r.reference} annulée par le client`,
+      shell(`<b>La réservation ${r.reference} a été annulée par le client.</b><br><br>${head}<br><br>` +
+        (before && before.table_id ? `<span style="color:#a4552f">La table a été libérée.</span><br><br>` : "") +
+        `<a href="${base()}/admin" style="display:inline-block;background:#1f473f;color:#fff;text-decoration:none;padding:11px 20px;border-radius:4px;font-size:13px">Ouvrir le tableau de bord</a>`));
+  }
+  await telegram(`❌ <b>Réservation ${r.reference} annulée par le client</b>\n${head}`);
+  await pushOwners(sql, {
+    title: `Réservation ${r.reference} annulée`,
+    body: `${r.name} · ${fmtDate(r.res_date)} ${fmtTime(r.res_time)} · ${r.party_size}p`,
     url: "/admin",
   });
 }

@@ -1,7 +1,7 @@
 import { sql } from "./_lib/db.mjs";
 import { json, readBody, fmtTime } from "./_lib/util.mjs";
 import { verifyEditToken } from "./_lib/auth.mjs";
-import { notifyOwnerChange } from "./_lib/notify.mjs";
+import { notifyOwnerChange, notifyOwnerCancel } from "./_lib/notify.mjs";
 
 // Public, token-protected self-service edit of a reservation — hour, room and
 // number of covers. ANY change sends the booking back to "En attente" for the
@@ -49,6 +49,26 @@ export default async (req) => {
   const ed = editability(r);
 
   if (method === "GET") return json({ reservation: publicView(r), editable: ed.editable, reason: ed.reason });
+
+  /* Cancellation is offered even when the 3-hour edit window has closed — a
+     guest who can no longer come should always be able to free the table, and
+     a late cancel is still far better than a no-show. */
+  if (body.cancel) {
+    if (!["pending", "accepted"].includes(r.status))
+      return json({ error: "Cette réservation ne peut plus être annulée en ligne. Merci de nous appeler." }, 409);
+    const upd = await sql`
+      update reservations
+         set status = 'cancelled', table_id = null, waiting = 0, updated_at = datetime('now')
+       where id = ${id} returning *`;
+    try {
+      await sql`insert into events (type, path, meta) values (
+        'reservation', ${"reservation:" + id},
+        ${JSON.stringify({ reservation_id: id, kind: "client_cancel", by: "client", guest: r.name, reference: r.reference,
+          from: { status: r.status, table_id: r.table_id } })})`;
+    } catch (e) { console.error("[cancel event]", e); }
+    try { await notifyOwnerCancel(sql, upd[0], r); } catch (e) { console.error("[notify cancel]", e); }
+    return json({ ok: true, cancelled: true, reservation: publicView(upd[0]) });
+  }
 
   // POST — apply change
   if (!ed.editable) return json({ error: ed.reason }, 409);
