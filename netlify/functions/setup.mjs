@@ -79,6 +79,7 @@ alter table reservations add column source text default 'web';
 alter table reservations add column waiting integer default 0;
 alter table reservations add column modified integer not null default 0;
 alter table reservations add column mod_summary text;
+alter table reservations add column arrival_undos integer not null default 0;
 create index if not exists idx_res_table on reservations(table_id);
 alter table tables add column merged_into integer;
 alter table tables add column blocked integer default 0;

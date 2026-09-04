@@ -106,7 +106,19 @@ a.btn{text-decoration:none}
 .btn--ok{background:var(--green);color:#fff;border-color:var(--green)}
 .btn--no{background:#fff;color:var(--red);border-color:#e8cfc7}
 .btn--ghost{background:var(--bone-2)}
-.btn:active{transform:scale(.97)}
+.btn:active{transform:scale(.96)}
+/* clear "you tapped this" feedback — matters on phones where there is no hover */
+.btn.is-pressed{box-shadow:0 0 0 3px rgba(31,71,63,.28);filter:brightness(.93)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.is-busy{color:transparent!important;position:relative;pointer-events:none}
+.btn.is-busy::after{content:"";position:absolute;top:50%;left:50%;width:14px;height:14px;margin:-7px 0 0 -7px;
+  border:2px solid currentColor;border-top-color:transparent;border-radius:50%;color:inherit;
+  animation:btnspin .6s linear infinite;opacity:.9}
+@keyframes btnspin{to{transform:rotate(360deg)}}
+/* persistent "arrived" toggle in the Acceptées list (#arrivé) */
+.btn--arrived{background:var(--green);color:#fff;border-color:var(--green);font-weight:700}
+.btn--arrived::before{content:"✓ ";}
+.tag--corr{background:#fdf1ea;color:#a4552f;border:1px solid #e8cbbb}
 .btn:disabled{opacity:.5}
 .pill{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500}
 .pill--inside{background:#eaf1ef;color:var(--marine)}
@@ -828,6 +840,7 @@ a.btn{text-decoration:none}
     var t='';
     if(r.table_code) t+='<span class="tag tag--table">'+tableLabel(r)+'</span>';
     if(r.arrived_at) t+='<span class="tag tag--arr">arrivé</span>';            /* stays visible while Accepté (#2) */
+    if(r.arrival_undos>0) t+='<span class="tag tag--corr" title="Arrivée corrigée '+r.arrival_undos+' fois (clic par erreur)">↩ '+r.arrival_undos+' correction'+(r.arrival_undos>1?'s':'')+'</span>';
     if(r.modified) t+='<span class="tag tag--mod">modifiée · à revoir</span>';  /* client change awaiting review (#4) */
     if(r.waiting) t+='<span class="tag tag--wait">attend une table</span>';
     if(r.late_minutes>0) t+='<span class="tag tag--late">'+r.late_minutes+' min de retard</span>';
@@ -870,6 +883,16 @@ a.btn{text-decoration:none}
     clearTimeout(_toastTimer); _toastTimer=setTimeout(hideToast, onUndo?7000:3500);
   }
   function hideToast(){ if(_toastEl) _toastEl.classList.remove('show'); }
+  /* show a spinner on a button while its action runs */
+  function busy(btn,on){ if(!btn) return; btn.disabled=!!on; btn.classList.toggle('is-busy',!!on); }
+  /* global "you tapped this" flash on every .btn — phones have no hover, so a
+     tap must visibly register even before the list reloads */
+  document.addEventListener('pointerdown', function(e){
+    var b=e.target.closest && e.target.closest('.btn, .tab, .kpi');
+    if(!b) return;
+    b.classList.add('is-pressed');
+    setTimeout(function(){ b.classList.remove('is-pressed'); }, 260);
+  }, true);
   /* capture the fields Undo needs to put a booking back exactly as it was */
   function snap(r){ return {status:r.status, table_id:r.table_id, waiting:r.waiting?1:0,
     arrived_at:r.arrived_at||null, seated_at:r.seated_at||null, late_minutes:r.late_minutes==null?null:r.late_minutes}; }
@@ -947,17 +970,21 @@ a.btn{text-decoration:none}
       if(r.status==='pending'){
         a='<button class="btn btn--ok btn--sm" data-pick="'+r.id+'">Accepter</button>'+
           '<button class="btn btn--no btn--sm" data-act="declined" data-id="'+r.id+'">Refuser</button>'+call;
-      } else if(r.status==='accepted'){
-        a=tableBtns+
-          '<button class="btn btn--ok btn--sm" data-arr="'+r.id+'">Arrivé</button>'+
-          '<button class="btn btn--sm btn--warn" data-wait="'+r.id+'">Fait patienter</button>'+
-          '<button class="btn btn--no btn--sm" data-act="no_show" data-id="'+r.id+'">No-show</button>'+call;
-      } else if(r.status==='arrived'){
-        a=tableBtns+
-          '<button class="btn btn--sm" data-act="seated" data-id="'+r.id+'">Arrivée</button>'+
-          '<button class="btn btn--no btn--sm" data-act="no_show" data-id="'+r.id+'">No-show</button>'+call;
-      } else if(r.status==='seated'){
-        a=tableBtns+call;                                   /* table still editable after seating (#6) */
+      } else if(r.status==='accepted'||r.status==='arrived'||r.status==='seated'){
+        /* the arrival is a PERSISTENT toggle in the Acceptées list: once tapped
+           it stays as "✓ Arrivé" so the owner sees the client checked in, and it
+           can be tapped again to cancel a mis-tap at any time — the 7 s undo is
+           not enough on its own. Every cancellation is counted as a mis-click. */
+        var arrToggle = r.arrived_at
+          ? '<button class="btn btn--sm btn--arrived" data-unarr="'+r.id+'" title="Annuler l\'arrivée (corriger un clic)">Arrivé</button>'
+          : '<button class="btn btn--ok btn--sm" data-arr="'+r.id+'">Arrivé</button>';
+        var seatBtn = (r.arrived_at && r.status!=='seated')
+          ? '<button class="btn btn--sm" data-act="seated" data-id="'+r.id+'">Installer</button>' : '';
+        var waitBtn = (!r.arrived_at)
+          ? '<button class="btn btn--sm btn--warn" data-wait="'+r.id+'">Fait patienter</button>' : '';
+        var nsBtn = (r.status!=='seated')
+          ? '<button class="btn btn--no btn--sm" data-act="no_show" data-id="'+r.id+'">No-show</button>' : '';
+        a=tableBtns+arrToggle+seatBtn+waitBtn+nsBtn+call;   /* table still editable after arrival/seating (#6) */
       } else if(r.status==='no_show'){
         a=call+(r.table_code?'<button class="btn btn--sm btn--ghost" data-free="'+r.id+'">Libérer '+esc(r.table_code)+'</button>':'');
       } else { a=call; }
@@ -989,7 +1016,7 @@ a.btn{text-decoration:none}
       var id=+b.getAttribute('data-arr');
       var r=list.find(function(x){ return x.id===id; });
       var before=r?snap(r):null;
-      b.disabled=true;
+      busy(b,true);
       var res=await api('assign',{method:'POST',body:{id:id,action:'arrived'}});
       if(res.status===200 && res.data.on_time===false) alert(res.data.late_minutes+' min de retard — noté au dossier du client.');
       await loadReservations(); await loadStats();
@@ -1022,6 +1049,18 @@ a.btn{text-decoration:none}
     el.querySelectorAll('[data-addtbl]').forEach(function(b){ b.addEventListener('click', function(){
       var r=list.find(function(x){ return x.id===+b.getAttribute('data-addtbl'); });
       if(r) openAddTable(r);
+    }); });
+    /* persistent un-arrive (#): cancels a mis-tapped arrival at any time and
+       counts it as a mis-click. Available for as long as the client is in the
+       Acceptées list, not just during the 7 s toast. */
+    el.querySelectorAll('[data-unarr]').forEach(function(b){ b.addEventListener('click', async function(){
+      var id=+b.getAttribute('data-unarr');
+      var a=await ask('Annuler l’arrivée ?','Le client repasse « non arrivé ». Utile si « Arrivé » a été tapé par erreur — c’est compté comme une correction.',{yes:'Oui, annuler l’arrivée'});
+      if(!a.ok) return;
+      busy(b,true);
+      await api('assign',{method:'POST',body:{id:id,action:'unarrive'}});
+      await loadReservations(); await loadStats();
+      toast('Arrivée annulée — le client est de nouveau « non arrivé ».');
     }); });
     el.querySelectorAll('[data-pick]').forEach(function(b){ b.addEventListener('click', function(){
       var r=list.find(function(x){ return x.id===+b.getAttribute('data-pick'); });

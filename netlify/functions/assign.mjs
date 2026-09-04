@@ -92,6 +92,29 @@ export default async (req) => {
     return json({ ok: true, reservation: rows[0], late_minutes: late, on_time: onTime });
   }
 
+  /* Cancel a mis-tapped arrival at ANY time (not just the 7 s undo window):
+     the guest goes back to "accepted / non arrivé", the client's punctuality
+     counter is reversed, and the correction is counted on the booking so the
+     owner can see it was toggled by mistake. */
+  if (action === "unarrive") {
+    if (!r.arrived_at) return json({ ok: true, reservation: r, unchanged: true });
+    if (r.client_id) {
+      if ((r.late_minutes || 0) <= GRACE_MIN) await sql`update clients set on_time = max(0, on_time - 1) where id = ${r.client_id}`;
+      else await sql`update clients set late_count = max(0, late_count - 1) where id = ${r.client_id}`;
+    }
+    const rows = await sql`update reservations
+      set status = 'accepted', arrived_at = null, seated_at = null, late_minutes = null,
+          arrival_undos = coalesce(arrival_undos, 0) + 1, updated_at = datetime('now')
+      where id = ${id} returning *`;
+    try {
+      await sql`insert into events (type, path, meta) values (
+        'reservation', ${"reservation:" + id},
+        ${JSON.stringify({ reservation_id: id, kind: "unarrive", by: me.role, guest: r.name })}
+      )`;
+    } catch (e) { /* history best-effort */ }
+    return json({ ok: true, reservation: rows[0], corrections: rows[0].arrival_undos });
+  }
+
   if (action === "seated") {
     const rows = await sql`update reservations
       set status = 'seated', seated_at = datetime('now'), waiting = 0, updated_at = datetime('now')

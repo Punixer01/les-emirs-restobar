@@ -68,6 +68,9 @@ a{color:inherit}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
 .actions .wt{background:transparent;color:var(--gold);border-color:rgba(208,168,78,.4)}
 .actions button{padding:14px 8px;border-radius:10px;font-weight:600;font-size:14px;border:1px solid var(--line);background:var(--card-2);color:var(--cream)}
+.actions button:active{transform:scale(.96)}
+.actions button.is-pressed{box-shadow:0 0 0 3px rgba(122,169,158,.35);filter:brightness(1.08)}
+.actions button:disabled{opacity:.5}
 .actions .ar{background:var(--marine);color:#04110c;border-color:var(--marine)}
 .actions .st{background:var(--green);color:#04110c;border-color:var(--green)}
 .actions .ns{background:transparent;color:var(--red);border-color:rgba(217,122,106,.4)}
@@ -190,6 +193,12 @@ a{color:inherit}
   if(/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone){ installBtn.style.display='inline-block'; }
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  /* visible "you tapped this" flash — no hover on phones */
+  document.addEventListener('pointerdown', function(e){
+    var b=e.target.closest && e.target.closest('.actions button, .callbtn, .fabbar button');
+    if(!b) return; b.classList.add('is-pressed');
+    setTimeout(function(){ b.classList.remove('is-pressed'); }, 260);
+  }, true);
   async function api(path, opts){
     opts=opts||{}; var headers={'content-type':'application/json'};
     if(opts.auth!==false && TOKEN) headers['authorization']='Bearer '+TOKEN;

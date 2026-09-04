@@ -183,17 +183,30 @@ export function shell(inner) {
 /* A request is not a table. Nothing that belongs to a confirmed booking — the
    QR pass, the link to change it — goes out at this stage: both are sent the
    moment the restaurant accepts. */
+/* Capitalise each word of the French date ("vendredi 4 septembre" →
+   "Vendredi 4 Septembre") and write the hour as 20h00, exactly the format the
+   restaurant asked to send its guests. */
+function frDateLong(d) {
+  return fmtDate(d).replace(/([a-zà-ÿ])([a-zà-ÿ']*)/gi, (m, a, b) => a.toUpperCase() + b);
+}
+function frHour(t) { return fmtTime(t).replace(":", "h"); }
+function seatPhrase(s) { return s === "terrace" ? "terrasse" : "salle intérieure"; }
+
 export async function notifyClientReceived(r) {
-  const when = `${fmtDate(r.res_date)} à ${fmtTime(r.res_time)}`;
+  const when = `${frDateLong(r.res_date)} ${frHour(r.res_time)}`;
   const html = shell(
-    `Bonjour ${r.name},<br><br>Nous avons bien reçu votre demande de réservation :<br><br>
-     <b>${when}</b> · ${r.party_size} couverts · ${seatFr(r.seating)}<br>
+    `<div style="font-family:Georgia,serif;font-size:19px;color:#17150f;margin-bottom:18px">Demande de réservation reçue</div>
+     Merci ${r.name},<br>
      Référence : <b>${r.reference}</b><br><br>
-     Notre équipe la confirme très rapidement : vous recevrez un email dès que votre
-     table est validée, avec votre code d’entrée.<br><br>À très bientôt.`
+     <b>${when}</b><br>
+     ${r.party_size} couverts · ${seatPhrase(r.seating)}<br><br>
+     Merci, nous avons reçu votre demande de réservation. La réservation n’est
+     considérée valide que seulement après la confirmation de notre équipe envoyée
+     par email.<br><br>
+     Nous vous enverrons une réponse à votre demande dans les plus brefs délais.`
   );
-  const sms = `Les Emirs: demande recue (${r.reference}) ${when}. Nous vous confirmons tres vite par email.`;
-  await reachClient(r, "Votre demande de réservation — Les Émirs", html, sms);
+  const sms = `Les Emirs: demande de reservation recue (${r.reference}) — ${when}, ${r.party_size} couverts. Valide seulement apres confirmation de notre equipe par email. Reponse dans les plus brefs delais.`;
+  await reachClient(r, "Demande de réservation reçue — Les Émirs", html, sms);
 }
 
 export async function notifyClientDecision(r) {
