@@ -77,7 +77,10 @@ async function list(req) {
   } else if (status && date) {
     rows = await sql.query(`${SELECT} where r.status = ? and r.res_date = ? order by r.res_time asc`, [status, date]);
   } else if (status) {
-    rows = await sql.query(`${SELECT} where r.status = ? order by r.res_date desc, r.res_time asc limit 300`, [status]);
+    /* pending is a queue the owner works through, so it reads soonest-first;
+       the closed lists (declined/no_show/…) read most-recent-first */
+    const ord = status === "pending" ? "r.res_date asc, r.res_time asc" : "r.res_date desc, r.res_time asc";
+    rows = await sql.query(`${SELECT} where r.status = ? order by ${ord} limit 300`, [status]);
   } else if (date) {
     rows = await sql.query(`${SELECT} where r.res_date = ? order by r.res_time asc`, [date]);
   } else {

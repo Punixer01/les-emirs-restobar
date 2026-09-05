@@ -270,6 +270,9 @@ p{margin:0}
 /* Shown only to someone who arrived on the menu link itself (Google, a QR):
    for them this is the whole site, so the way to book must be here. */
 .sheet__book{display:none}
+/* arriving via the menu link, the single Réserver button is the big one at the
+   bottom of the carte — the header pill would be a duplicate, so hide it */
+body.via-carte .sheet__reserve{display:none}
 body.via-carte .sheet__book{display:block;margin:clamp(26px,4vw,38px) auto 0;max-width:420px;
   padding:16px 26px;background:var(--marine);color:var(--bone);text-align:center;
   font-family:var(--font-sans);font-size:12px;letter-spacing:.2em;text-transform:uppercase;
@@ -1073,7 +1076,7 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
       if(si===0) b.classList.add("on");
       sheetTabs.appendChild(b);
       var d=document.createElement("div"); d.className="msec"; d.id=slug(sec.c);
-      d.innerHTML='<div class="msec__h"><h3>'+esc(sec.c)+'</h3><i></i><span class="n">'+sec.i.length+' plats</span></div>'+
+      d.innerHTML='<div class="msec__h"><h3>'+esc(sec.c)+'</h3><i></i></div>'+
         sec.i.map(function(it){
           return '<div class="mitem"><div><div class="mitem__n">'+esc(it[0])+'</div>'+
             (it[1]?'<div class="mitem__d">'+esc(it[1])+'</div>':'')+

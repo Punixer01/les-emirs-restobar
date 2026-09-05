@@ -468,7 +468,7 @@ a.btn{text-decoration:none}
             <button type="button" data-day="1" aria-label="Jour suivant">›</button>
           </div>
           <button type="button" class="datepick__quick" id="fToday">Aujourd’hui</button>
-          <button type="button" class="datepick__quick hide" id="fClear">Tout voir</button>
+          <button type="button" class="datepick__quick" id="fTomorrow">Demain</button>
         </div>
         <span class="muted" id="listCount"></span>
       </div>
@@ -495,7 +495,7 @@ a.btn{text-decoration:none}
           <button class="btn btn--sm btn--ghost" id="mailReadAll">Tout marquer lu</button>
         </div>
       </div>
-      <p class="hint" style="margin:0 0 12px">Vous recevez et envoyez depuis <b>contact@lesemirs.tn</b>. Les réponses reviennent ici.</p>
+      <p class="hint" style="margin:0 0 12px">Tous les emails <b>envoyés et reçus</b> — confirmations, refus, réponses aux clients et messages entrants. Les réponses reviennent ici.</p>
       <div class="panel" id="mailList"><div class="empty">Chargement…</div></div>
     </section>
 
@@ -945,7 +945,12 @@ a.btn{text-decoration:none}
 
   /* reservations */
   async function loadReservations(){
-    var status=CUR_FILTER, date=document.getElementById('fDate').value;
+    var status=CUR_FILTER;
+    /* En attente shows EVERY pending request, all dates, in chronological order,
+       and the date picker is hidden so the queue can't be narrowed by mistake. */
+    var pendingAll = (status==='pending');
+    var dp=document.querySelector('.datepick'); if(dp) dp.style.display = pendingAll ? 'none' : '';
+    var date = pendingAll ? '' : document.getElementById('fDate').value;
     var q=[];
     if(status.charAt(0)==='@') q.push('scope='+status.slice(1));   // scope filters
     else if(status) q.push('status='+status);
@@ -1086,7 +1091,6 @@ a.btn{text-decoration:none}
   (function(){
     var inp = document.getElementById('fDate');
     var lab = document.getElementById('fDateLabel');
-    var clearBtn = document.getElementById('fClear');
     if(!inp || !lab) return;
 
     var DOW = ['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
@@ -1098,13 +1102,12 @@ a.btn{text-decoration:none}
     }
     function label(){
       var v = inp.value;
-      if(!v){ lab.textContent = 'Toutes les dates'; clearBtn.classList.add('hide'); return; }
+      if(!v){ lab.textContent = 'Toutes les dates'; return; }
       var d = new Date(v+'T00:00:00');
       var t = new Date(); t.setHours(0,0,0,0);
       var diff = Math.round((d - t) / 86400000);
       var name = diff === 0 ? "Aujourd\u2019hui" : diff === 1 ? 'Demain' : diff === -1 ? 'Hier' : DOW[d.getDay()];
       lab.textContent = name + ' ' + d.getDate() + ' ' + MON[d.getMonth()];
-      clearBtn.classList.remove('hide');
     }
     function set(v){ inp.value = v; label(); loadReservations(); }
 
@@ -1117,7 +1120,7 @@ a.btn{text-decoration:none}
       });
     });
     document.getElementById('fToday').addEventListener('click', function(){ set(iso(new Date())); });
-    clearBtn.addEventListener('click', function(){ set(''); });
+    document.getElementById('fTomorrow').addEventListener('click', function(){ var d=new Date(); d.setDate(d.getDate()+1); set(iso(d)); });
     label();
   })();
 

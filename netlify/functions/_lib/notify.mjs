@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { sql } from "./db.mjs";
 import { sendPush } from "./webpush.mjs";
 import { fmtDate, fmtTime, seatFr } from "./util.mjs";
 import { editToken, passToken } from "./auth.mjs";
@@ -47,6 +48,22 @@ export async function sendMail(from, to, subject, html) {
   catch (e) { console.error("[email send]", e); return { error: String((e && e.message) || e).slice(0, 200) }; }
 }
 
+/* Keep a copy of every guest-facing email in the same `emails` table the inbox
+   reads, marked direction 'out', so the dashboard's Emails tab is a full record
+   of what the restaurant sent AND received. HTML is flattened to text for the
+   stored body/snippet. Best-effort: a logging failure never blocks the send. */
+export async function logOutbound(to, subject, html) {
+  if (!to) return;
+  try {
+    const text = String(html || "")
+      .replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/gi, " ").replace(/&amp;/gi, "&").replace(/&lt;/gi, "<").replace(/&gt;/gi, ">")
+      .replace(/\s+/g, " ").trim();
+    await sql`insert into emails (from_addr, to_addr, subject, body, snippet, direction, is_read, size)
+      values (${mailFrom()}, ${String(to)}, ${String(subject || "")}, ${text}, ${text.slice(0, 180)}, 'out', 1, ${text.length})`;
+  } catch (e) { console.error("[email out log]", e); }
+}
+
 export async function sendSms(to, body) {
   const sid = process.env.TWILIO_ACCOUNT_SID, tok = process.env.TWILIO_AUTH_TOKEN, from = process.env.TWILIO_FROM;
   if (!sid || !tok || !from || !to) return { skipped: true };
@@ -78,7 +95,7 @@ export async function sendWhatsApp(to, body) {
 
 async function reachClient(r, subject, html, smsText) {
   const jobs = [];
-  if (r.email) jobs.push(sendEmail(r.email, subject, html));
+  if (r.email) { jobs.push(sendEmail(r.email, subject, html)); jobs.push(logOutbound(r.email, subject, html)); }
   if (r.phone) { jobs.push(sendSms(r.phone, smsText)); jobs.push(sendWhatsApp(r.phone, smsText)); }
   await Promise.allSettled(jobs);
 }
@@ -332,7 +349,7 @@ export function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
 export async function sendClientMessage({ email, phone, name, text }) {
   const html = shell(`Bonjour ${name || ""},<br><br>${String(text).replace(/\n/g, "<br>")}<br><br>— L'équipe des Émirs`);
-  if (email) return sendEmail(email, "Un message de Les Émirs", html);
+  if (email) { const res = await sendEmail(email, "Un message de Les Émirs", html); await logOutbound(email, "Un message de Les Émirs", html); return res; }
   if (phone) return sendSms(phone, "Les Emirs: " + text);
   return { skipped: true };
 }
