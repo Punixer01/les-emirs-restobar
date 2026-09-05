@@ -86,6 +86,11 @@ async function list(req) {
   } else if (scope === "waiting") {
     rows = await sql.query(`${SELECT} where r.waiting = 1 and r.res_date = date('now')
                             order by r.res_time asc`);
+  } else if (status === "pending") {
+    /* the En attente queue is forward-looking: today and the days ahead, never
+       requests whose date has already passed. */
+    rows = await sql.query(`${SELECT} where r.status = 'pending' and r.res_date >= date('now')
+                            order by r.res_date asc, r.res_time asc limit 300`);
   } else if (status && date) {
     rows = await sql.query(`${SELECT} where r.status = ? and r.res_date = ? order by r.res_time asc`, [status, date]);
   } else if (status) {

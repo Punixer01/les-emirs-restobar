@@ -40,6 +40,11 @@ export default async (req) => {
       count(*)                                                                 as total
     from reservations where res_date = date('now')`;
 
+  /* En attente is the forward-looking queue (today + upcoming), so its KPI/badge
+     matches the list, which no longer shows requests whose date has passed. */
+  const pendAhead = await sql`select count(*) as n from reservations where status = 'pending' and res_date >= date('now')`;
+  if (today[0]) today[0].pending = pendAhead.length ? pendAhead[0].n : 0;
+
   const byStatus = await sql`select status, count(*) as n from reservations group by status`;
   const seating  = await sql`select seating, count(*) as n from reservations group by seating`;
   const perDay   = await sql`
