@@ -34,7 +34,7 @@ export default async (req) => {
       sum(case when status='no_show' then 1 else 0 end)                        as no_shows,
       sum(case when waiting=1 then 1 else 0 end)                               as waiting,
       sum(case when status='cancelled' then 1 else 0 end)                      as cancelled,
-      sum(case when status in ('expired','no_show') then 1 else 0 end)         as expired,
+      sum(case when status = 'expired' then 1 else 0 end)                      as expired,
       sum(case when source='walkin' then 1 else 0 end)                         as walkins,
       sum(case when modified=1 and status='pending' then 1 else 0 end)         as modified,
       count(*)                                                                 as total
