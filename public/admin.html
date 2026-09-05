@@ -318,8 +318,13 @@ a.btn{text-decoration:none}
 /* bloquée — filled gold so a held table is unmistakable */
 .tbl--held{border-color:#8a6d1f;background:#b08d3e;color:#fff;border-style:dashed}
 .tbl--held .tbl__code,.tbl--held .tbl__seats{color:#fff}
-/* keep the group badge visible even on dense plans */
-.plan--dense .tbl__join{display:block}
+/* keep the group badge visible even on dense plans (mobile). Grouped tables are
+   drawn a bit larger so the "+N" chip fits INSIDE them and stays readable on a
+   phone without covering the number or a neighbouring table. */
+.plan--dense .tbl__join{display:inline-block}
+.plan--dense .tbl--grouped{width:clamp(38px,10cqw,62px);height:clamp(38px,10cqw,62px);z-index:4}
+.plan--dense .tbl--grouped .tbl__code{font-size:clamp(11px,2.8cqw,14px)}
+.plan--dense .tbl--grouped .tbl__join{font-size:clamp(7px,1.9cqw,10px);padding:0 4px;line-height:13px}
 .dot--held{border-color:#8a6d1f;background:#b08d3e}
 .legend2{display:flex;gap:18px;margin-top:10px;font-size:12px;color:#8b8271;flex-wrap:wrap}
 .legend2 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px;border:2px solid}
