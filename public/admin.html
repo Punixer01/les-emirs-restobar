@@ -300,12 +300,12 @@ a.btn{text-decoration:none}
 .tbl--sel{box-shadow:0 0 0 4px rgba(31,71,63,.45)!important}
 /* a table that has other tables joined to it — obvious badge + ring */
 .tbl--grouped{box-shadow:0 0 0 3px rgba(31,71,63,.35)}
-/* the "+N" sits to the RIGHT of the marker, vertically centred, so it never
-   covers the table number or the guest name */
-.tbl__join{position:absolute;left:100%;top:50%;transform:translateY(-50%);margin-left:4px;
-  min-width:18px;height:18px;padding:0 5px;border-radius:9px;white-space:nowrap;
-  background:#1f473f;color:#fff;font-size:10px;font-weight:700;line-height:18px;text-align:center;
-  box-shadow:0 1px 4px rgba(0,0,0,.3);z-index:3}
+/* the "+N" is a small chip INSIDE the marker, on its own line under the number,
+   so it never covers the table number nor spills onto a neighbouring table */
+.tbl{overflow:hidden}
+.tbl__join{display:inline-block;margin-top:2px;max-width:92%;padding:0 5px;border-radius:8px;
+  background:#1f473f;color:#fff;font-size:9px;font-weight:700;line-height:15px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tbl--joinsel{box-shadow:0 0 0 3px rgba(176,141,62,.55);border-color:#b08d3e}
 .plan.merging .tbl{cursor:crosshair}
 .plan.locked .tbl{cursor:pointer}   /* locked: tap to view/edit, but no dragging */
