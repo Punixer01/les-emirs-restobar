@@ -509,7 +509,6 @@ a.btn{text-decoration:none}
       <div class="tools">
         <button class="btn btn--sm" id="resAdd">+ Nouvelle réservation</button>
         <button class="btn btn--sm btn--ghost" id="walkinAdd">+ Sans réservation</button>
-        <button class="btn btn--sm" id="openScan">⛶ Scanner un QR</button>
         <span class="filterchip" id="filterChip" role="button" tabindex="0" hidden></span>
         <div class="datepick">
           <div class="datepick__group">
@@ -816,6 +815,18 @@ a.btn{text-decoration:none}
 (function(){
   "use strict";
   var TOKEN=null; try{ TOKEN=localStorage.getItem('emirs_admin_token'); }catch(e){}
+  var ROLE=null; try{ ROLE=localStorage.getItem('emirs_role'); }catch(e){}
+  /* tabs only the owner sees; reception gets the same dashboard without them */
+  var OWNER_ONLY=['emails','analytics','marketing','site','complet','envois'];
+  function applyRole(){
+    var owner = ROLE==='owner';
+    OWNER_ONLY.forEach(function(n){
+      document.querySelectorAll('.tab[data-tab="'+n+'"]').forEach(function(t){ t.classList.toggle('hide', !owner); });
+      if(!owner) document.querySelectorAll('[data-panel="'+n+'"]').forEach(function(p){ p.classList.add('hide'); });
+    });
+    var active=document.querySelector('.tab.active');
+    if(active && active.classList.contains('hide')){ var d=document.querySelector('.tab[data-tab="demandes"]'); if(d) d.click(); }
+  }
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   /* the dashboard opens on TODAY (no status filter + today's date) so during a
      rush the owner immediately sees every booking of the day, no date to pick */
@@ -850,15 +861,18 @@ a.btn{text-decoration:none}
 
   /* auth */
   var loginEl=document.getElementById('login'), appEl=document.getElementById('app');
-  function showApp(){ loginEl.classList.add('hide'); appEl.classList.remove('hide'); loadAll(); startPolling(); }
-  function logout(){ TOKEN=null; try{localStorage.removeItem('emirs_admin_token');}catch(e){} appEl.classList.add('hide'); loginEl.classList.remove('hide'); }
+  function showApp(){ loginEl.classList.add('hide'); appEl.classList.remove('hide'); applyRole(); loadAll(); startPolling(); }
+  function logout(){ TOKEN=null; ROLE=null; try{localStorage.removeItem('emirs_admin_token');localStorage.removeItem('emirs_role');}catch(e){} appEl.classList.add('hide'); loginEl.classList.remove('hide'); }
   document.getElementById('logoutBtn').addEventListener('click', logout);
   async function doLogin(){
     var code=document.getElementById('code').value.trim(), err=document.getElementById('loginErr'); if(!code) return;
     try{ var res=await api('auth',{method:'POST',auth:false,body:{code:code}});
-      if(res.status===200 && res.data.token && res.data.role==='owner'){ TOKEN=res.data.token; try{localStorage.setItem('emirs_admin_token',TOKEN);}catch(e){} showApp(); }
-      else err.textContent = (res.data.role && res.data.role!=='owner') ? "Ce code n'est pas un code Direction."
-        : ((res.data && res.data.error) ? res.data.error : "Code invalide.");
+      if(res.status===200 && res.data.token && (res.data.role==='owner'||res.data.role==='reception')){
+        TOKEN=res.data.token; ROLE=res.data.role;
+        try{localStorage.setItem('emirs_admin_token',TOKEN);localStorage.setItem('emirs_role',ROLE);}catch(e){}
+        showApp();
+      }
+      else err.textContent = ((res.data && res.data.error) ? res.data.error : "Code invalide.");
     }catch(e){ err.textContent="Connexion impossible."; }
   }
   document.getElementById('loginBtn').addEventListener('click', doLogin);
@@ -1029,7 +1043,7 @@ a.btn{text-decoration:none}
     var tb=[...document.querySelectorAll('.tab')].find(function(t){return t.getAttribute('data-tab')==='demandes';});
     if(tb) tb.click();
     setFilter(kind==='status' ? val : ('@'+val));
-    document.querySelector('[data-panel="demandes"]').scrollIntoView({behavior:'smooth',block:'start'});
+    /* no auto-scroll — the owner scrolls himself when he wants to */
   }
 
 
@@ -1423,7 +1437,7 @@ a.btn{text-decoration:none}
   document.getElementById('readAll').addEventListener('click', async function(){ await api('messages',{method:'POST',body:{action:'read'}}); loadMessages(); });
   async function pollUnread(){
     try{ var r=await api('messages'); var b=document.getElementById('msgBadge'); b.textContent=r.data.unread||0; b.classList.toggle('hide',!(r.data.unread)); }catch(e){}
-    try{ var e2=await api('emails'); var mb=document.getElementById('mailBadge'); var n=(e2.data&&e2.data.unread)||0; mb.textContent=n; mb.classList.toggle('hide',!n); }catch(e){}
+    if(ROLE==='owner'){ try{ var e2=await api('emails'); var mb=document.getElementById('mailBadge'); var n=(e2.data&&e2.data.unread)||0; mb.textContent=n; mb.classList.toggle('hide',!n); }catch(e){} }
   }
 
   /* modal (send message to client) */
@@ -2325,7 +2339,7 @@ a.btn{text-decoration:none}
         } else { go.disabled=false; go.textContent='Réessayer'; alert((r.data&&r.data.error)||'Erreur.'); }
       });
     }
-    document.getElementById('openScan').addEventListener('click', openScan);
+    var _os=document.getElementById('openScan'); if(_os) _os.addEventListener('click', openScan);
     document.getElementById('scanClose').addEventListener('click', closeScan);
     document.getElementById('scanRefGo').addEventListener('click', function(){
       var ref=document.getElementById('scanRef').value.trim(); if(ref) lookup({reference:ref});

@@ -9,7 +9,7 @@ import { notifyOwnerMessage } from "./_lib/notify.mjs";
 // POST /api/messages {action:"read", id}  (owner) — mark read
 export default async (req) => {
   if (req.method === "GET") {
-    const me = auth(req, ["owner"]);
+    const me = auth(req, ["owner", "reception"]);
     if (!me) return json({ error: "unauthorized" }, 401);
     const rows = await sql`select * from messages where direction = 'inbound' order by created_at desc limit 200`;
     const unread = rows.filter((m) => !m.is_read).length;
@@ -21,7 +21,7 @@ export default async (req) => {
 
     // owner action: mark read
     if (b.action === "read") {
-      const me = auth(req, ["owner"]);
+      const me = auth(req, ["owner", "reception"]);
       if (!me) return json({ error: "unauthorized" }, 401);
       if (b.id) await sql`update messages set is_read = 1 where id = ${b.id}`;
       else await sql`update messages set is_read = 1 where direction = 'inbound' and is_read = 0`;

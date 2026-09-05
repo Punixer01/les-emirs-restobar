@@ -4,7 +4,7 @@ import { auth } from "./_lib/auth.mjs";
 
 // GET /api/clients?q=  (owner) — client book, sorted by loyalty
 export default async (req) => {
-  const me = auth(req, ["owner"]);
+  const me = auth(req, ["owner", "reception"]);
   if (!me) return json({ error: "unauthorized" }, 401);
 
   const url = new URL(req.url);

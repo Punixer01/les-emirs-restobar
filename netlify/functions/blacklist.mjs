@@ -6,7 +6,7 @@ import { auth } from "./_lib/auth.mjs";
 // POST /api/blacklist (owner) { phone, name, reason }
 // DELETE /api/blacklist (owner) { phone }
 export default async (req) => {
-  const me = auth(req, ["owner"]);
+  const me = auth(req, ["owner", "reception"]);
   if (!me) return json({ error: "unauthorized" }, 401);
 
   if (req.method === "GET") {

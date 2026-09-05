@@ -5,7 +5,7 @@ import { sweepExpired } from "./_lib/sweep.mjs";
 
 // GET /api/stats (owner) — dashboard analytics (SQLite / D1 dialect)
 export default async (req) => {
-  const me = auth(req, ["owner"]);
+  const me = auth(req, ["owner", "reception"]);
   if (!me) return json({ error: "unauthorized" }, 401);
 
   await sweepExpired();
