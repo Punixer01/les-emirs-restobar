@@ -447,7 +447,6 @@ a.btn{text-decoration:none}
       <div class="tools">
         <select id="planZone"><option value="inside">Salle intérieure</option><option value="terrace">Terrasse</option></select>
         <input type="date" id="planDate" />
-        <input type="time" id="planTime" step="900" />
         <button class="btn btn--sm" id="tblAdd">+ Ajouter une table</button>
         <button class="btn btn--sm btn--ghost" id="mergeMode">Joindre des tables</button>
         <button class="btn btn--sm btn--ghost hide" id="planSave">Enregistrer les positions</button>
@@ -1554,9 +1553,9 @@ a.btn{text-decoration:none}
 
   function todayStr(){ return new Date().toISOString().slice(0,10); }
   function planParams(){
+    /* no time picker — a table shows occupied if it has any booking that day */
     var d=document.getElementById('planDate').value || todayStr();
-    var t=document.getElementById('planTime').value;
-    return 'date='+d+(t?'&time='+t:'');
+    return 'date='+d;
   }
   async function loadTables(){
     var res=await api('tables?'+planParams());
@@ -1796,7 +1795,6 @@ a.btn{text-decoration:none}
   });
   document.getElementById('planZone').addEventListener('change', renderPlan);
   document.getElementById('planDate').addEventListener('change', loadTables);
-  document.getElementById('planTime').addEventListener('change', loadTables);
 
 
   /* ---- joining tables: 27 + 28 become one "27" for 8 ----
