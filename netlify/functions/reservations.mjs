@@ -46,12 +46,16 @@ async function list(req) {
        booking stays in "Acceptées" after the client walks in (#2).
        Honours the date picker: a chosen day shows that day, no date shows every
        upcoming day so the owner can page through with Aujourd'hui / Demain. */
+    /* walk-ins live in their own "Sans réservation" section and must not appear
+       here; owner-added reservations (source 'owner') stay in Acceptées. */
     if (date) {
       rows = await sql.query(`${SELECT} where r.res_date = ?
-                              and r.status in ('accepted','arrived','seated') order by r.res_time asc`, [date]);
+                              and r.status in ('accepted','arrived','seated')
+                              and coalesce(r.source,'') != 'walkin' order by r.res_time asc`, [date]);
     } else {
       rows = await sql.query(`${SELECT} where r.res_date >= date('now')
-                              and r.status in ('accepted','arrived','seated') order by r.res_date asc, r.res_time asc`);
+                              and r.status in ('accepted','arrived','seated')
+                              and coalesce(r.source,'') != 'walkin' order by r.res_date asc, r.res_time asc`);
     }
   } else if (scope === "upcoming") {
     rows = await sql.query(`${SELECT} where r.res_date >= date('now') and r.status in ('accepted','arrived','seated')

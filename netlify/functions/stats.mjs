@@ -25,7 +25,7 @@ export default async (req) => {
   const today = await sql`
     select
       sum(case when status='pending' then 1 else 0 end)                        as pending,
-      sum(case when status in ('accepted','arrived','seated') then 1 else 0 end) as accepted,
+      sum(case when status in ('accepted','arrived','seated') and coalesce(source,'') != 'walkin' then 1 else 0 end) as accepted,
       coalesce(sum(case when status in ('accepted','arrived','seated') then party_size else 0 end),0) as covers,
       sum(case when status in ('accepted','arrived','seated') and table_id is null then 1 else 0 end) as no_table,
       sum(case when status in ('accepted','arrived','seated') and table_id is not null then 1 else 0 end) as with_table,
