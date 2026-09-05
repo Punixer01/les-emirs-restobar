@@ -135,6 +135,13 @@ async function create(req) {
     if (!body.time) body.time = now.toISOString().slice(11, 16);
   }
 
+  /* The owner adds a booking for a friend who may leave no number — phone is
+     optional for staff. Fill a unique placeholder so the record stays valid and
+     clients.phone (UNIQUE) never collides; it just carries no contact. */
+  if (staff && (!body.phone || String(body.phone).replace(/[^0-9]/g, "").length < 6)) {
+    body.phone = "+000" + Date.now();
+  }
+
   /* Reception takes bookings over the phone, where there is often no email;
      only the public form is required to supply one. */
   if (staff) body.staff = true;

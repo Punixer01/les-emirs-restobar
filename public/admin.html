@@ -252,6 +252,13 @@ a.btn{text-decoration:none}
 .datepick__quick.is-active{background:var(--marine);color:#fff;border-color:var(--marine)}
 .datepick__field.is-active{background:var(--marine)}
 .datepick__field.is-active span{color:#fff}
+/* day / time chips in the new-reservation modal (same idea as the public site) */
+.chiprow{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.chip{flex:0 0 auto;padding:9px 13px;border-radius:12px;border:1px solid var(--line);background:var(--card);
+  color:var(--ink);font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap;text-align:center;line-height:1.25;font-family:inherit}
+.chip .cd{display:block;font-size:9.5px;font-weight:500;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.chip.on{background:var(--marine);border-color:var(--marine);color:#fff}
+.chip.on .cd{color:rgba(255,255,255,.72)}
 /* ---- plan de salle ---- */
 .plan{position:relative;width:100%;aspect-ratio:16/10;background:
   linear-gradient(#efe9dd 1px,transparent 1px) 0 0/100% 5%,
@@ -736,12 +743,10 @@ a.btn{text-decoration:none}
     <div class="form">
       <div class="f2">
         <div class="fg"><label>Nom</label><input id="nrName" placeholder="Nom du client" /></div>
-        <div class="fg"><label>Téléphone</label><input id="nrPhone" placeholder="+216…" /></div>
+        <div class="fg"><label>Téléphone (facultatif)</label><input id="nrPhone" placeholder="+216…" /></div>
       </div>
-      <div class="f2">
-        <div class="fg"><label>Date</label><input id="nrDate" type="date" /></div>
-        <div class="fg"><label>Heure</label><input id="nrTime" type="time" step="900" /></div>
-      </div>
+      <div class="fg"><label>Date</label><div class="chiprow" id="nrDays"></div><input id="nrDate" type="hidden" /></div>
+      <div class="fg"><label>Heure</label><div class="chiprow" id="nrTimes"></div><input id="nrTime" type="hidden" /></div>
       <div class="f2">
         <div class="fg"><label>Couverts</label><input id="nrParty" type="number" min="1" max="40" value="2" /></div>
         <div class="fg"><label>Place</label><select id="nrSeat"><option value="inside">Salle intérieure</option><option value="terrace">Terrasse</option></select></div>
@@ -1973,23 +1978,65 @@ a.btn{text-decoration:none}
   });
 
   /* ---- new reservation (owner) ---- */
+  /* day / time chips, matching the website's booking picker */
+  var NR_DOW=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+  var NR_MON=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  function nrIso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function buildNrSlots(){
+    var dayEl=document.getElementById('nrDays'), timeEl=document.getElementById('nrTimes');
+    var today=new Date(); today.setHours(0,0,0,0);
+    var days='';
+    for(var i=0;i<14;i++){ var d=new Date(today); d.setDate(today.getDate()+i);
+      var top=i===0?"Aujourd'hui":(i===1?'Demain':NR_DOW[d.getDay()]);
+      days+='<button type="button" class="chip" data-nrday="'+nrIso(d)+'"><span class="cd">'+top+'</span>'+d.getDate()+' '+NR_MON[d.getMonth()]+'</button>';
+    }
+    dayEl.innerHTML=days;
+    var times='';
+    for(var m=12*60;m<=21*60+30;m+=30){ var hh=String(Math.floor(m/60)).padStart(2,'0'), mm=String(m%60).padStart(2,'0');
+      times+='<button type="button" class="chip" data-nrtime="'+hh+':'+mm+'">'+hh+'h'+mm+'</button>';
+    }
+    timeEl.innerHTML=times;
+    dayEl.onclick=function(e){ var b=e.target.closest('[data-nrday]'); if(!b)return;
+      dayEl.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on');}); b.classList.add('on');
+      document.getElementById('nrDate').value=b.getAttribute('data-nrday'); refreshNrTables(); };
+    timeEl.onclick=function(e){ var b=e.target.closest('[data-nrtime]'); if(!b)return;
+      timeEl.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on');}); b.classList.add('on');
+      document.getElementById('nrTime').value=b.getAttribute('data-nrtime'); refreshNrTables(); };
+    /* open on today */
+    var first=dayEl.querySelector('[data-nrday]'); if(first){ first.classList.add('on'); document.getElementById('nrDate').value=first.getAttribute('data-nrday'); }
+  }
+  /* only AVAILABLE tables, in numeric order, numbered (01, 02, 03…), no seat count */
+  function nrPad(code){ return /^\d+$/.test(String(code)) ? String(code).padStart(2,'0') : String(code); }
+  async function refreshNrTables(){
+    var sel=document.getElementById('nrTable'); var cur=sel.value;
+    var date=document.getElementById('nrDate').value||todayStr();
+    var time=document.getElementById('nrTime').value;
+    var res=await api('tables?date='+date+(time?'&time='+time:''));
+    var tables=(res.data&&res.data.tables)||[], busy=(res.data&&res.data.busy)||{};
+    var avail=tables.filter(function(t){ return t.active && !t.merged_into && !t.blocked && !busy[t.id]; })
+      .sort(function(a,b){ var na=parseInt(a.code,10), nb=parseInt(b.code,10);
+        if(!isNaN(na)&&!isNaN(nb)&&na!==nb) return na-nb; return String(a.code).localeCompare(String(b.code)); });
+    sel.innerHTML='<option value="">— choisir plus tard —</option>'+avail.map(function(t){
+      return '<option value="'+t.id+'">'+esc(nrPad(t.code))+' · '+seat(t.zone)+'</option>'; }).join('');
+    if(cur && avail.some(function(t){return String(t.id)===cur;})) sel.value=cur;   // keep selection if still free
+  }
   document.getElementById('resAdd').addEventListener('click', async function(){
-    document.getElementById('nrDate').value=todayStr();
     document.getElementById('nrMsg').textContent='';
     ['nrName','nrPhone','nrEmail','nrNote'].forEach(function(id){ document.getElementById(id).value=''; });
-    var res=await api('tables?date='+todayStr());
-    var opts='<option value="">— choisir plus tard —</option>'+((res.data&&res.data.tables)||[])
-      .filter(function(t){return t.active;})
-      .map(function(t){ return '<option value="'+t.id+'">'+esc(t.code)+' · '+t.seats+' pl. · '+seat(t.zone)+'</option>'; }).join('');
-    document.getElementById('nrTable').innerHTML=opts;
+    document.getElementById('nrTime').value='';
+    document.getElementById('nrParty').value='2';
+    document.getElementById('nrSeat').value='inside';
+    buildNrSlots();                 // sets nrDate to today
+    await refreshNrTables();
     show('newModal',true);
   });
+  document.getElementById('nrSeat').addEventListener('change', refreshNrTables);
   document.getElementById('nrCancel').addEventListener('click', function(){ show('newModal',false); });
   document.getElementById('nrSave').addEventListener('click', async function(){
     var b=this, m=document.getElementById('nrMsg');
     var body={
       name:document.getElementById('nrName').value.trim(),
-      phone:document.getElementById('nrPhone').value.trim(),
+      phone:document.getElementById('nrPhone').value.trim()||null,   // phone optional (#)
       email:document.getElementById('nrEmail').value.trim()||null,
       date:document.getElementById('nrDate').value,
       time:document.getElementById('nrTime').value,
@@ -1999,11 +2046,11 @@ a.btn{text-decoration:none}
       table_id:document.getElementById('nrTable').value||null,
       notify:document.getElementById('nrNotify').checked
     };
-    if(!body.name||!body.phone||!body.date||!body.time){ m.textContent='Nom, téléphone, date et heure sont requis.'; return; }
-    b.disabled=true; m.textContent='Enregistrement…';
+    if(!body.name||!body.date||!body.time){ m.style.color='#a4552f'; m.textContent='Nom, date et heure sont requis.'; return; }
+    b.disabled=true; m.style.color='var(--mute)'; m.textContent='Enregistrement…';
     var res=await api('reservations',{method:'POST',body:body});
     b.disabled=false;
-    if(res.status!==200||!res.data.ok){ m.textContent=(res.data&&res.data.error)||'Erreur.'; return; }
+    if(res.status!==200||!res.data.ok){ m.style.color='#a4552f'; m.textContent=(res.data&&res.data.error)||'Erreur.'; return; }
     show('newModal',false); loadReservations(); loadTables(); loadStats();
   });
 
