@@ -185,6 +185,40 @@ export default async (req) => {
     return json({ ok: true, reservation: rows[0], added: t[0].code, merged_seats: seats[0].n });
   }
 
+  /* Free ONE specific table of a booking that may hold several (#8): the owner
+     releases each table on its own as guests leave.
+     - a secondary (child) table  -> detached, becomes free; booking keeps the rest
+     - the primary, with children -> a child is promoted to primary, the old
+       primary is freed; the booking stays seated on the remaining tables
+     - the primary, no children   -> booking goes to "Acceptées sans table" */
+  if (action === "free_table") {
+    const tid = parseInt(b.free_table_id, 10);
+    if (!tid) return json({ error: "bad request" }, 400);
+    const t = await sql`select * from tables where id = ${tid}`;
+    if (!t.length) return json({ error: "Table introuvable." }, 404);
+    const reason = String(b.reason || "").slice(0, 120) || "—";
+
+    if (tid === r.table_id) {
+      const kids = await sql`select * from tables where merged_into = ${r.table_id} order by id`;
+      if (kids.length) {
+        const np = kids[0].id;                                   // promote first child to primary
+        await sql`update tables set merged_into = null where id = ${np}`;
+        await sql`update tables set merged_into = ${np} where merged_into = ${r.table_id}`;
+        await sql`update reservations set table_id = ${np} where id = ${id}`;
+      } else {
+        await sql`update reservations set table_id = null, waiting = 0 where id = ${id}`;
+      }
+      await logTableEvent(r.table_id, id, "free", me.role, reason, r.name);
+    } else if (t[0].merged_into === r.table_id) {
+      await sql`update tables set merged_into = null where id = ${tid}`;         // detach child
+      await logTableEvent(r.table_id, id, "free", me.role, "-" + t[0].code, r.name);
+    } else {
+      return json({ error: "Cette table n'appartient pas à cette réservation." }, 409);
+    }
+    const rows = await sql`select * from reservations where id = ${id}`;
+    return json({ ok: true, reservation: rows[0], freed: t[0].code });
+  }
+
   /* Detach a secondary table again (#8). Primary is untouched. */
   if (action === "remove_table") {
     const tid = parseInt(b.remove_table_id, 10);

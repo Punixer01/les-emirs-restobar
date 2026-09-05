@@ -134,7 +134,9 @@ a.btn{text-decoration:none}
 .pill--terrace{background:var(--amber-bg);color:var(--gold)}
 .pill--pending{background:var(--amber-bg);color:var(--gold)}
 .pill--accepted,.pill--seated,.pill--arrived{background:var(--green-bg);color:var(--green)}
-.pill--declined,.pill--no_show{background:var(--red-bg);color:var(--red)}
+.pill--declined{background:var(--red-bg);color:var(--red)}
+/* no-show stands out — filled red so it's caught at a glance */
+.pill--no_show{background:var(--red);color:#fff;font-weight:700}
 .empty{padding:44px 18px;text-align:center;color:var(--mute)}
 .loyal{color:var(--gold);font-weight:600;font-size:12px}
 
@@ -287,27 +289,36 @@ a.btn{text-decoration:none}
 .tbl__seats{font-size:clamp(8px,2cqw,10px);color:#8b8271;margin-top:2px}
 /* below this the marker is too small for the seat count — keep just the number */
 @container (max-width: 460px){ .tbl__seats{display:none} }
-.tbl--busy{border-color:#a4552f;background:#fdf1ea}
-.tbl--busy .tbl__seats{color:#a4552f}
-.tbl--off{border-color:#c9c2b3;background:#f0ece3;opacity:.65}
+/* réservée / occupée — filled terracotta so it reads instantly */
+.tbl--busy{border-color:#8f4526;background:#a4552f;color:#fff;box-shadow:0 3px 10px rgba(164,85,47,.35)}
+.tbl--busy .tbl__code,.tbl--busy .tbl__seats{color:#fff}
+.tbl--off{border-color:#c9c2b3;background:#e7e1d5;opacity:.6}
 .tbl--pick{cursor:pointer}
-.tbl--sel{box-shadow:0 0 0 3px rgba(31,71,63,.28)}
-.tbl__join{font-size:9px;color:#1f473f;font-weight:700;margin-top:1px}
+.tbl--sel{box-shadow:0 0 0 4px rgba(31,71,63,.45)!important}
+/* a table that has other tables joined to it — obvious badge + ring */
+.tbl--grouped{box-shadow:0 0 0 3px rgba(31,71,63,.35)}
+.tbl__join{position:absolute;top:-8px;right:-8px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;
+  background:#1f473f;color:#fff;font-size:10px;font-weight:700;line-height:18px;text-align:center;
+  box-shadow:0 1px 4px rgba(0,0,0,.3);z-index:2}
 .tbl--joinsel{box-shadow:0 0 0 3px rgba(176,141,62,.55);border-color:#b08d3e}
 .plan.merging .tbl{cursor:crosshair}
+.plan.locked .tbl{cursor:pointer}   /* locked: tap to view/edit, but no dragging */
 /* dense floor plans: keep the code readable, drop the detail until zoomed */
 .plan--dense .tbl{width:clamp(20px,5.6cqw,50px);height:clamp(20px,5.6cqw,50px);border-width:1.5px}
 .plan--dense .tbl--rect{width:clamp(30px,8cqw,72px);height:clamp(19px,5cqw,46px)}
 .plan--dense .tbl__code{font-size:clamp(10px,2.6cqw,12px)}
 .plan--dense .tbl__seats,.plan--dense .tbl__join{display:none}
 .plan--dense.zoomed .tbl__seats{display:block}
-.tbl--held{border-color:#b08d3e;background:#fdf6e6;border-style:dashed}
-.tbl--held .tbl__seats{color:#8a6d1f}
-.dot--held{border-color:#b08d3e;background:#fdf6e6}
+/* bloquée — filled gold so a held table is unmistakable */
+.tbl--held{border-color:#8a6d1f;background:#b08d3e;color:#fff;border-style:dashed}
+.tbl--held .tbl__code,.tbl--held .tbl__seats{color:#fff}
+/* keep the group badge visible even on dense plans */
+.plan--dense .tbl__join{display:block}
+.dot--held{border-color:#8a6d1f;background:#b08d3e}
 .legend2{display:flex;gap:18px;margin-top:10px;font-size:12px;color:#8b8271;flex-wrap:wrap}
 .legend2 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px;border:2px solid}
 .dot--free{border-color:#1f473f;background:#fff}
-.dot--busy{border-color:#a4552f;background:#fdf1ea}
+.dot--busy{border-color:#8f4526;background:#a4552f}
 .dot--off{border-color:#c9c2b3;background:#f0ece3}
 .pill--expired{background:#f3ece2;color:#8a6d1f}
 .pill--cancelled{background:#f1eeea;color:#8b8271}
@@ -448,7 +459,7 @@ a.btn{text-decoration:none}
       <div class="legend2">
         <span><i class="dot dot--free"></i>Libre</span>
         <span><i class="dot dot--busy"></i>Réservée</span>
-        <span><i class="dot dot--held"></i>Réservée maison</span>
+        <span><i class="dot dot--held"></i>Bloquée</span>
         <span><i class="dot dot--off"></i>Hors service</span>
       </div>
       <div class="section-h" style="margin-top:22px"><h2>En attente d'une table</h2><span class="muted" id="waitCount"></span></div>
@@ -710,7 +721,7 @@ a.btn{text-decoration:none}
         <div class="fg"><label>Forme</label><select id="tblShape"><option value="round">Ronde</option><option value="square">Carrée</option><option value="rect">Rectangulaire</option></select></div>
       </div>
       <div class="fg"><label><input type="checkbox" id="tblActive" checked style="width:auto;margin-right:8px" />En service</label></div>
-      <div class="fg"><label><input type="checkbox" id="tblBlocked" style="width:auto;margin-right:8px" />Réservée à la maison (privée)</label></div>
+      <div class="fg"><label><input type="checkbox" id="tblBlocked" style="width:auto;margin-right:8px" />Bloquée</label></div>
       <div class="fg" id="tblNoteWrap"><label>Pour qui / pourquoi</label><input id="tblNote" placeholder="Famille, amis, table du patron…" /></div>
       <span id="tblMsg" class="muted"></span>
     </div>
@@ -865,6 +876,17 @@ a.btn{text-decoration:none}
   function tableLabel(r){
     if(!r.table_code) return '';
     return esc(r.table_code) + (r.merged_codes ? ' +'+esc(String(r.merged_codes).split(',').join(' +')) : '');
+  }
+  /* one "Libérer {n}" per table a booking holds — primary + each added table,
+     so the owner frees each individually as guests leave (#8) */
+  function freeButtons(r){
+    if(!r.table_code) return '';
+    var out='<button class="btn btn--sm btn--ghost" data-freetbl="'+r.table_id+'" data-fres="'+r.id+'" data-fcode="'+esc(r.table_code)+'">Libérer '+esc(r.table_code)+'</button>';
+    if(r.merged_pairs){ String(r.merged_pairs).split(',').forEach(function(p){
+      var i=p.indexOf('~'); if(i<0) return; var cid=p.slice(0,i), code=p.slice(i+1);
+      out+='<button class="btn btn--sm btn--ghost" data-freetbl="'+esc(cid)+'" data-fres="'+r.id+'" data-fcode="'+esc(code)+'">Libérer '+esc(code)+'</button>';
+    }); }
+    return out;
   }
   function tags(r){
     var t='';
@@ -1021,7 +1043,7 @@ a.btn{text-decoration:none}
       var tableBtns=
         '<button class="btn btn--sm btn--ghost" data-pick="'+r.id+'">'+(r.table_code?'Changer de table':'Placer')+'</button>'+
         (r.table_code?'<button class="btn btn--sm btn--ghost" data-addtbl="'+r.id+'">+ Table</button>':'')+
-        (r.table_code?'<button class="btn btn--sm btn--ghost" data-free="'+r.id+'">Libérer '+esc(r.table_code)+'</button>':'');
+        freeButtons(r);   /* one "Libérer" per assigned table, freed individually (#8) */
       var a='';
       if(r.status==='pending'){
         a='<button class="btn btn--ok btn--sm" data-pick="'+r.id+'">Accepter</button>'+
@@ -1121,6 +1143,21 @@ a.btn{text-decoration:none}
       await api('assign',{method:'POST',body:{id:id,action:'free',reason:a.reason||'—'}});
       await loadReservations(); await loadStats(); if(typeof loadTables==='function') loadTables();
       toast('Table libérée.', before?function(){ return undo(id,'free',before); }:null);
+    }); });
+    /* free ONE specific table of the booking (primary or an added one) — #8 */
+    el.querySelectorAll('[data-freetbl]').forEach(function(b){ b.addEventListener('click', async function(){
+      var tid=+b.getAttribute('data-freetbl'), rid=+b.getAttribute('data-fres'), code=b.getAttribute('data-fcode')||'';
+      var r=list.find(function(x){ return x.id===rid; });
+      var multi=r && r.merged_pairs;   /* booking holds more than one table */
+      var a=await ask('Libérer la table '+code+' ?',
+        multi ? 'La table '+code+' redevient libre. '+(r?r.name:'Le client')+' garde ses autres tables.'
+              : (r?r.name:'Ce client')+' repassera dans « Acceptées sans table ». La table redevient libre immédiatement.',
+        {reason:true, reasonDefault:'départ', yes:'Oui, libérer', danger:true});
+      if(!a.ok) return;
+      busy(b,true);
+      await api('assign',{method:'POST',body:{id:rid,action:'free_table',free_table_id:tid,reason:a.reason||'—'}});
+      await loadReservations(); await loadStats(); if(typeof loadTables==='function') loadTables();
+      toast('Table '+code+' libérée.');
     }); });
     el.querySelectorAll('[data-addtbl]').forEach(function(b){ b.addEventListener('click', function(){
       var r=list.find(function(x){ return x.id===+b.getAttribute('data-addtbl'); });
@@ -1530,14 +1567,18 @@ a.btn{text-decoration:none}
   }
   function tblClass(t){
     var c='tbl tbl--'+t.shape;
-    if(!t.active) c+=' tbl--off';
-    else if(t.blocked) c+=' tbl--held';      // kept for the house
-    else if(BUSY[t.id]) c+=' tbl--busy';
+    if(BUSY[t.id]) c+=' tbl--busy';          // occupée / réservée — most important
+    else if(t.blocked) c+=' tbl--held';      // bloquée — obvious even if not "en service"
+    else if(!t.active) c+=' tbl--off';       // hors service
+    if(t.merged_with && t.merged_with.length) c+=' tbl--grouped';   // has other tables joined
     return c;
   }
   /* one drawing per room, matching the zone being shown */
   var PLAN_BG = { inside: '/assets/plan/salle.png', terrace: '/assets/plan/terrasse.png' };
   var planBgOn = true;
+  /* the plan is LOCKED by default so tables can't be moved by accident during a
+     rush; the owner unlocks it to rearrange the room (#) */
+  var planLocked = true;
   function applyPlanBg(el){
     var zone = (document.getElementById('planZone')||{}).value || 'inside';
     el.style.setProperty('--plan-bg', 'url("'+(PLAN_BG[zone]||PLAN_BG.inside)+'")');
@@ -1556,14 +1597,16 @@ a.btn{text-decoration:none}
 
   function tblHtml(t,pick){
     var b=BUSY[t.id];
+    var joined=(t.merged_with&&t.merged_with.length);
     var title=b ? (b.name+' · '+ftime(b.time)+' · '+b.party+' couv.')
-      : (!t.active ? 'Hors service'
-      : (t.blocked ? ('Réservée à la maison'+(t.blocked_note?' — '+t.blocked_note:'')) : 'Libre'));
+      : (t.blocked ? ('Bloquée'+(t.blocked_note?' — '+t.blocked_note:''))
+      : (!t.active ? 'Hors service' : 'Libre'));
+    if(joined) title+=' · avec table '+t.merged_with.join(', ');
     return '<div class="'+tblClass(t)+(pick?' tbl--pick':'')+'" data-t="'+t.id+'" title="'+esc(title)+'" '+
       'style="left:'+t.x+'%;top:'+t.y+'%">'+
       '<span class="tbl__code">'+esc(t.code)+'</span>'+
       '<span class="tbl__seats">'+(b? esc(b.name.split(' ')[0]) : (t.merged_seats||t.seats)+' pl.')+'</span>'+
-      ((t.merged_with&&t.merged_with.length)?'<span class="tbl__join">+'+esc(t.merged_with.join('+'))+'</span>':'')+
+      (joined?'<span class="tbl__join" title="Jointe à '+esc(t.merged_with.join(', '))+'">+'+esc(t.merged_with.join('+'))+'</span>':'')+
       '</div>';
   }
   function renderPlan(){
@@ -1578,14 +1621,24 @@ a.btn{text-decoration:none}
     applyPlanBg(el);
     el.innerHTML='<div class="plan__canvas" id="planCanvas">'+list.map(function(t){ return tblHtml(t,false); }).join('')+'</div>'+
       '<div class="plan__zoom">'+
+        '<button id="planLock" title="'+(planLocked?'Déverrouiller pour déplacer les tables':'Verrouiller le plan')+'">'+(planLocked?'🔒':'🔓')+'</button>'+
         '<button data-zoom="out" aria-label="Zoom arrière">−</button>'+
         '<button data-zoom="fit" aria-label="Tout afficher">⤢</button>'+
         '<button data-zoom="in" aria-label="Zoom avant">+</button>'+
       '</div>';
+    el.classList.toggle('locked', planLocked);
     el.classList.toggle('plan--dense', list.length>24);
     var canvas=document.getElementById('planCanvas');
     list.forEach(function(t){ wireDrag(canvas.querySelector('[data-t="'+t.id+'"]'), t); });
     initPlanZoom(el, canvas, list);
+    var lock=document.getElementById('planLock');
+    if(lock) lock.addEventListener('click', function(){
+      planLocked=!planLocked;
+      el.classList.toggle('locked', planLocked);
+      lock.textContent=planLocked?'🔒':'🔓';
+      lock.title=planLocked?'Déverrouiller pour déplacer les tables':'Verrouiller le plan';
+      toast(planLocked?'Plan verrouillé — les tables ne bougent plus.':'Plan déverrouillé — vous pouvez déplacer les tables.');
+    });
   }
 
   /* ---- plan zoom & pan ----
@@ -1706,6 +1759,7 @@ a.btn{text-decoration:none}
     });
     node.addEventListener('pointermove', function(e){
       if(!down) return;
+      if(planLocked) return;                 // locked: no repositioning, tap still edits
       moved++;
       var x=((e.clientX-box.left)/box.width)*100, y=((e.clientY-box.top)/box.height)*100;
       t.x=Math.max(2,Math.min(98,x)); t.y=Math.max(3,Math.min(97,y));
@@ -1821,6 +1875,9 @@ a.btn{text-decoration:none}
     show('tblModal',true);
   }
   document.getElementById('tblAdd').addEventListener('click', function(){ openTable(null); });
+  /* "En service" and "Bloquée" are opposite states: toggling one clears the other */
+  (function(){ var a=document.getElementById('tblActive'), bl=document.getElementById('tblBlocked');
+    if(a&&bl){ a.addEventListener('change',function(){ bl.checked=!a.checked; }); bl.addEventListener('change',function(){ a.checked=!bl.checked; }); } })();
   document.getElementById('tblCancel').addEventListener('click', function(){ show('tblModal',false); });
   document.getElementById('tblSave').addEventListener('click', async function(){
     var body={

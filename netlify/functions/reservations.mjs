@@ -22,6 +22,7 @@ const SELECT = `
          t.zone  as table_zone,
          t.seats as table_seats,
          (select group_concat(tk.code) from tables tk where tk.merged_into = t.id) as merged_codes,
+         (select group_concat(tk.id || '~' || tk.code) from tables tk where tk.merged_into = t.id) as merged_pairs,
          c.bookings_completed, c.bookings_total, c.no_shows,
          c.on_time, c.late_count, c.is_blocked
   from reservations r
