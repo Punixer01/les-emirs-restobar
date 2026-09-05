@@ -344,8 +344,12 @@ a.btn{text-decoration:none}
   .kpi .n{font-size:19px;line-height:1}
   .kpi .l{font-size:8px;letter-spacing:.02em;margin-top:3px;line-height:1.2;
     white-space:normal;overflow-wrap:anywhere}
-  .menu-item{grid-template-columns:1fr 1fr;grid-auto-rows:auto}
-  .menu-item .del{grid-column:2;justify-self:end}
+  /* menu editor on the phone: category and plate name each get their own full
+     row (never truncated); the price box stays small with the delete beside it */
+  .menu-item{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .menu-item input{width:100%;flex:1 1 100%}
+  .menu-item input[data-k="price"]{flex:0 0 120px;width:120px}
+  .menu-item .del{flex:0 0 auto;margin-left:auto}
   .f2{grid-template-columns:1fr}
 
   /* ---- reservation rows: stack instead of squeezing into columns ---- */

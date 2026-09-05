@@ -547,6 +547,7 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
 .passlb__qr svg,.passlb__qr img{width:100%;max-width:224px;height:auto;display:block}
 .passlb__when{font-family:var(--font-serif);font-size:1.3rem;letter-spacing:-.01em}
 .passlb__meta{font-family:var(--font-sans);font-size:13px;color:var(--stone);margin-top:5px}
+.passlb__occ{font-family:var(--font-sans);font-size:13px;color:#8a6d1f;background:#faf5e6;border:1px solid #ecdfbf;border-radius:10px;padding:8px 12px;margin:14px auto 0;max-width:24rem;line-height:1.5}
 .passlb__note{font-size:12.5px;line-height:1.65;color:var(--stone-soft);margin-top:18px;
   padding-top:18px;border-top:1px solid var(--hair)}
 .passlb__link{display:block;width:100%;border:0;cursor:pointer;margin-top:18px;font-family:var(--font-sans);font-size:12px;font-weight:600;
@@ -936,6 +937,7 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
     <div class="passlb__seal" aria-hidden="true"></div>
     <div class="passlb__when" id="passWhen">—</div>
     <div class="passlb__meta" id="passMeta">—</div>
+    <div class="passlb__occ" id="passOcc" hidden></div>
     <p class="passlb__note">Merci ! Votre demande vient d’arriver chez nous.<br />
       Notre équipe la confirme <b>très rapidement par email</b> — vous recevrez alors
       votre code d’entrée et un lien pour modifier votre réservation.</p>
@@ -1407,7 +1409,7 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
   /* The guest has asked for a table, not been given one. The QR code and the
      link to change the booking are sent by email once the restaurant accepts,
      so this sheet only acknowledges the request. */
-  function showReceived(res, nom, party, seating){
+  function showReceived(res, nom, party, seating, note){
     var lb=document.getElementById("passLb");
     if(!lb) return false;
     function put(id, txt){ var el=document.getElementById(id); if(el) el.textContent=txt; }
@@ -1418,6 +1420,9 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
       ? fdatePass(r.res_date)+" · "+String(r.res_time||"").slice(0,5).replace(":","h")
       : "");
     put("passMeta", party+" couverts · "+(seating==="terrace"?"Terrasse":"Salle intérieure"));
+    /* echo back the guest's special-occasion note so they see it was received */
+    var occEl=document.getElementById("passOcc");
+    if(occEl){ var n=(note||r.note||"").trim(); if(n){ occEl.textContent="✎ "+n; occEl.hidden=false; } else { occEl.textContent=""; occEl.hidden=true; } }
     lb.classList.add("open"); lb.setAttribute("aria-hidden","false");
     document.body.classList.add("locked");
     /* The sheet appears under the finger that just tapped "Demander la
@@ -1620,7 +1625,7 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
          scolding them for an empty form. */
       if(window.__lastBooking && Date.now()-window.__lastBooking.at < 8000){
         var b=window.__lastBooking;
-        try{ showReceived(b.res, b.nom, b.party, b.seating); }catch(err){}
+        try{ showReceived(b.res, b.nom, b.party, b.seating, b.note); }catch(err){}
         return;
       }
       var nom=form.nom.value.trim(), tel=form.tel.value.trim();
@@ -1647,12 +1652,12 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
       var service=(_h>=12&&_h<17)?'lunch':'dinner';   /* 00h00 counts as dinner */
       var seating=(document.getElementById('place')||{}).value||'inside';
       var email=(form.email&&form.email.value.trim())||null;
+      var note=((document.getElementById('note')||{}).value||'').trim()||null;
       var btn=form.querySelector('button[type=submit]'); if(btn) btn.disabled=true;
       msg.style.color="var(--stone)"; msg.textContent="Envoi…";
       fetch('/api/reservations',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
         name:nom, phone:tel, email:email, date:form.date.value, time:form.heure.value,
-        party:party, seating:seating, service:service,
-        note:((document.getElementById('note')||{}).value||'').trim()||null
+        party:party, seating:seating, service:service, note:note
       })}).then(function(r){return r.json().then(function(res){return {status:r.status,res:res};});}).then(function(o){
         if(btn) btn.disabled=false;
         var res=o.res;
@@ -1660,10 +1665,10 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
           msg.style.color="var(--marine)";
           msg.innerHTML="Merci "+esc(nom)+" — demande reçue. Référence : <b>"+esc(res.reference)+"</b>. "+
             "Nous vous confirmons très rapidement "+(email?"par email":"par téléphone")+".";
-          window.__lastBooking={res:res, nom:nom, party:party, seating:seating, at:Date.now()};
+          window.__lastBooking={res:res, nom:nom, party:party, seating:seating, note:note, at:Date.now()};
           try{ track('reservation_submit',{ref:res.reference, party:party, seating:seating}); }catch(err){}
           var shown=false;
-          try{ shown=showReceived(res, nom, party, seating); }catch(err){ shown=false; }
+          try{ shown=showReceived(res, nom, party, seating, note); }catch(err){ shown=false; }
           /* the sheet is the confirmation; if it could not be drawn, make sure
              the written one is at least in front of the guest's eyes */
           if(!shown && msg.scrollIntoView) msg.scrollIntoView({block:"center", behavior:"smooth"});

@@ -215,6 +215,12 @@ function frDateLong(d) {
 function frHour(t) { return fmtTime(t).replace(":", "h"); }
 function seatPhrase(s) { return s === "terrace" ? "terrasse" : "salle intérieure"; }
 function seatPhraseCap(s) { const p = seatPhrase(s); return p.charAt(0).toUpperCase() + p.slice(1); }
+function esc(s) { return String(s == null ? "" : s).replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c])); }
+/* the guest's special-occasion note, echoed back in the emails as a soft banner */
+function occBlock(r) {
+  if (!r || !r.note) return "";
+  return `<div style="margin:16px 0;padding:12px 14px;background:#faf5e6;border:1px solid #ecdfbf;border-radius:8px;font-size:13.5px;color:#8a6d1f">✎ ${esc(r.note)}</div>`;
+}
 
 export async function notifyClientReceived(r) {
   const when = `${frDateLong(r.res_date)} ${frHour(r.res_time)}`;
@@ -223,13 +229,14 @@ export async function notifyClientReceived(r) {
      Merci ${r.name},<br>
      Référence : <b>${r.reference}</b><br><br>
      <b>${when}</b><br>
-     ${r.party_size} couverts · ${seatPhrase(r.seating)}<br><br>
-     Merci, nous avons reçu votre demande de réservation. La réservation n’est
+     ${r.party_size} couverts · ${seatPhrase(r.seating)}<br>` +
+     occBlock(r) +
+     `<br>Merci, nous avons reçu votre demande de réservation. La réservation n’est
      considérée valide que seulement après la confirmation de notre équipe envoyée
      par email.<br><br>
      Nous vous enverrons une réponse à votre demande dans les plus brefs délais.`
   );
-  const sms = `Les Emirs: demande de reservation recue (${r.reference}) — ${when}, ${r.party_size} couverts. Valide seulement apres confirmation de notre equipe par email. Reponse dans les plus brefs delais.`;
+  const sms = `Les Emirs: demande de reservation recue (${r.reference}) — ${when}, ${r.party_size} couverts.` + (r.note ? ` Occasion: ${r.note}.` : "") + ` Valide seulement apres confirmation de notre equipe par email.`;
   await reachClient(r, "Demande de réservation reçue — Les Émirs", html, sms);
 }
 
@@ -247,6 +254,7 @@ export async function notifyClientDecision(r) {
       `<b>${frDateLong(r.res_date)} · ${frHour(r.res_time)}</b> · ${r.party_size} personne${r.party_size > 1 ? "s" : ""}<br>` +
       `${seatPhraseCap(r.seating)}<br>` +
       `Référence : <b>${r.reference}</b>` +
+      occBlock(r) +
       passBlock(r) +
       `<div style="margin-top:4px">Au plaisir de vous accueillir.</div>` +
       (link || cancel
