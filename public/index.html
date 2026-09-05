@@ -799,9 +799,22 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
       </div>
       <div class="frow">
         <div class="field"><label for="place">Place</label>
-          <select id="place"><option value="inside">Salle intérieure</option><option value="terrace">Terrasse</option></select></div>
-        <div class="field"><label for="couverts">Couverts</label>
-          <select id="couverts"><option>2 personnes</option><option>3 personnes</option><option>4 personnes</option><option>5 personnes</option><option>6 personnes</option><option>7 et plus</option></select></div>
+          <select id="place"><option value="terrace">Terrasse</option><option value="inside">Salle intérieure</option></select></div>
+        <div class="field"><label for="couverts">Combien de personnes&nbsp;?</label>
+          <select id="couverts">
+            <option value="1">1 personne</option>
+            <option value="2" selected>2 personnes</option>
+            <option value="3">3 personnes</option>
+            <option value="4">4 personnes</option>
+            <option value="5">5 personnes</option>
+            <option value="6">6 personnes</option>
+            <option value="7">7 personnes</option>
+            <option value="8">8 personnes</option>
+            <option value="9">9 personnes</option>
+            <option value="10">10 personnes</option>
+            <option value="autre">Autre (plus de 10)</option>
+          </select>
+          <input id="couvertsAutre" type="number" min="11" max="30" inputmode="numeric" placeholder="Nombre de personnes" hidden style="margin-top:10px" /></div>
       </div>
       <div class="field" style="margin-bottom:26px">
         <label for="email">Email</label>
@@ -1593,6 +1606,11 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
   var form=document.getElementById("resaForm"), msg=document.getElementById("resaMsg"), formStarted=false;
   if(form){
     var d=document.getElementById("date"); if(d) d.min=new Date().toISOString().split("T")[0];
+    /* "Autre (plus de 10)" reveals a free number field */
+    var cvSel=document.getElementById("couverts"), cvOther=document.getElementById("couvertsAutre");
+    if(cvSel&&cvOther) cvSel.addEventListener("change", function(){
+      var on=cvSel.value==="autre"; cvOther.hidden=!on; if(on) cvOther.focus(); else cvOther.value="";
+    });
     form.addEventListener('focusin', function(){ if(!formStarted){ formStarted=true; track('form_start'); } });
     form.addEventListener("submit", function(e){
       e.preventDefault();
@@ -1617,7 +1635,13 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
         if(msg.scrollIntoView) msg.scrollIntoView({block:"center", behavior:"smooth"});
         return;
       }
-      var party=parseInt((document.getElementById('couverts')||{}).value||'2',10)||2;
+      var cv=(document.getElementById('couverts')||{}).value||'2';
+      var party;
+      if(cv==='autre'){
+        party=parseInt((document.getElementById('couvertsAutre')||{}).value,10);
+        if(!party||party<11){ msg.style.color="#a4552f"; msg.textContent="Indiquez le nombre de personnes (plus de 10)."; if(msg.scrollIntoView) msg.scrollIntoView({block:"center",behavior:"smooth"}); if(document.getElementById('couvertsAutre')) document.getElementById('couvertsAutre').focus(); return; }
+        if(party>30){ msg.style.color="#a4552f"; msg.textContent="Pour plus de 30 personnes, merci de nous appeler."; return; }
+      } else { party=parseInt(cv,10)||2; }
       /* service is implied by the hour — no need to ask the guest */
       var _h=parseInt(form.heure.value.split(':')[0],10); if(isNaN(_h)) _h=20;
       var service=(_h>=12&&_h<17)?'lunch':'dinner';   /* 00h00 counts as dinner */

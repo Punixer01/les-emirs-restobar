@@ -115,8 +115,8 @@ a.home{color:var(--marine);font-size:13px}
         '<div class="fg"><label for="party">Nombre de couverts</label><select id="party">'+popts+
           '<option value="__more"'+(Number(v.party)>20?' selected':'')+'>Plus de 20 — nous appeler</option></select></div>'+
         '<div class="fg"><label for="seating">Place</label><select id="seating">'+
-          '<option value="inside"'+(v.seating!=='terrace'?' selected':'')+'>Salle intérieure</option>'+
-          '<option value="terrace"'+(v.seating==='terrace'?' selected':'')+'>Terrasse</option></select></div>'+
+          '<option value="terrace"'+(v.seating==='terrace'?' selected':'')+'>Terrasse</option>'+
+          '<option value="inside"'+(v.seating!=='terrace'?' selected':'')+'>Salle intérieure</option></select></div>'+
         '<button class="btn" id="save">Enregistrer les modifications</button>'+
         '<div class="msg" id="msg"></div>'+
         cancelSection();

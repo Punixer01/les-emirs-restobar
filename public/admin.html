@@ -749,7 +749,7 @@ a.btn{text-decoration:none}
       <div class="fg"><label>Heure</label><div class="chiprow" id="nrTimes"></div><input id="nrTime" type="hidden" /></div>
       <div class="f2">
         <div class="fg"><label>Couverts</label><input id="nrParty" type="number" min="1" max="40" value="2" /></div>
-        <div class="fg"><label>Place</label><select id="nrSeat"><option value="inside">Salle intérieure</option><option value="terrace">Terrasse</option></select></div>
+        <div class="fg"><label>Place</label><select id="nrSeat"><option value="terrace">Terrasse</option><option value="inside">Salle intérieure</option></select></div>
       </div>
       <div class="f2">
         <div class="fg"><label>Email (facultatif)</label><input id="nrEmail" type="email" placeholder="Pour la confirmation" /></div>
@@ -2025,7 +2025,7 @@ a.btn{text-decoration:none}
     ['nrName','nrPhone','nrEmail','nrNote'].forEach(function(id){ document.getElementById(id).value=''; });
     document.getElementById('nrTime').value='';
     document.getElementById('nrParty').value='2';
-    document.getElementById('nrSeat').value='inside';
+    document.getElementById('nrSeat').value='terrace';
     buildNrSlots();                 // sets nrDate to today
     await refreshNrTables();
     show('newModal',true);
