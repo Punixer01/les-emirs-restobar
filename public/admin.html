@@ -102,9 +102,12 @@ a{color:inherit}
 .btn--ico{display:inline-flex;align-items:center;justify-content:center;gap:7px;text-decoration:none}
 .btn--warn{border-color:#e6d6ae;color:#8a6d1f;background:#fdf6e6}
 a.btn{text-decoration:none}
-.kpi--go{cursor:pointer;text-align:left;font:inherit;transition:border-color .2s,transform .15s}
+.kpi--go{cursor:pointer;text-align:left;font:inherit;transition:border-color .2s,transform .15s,background .2s}
 .kpi--go:hover{border-color:var(--marine)}
 .kpi--go:active{transform:scale(.97)}
+/* the section you are viewing: filled marine so it's unmistakable which list is open */
+.kpi--sel{background:var(--marine)!important;border-color:var(--marine)!important;box-shadow:0 8px 22px rgba(31,71,63,.32)!important}
+.kpi--sel .n,.kpi--sel .l{color:#fff!important}
 .btn--ico .ico{width:16px;height:16px;flex:0 0 auto}
 .btn__lbl{display:none}
 .btn--m{background:var(--marine);color:#fff;border-color:var(--marine)}
@@ -950,6 +953,15 @@ a.btn{text-decoration:none}
       b.addEventListener('click', function(){ applyKpiFilter(b.getAttribute('data-kpi')); });
     });
     var pend=d.pending||0, b=document.getElementById('pendBadge'); b.textContent=pend; b.classList.toggle('hide',pend===0);
+    markActiveKpi();
+  }
+  /* which filter a KPI box maps to, so the open section stays highlighted */
+  function kpiToFilter(f){ if(!f) return null; if(f.indexOf('status:')===0) return f.slice(7); if(f.indexOf('scope:')===0) return '@'+f.slice(6); return null; }
+  function markActiveKpi(){
+    document.querySelectorAll('#kpis .kpi[data-kpi]').forEach(function(b){
+      var f=kpiToFilter(b.getAttribute('data-kpi'));
+      b.classList.toggle('kpi--sel', !!f && f===CUR_FILTER && CUR_FILTER!=='');
+    });
   }
 
   /* a KPI box either switches tab, or filters the reservation list */
@@ -1131,6 +1143,7 @@ a.btn{text-decoration:none}
     var label=FILTER_LABELS[CUR_FILTER];
     if(label){ chip.textContent=label+' ×'; chip.hidden=false; }
     else chip.hidden=true;
+    markActiveKpi();
     loadReservations();
   }
   document.getElementById('filterChip').addEventListener('click', function(){ setFilter(''); });
