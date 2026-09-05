@@ -767,7 +767,9 @@ a.btn{text-decoration:none}
   "use strict";
   var TOKEN=null; try{ TOKEN=localStorage.getItem('emirs_admin_token'); }catch(e){}
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
-  var CUR_FILTER='pending';
+  /* the dashboard opens on TODAY (no status filter + today's date) so during a
+     rush the owner immediately sees every booking of the day, no date to pick */
+  var CUR_FILTER='';
   var FILTER_LABELS={
     'pending':'En attente', 'accepted':'Acceptées', 'declined':'Refusées', 'no_show':'No-shows',
     'expired':'Expirées', 'cancelled':'Annulées',
@@ -1008,8 +1010,16 @@ a.btn{text-decoration:none}
         var nsBtn = (r.status!=='seated')
           ? '<button class="btn btn--no btn--sm" data-act="no_show" data-id="'+r.id+'">No-show</button>' : '';
         a=tableBtns+arrToggle+seatBtn+waitBtn+nsBtn+call;   /* table still editable after arrival/seating (#6) */
+      } else if(r.status==='expired'){
+        /* a late guest the 30-min rule auto-expired: the owner can still seat
+           them if they turn up, or mark a manual No-show (which removes them
+           from Pas encore arrivé and Expirées) */
+        a='<button class="btn btn--ok btn--sm" data-arr="'+r.id+'">Arrivé</button>'+
+          '<button class="btn btn--no btn--sm" data-act="no_show" data-id="'+r.id+'">No-show</button>'+
+          (r.table_code?'<button class="btn btn--sm btn--ghost" data-free="'+r.id+'">Libérer '+esc(r.table_code)+'</button>':'')+call;
       } else if(r.status==='no_show'){
-        a=call+(r.table_code?'<button class="btn btn--sm btn--ghost" data-free="'+r.id+'">Libérer '+esc(r.table_code)+'</button>':'');
+        a='<button class="btn btn--sm btn--ok" data-restore="'+r.id+'">Rétablir</button>'+call+
+          (r.table_code?'<button class="btn btn--sm btn--ghost" data-free="'+r.id+'">Libérer '+esc(r.table_code)+'</button>':'');
       } else { a=call; }
       a+='<button class="btn btn--sm btn--ghost btn--ico" data-msg="'+r.id+'" data-nm="'+esc(r.name)+'" data-ph="'+esc(r.phone)+'" data-em="'+esc(r.email||'')+'" aria-label="Écrire à '+esc(r.name)+'" title="Écrire au client"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 7 8.2 5.6a1.5 1.5 0 0 0 1.6 0L21 7"/></svg><span class="btn__lbl">Message</span></button>';
       return '<div class="row">'+
@@ -1085,6 +1095,16 @@ a.btn{text-decoration:none}
       var r=list.find(function(x){ return x.id===+b.getAttribute('data-addtbl'); });
       if(r) openAddTable(r);
     }); });
+    /* Rétablir: undo a no-show — the client returns to Acceptées / Pas encore arrivé */
+    el.querySelectorAll('[data-restore]').forEach(function(b){ b.addEventListener('click', async function(){
+      var id=+b.getAttribute('data-restore');
+      var a=await ask('Rétablir la réservation ?','Le client repasse en « Acceptée » et réapparaît dans « Pas encore arrivé ». Son no-show est annulé.',{yes:'Oui, rétablir'});
+      if(!a.ok) return;
+      busy(b,true);
+      await api('reservation-status',{method:'POST',body:{id:id,restore:true}});
+      await loadReservations(); await loadStats();
+      toast('Réservation rétablie — de nouveau en « Acceptée ».');
+    }); });
     /* persistent un-arrive (#): cancels a mis-tapped arrival at any time and
        counts it as a mis-click. Available for as long as the client is in the
        Acceptées list, not just during the 7 s toast. */
@@ -1151,6 +1171,8 @@ a.btn{text-decoration:none}
     });
     document.getElementById('fToday').addEventListener('click', function(){ set(iso(new Date())); });
     document.getElementById('fTomorrow').addEventListener('click', function(){ var d=new Date(); d.setDate(d.getDate()+1); set(iso(d)); });
+    /* open on today's date automatically (loadReservations runs after login) */
+    inp.value = iso(new Date());
     label();
   })();
 

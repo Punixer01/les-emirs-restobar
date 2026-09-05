@@ -72,12 +72,13 @@ async function list(req) {
     rows = await sql.query(`${SELECT} where r.res_date = date('now')
                             and r.arrived_at is not null order by r.res_time`);
   } else if (scope === "not_arrived") {
-    /* Everyone expected today who has not walked in — including the ones the
-       30-minute rule already flipped to no-show, so they stay visible here as
-       well as in the no-show list. */
+    /* Everyone expected today who has not walked in — the still-waited-for
+       (accepted) AND the ones the 30-minute rule auto-expired, so a late guest
+       stays visible here while also appearing in Expirées. Manual no-shows are
+       a deliberate absence and live only in the No-shows list. */
     rows = await sql.query(`${SELECT} where r.res_date = date('now')
                             and r.arrived_at is null
-                            and r.status in ('accepted','no_show')
+                            and r.status in ('accepted','expired')
                             order by r.res_time`);
   } else if (scope === "walkins") {
     rows = await sql.query(`${SELECT} where r.source = 'walkin' and r.res_date = date('now')
