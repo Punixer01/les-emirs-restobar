@@ -269,12 +269,15 @@ a.btn{text-decoration:none}
   container-type:inline-size}
 .plan__canvas{position:absolute;inset:0;transform-origin:50% 50%;will-change:transform}
 .plan.panning{cursor:grabbing}
-.plan__zoom{position:absolute;right:10px;bottom:10px;z-index:6;display:flex;flex-direction:column;gap:6px}
-.plan__zoom button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
-  background:rgba(255,255,255,.94);backdrop-filter:blur(6px);color:var(--ink);font-size:17px;
-  font-weight:600;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.1);display:flex;
-  align-items:center;justify-content:center}
-.plan__zoom button:active{background:var(--card-2,#efe9dd)}
+/* plan controls now sit UNDER the plan, not floating over the tables */
+.plan__ctrls{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;flex-wrap:wrap}
+.plan__zoombar{display:flex;gap:6px}
+.plan__ctrls button{height:40px;min-width:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink);font-size:16px;font-weight:600;line-height:1;
+  display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+.plan__ctrls button:active{background:var(--card-2,#efe9dd)}
+#planLock{font-size:14px}
+.plan.locked ~ .plan__ctrls #planLock{border-color:var(--line)}
 /* markers scale with the plan width (container units) so they keep the PDF's
    proportions on any screen — fixed px piled up on a narrow phone. */
 .tbl{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;
@@ -297,9 +300,12 @@ a.btn{text-decoration:none}
 .tbl--sel{box-shadow:0 0 0 4px rgba(31,71,63,.45)!important}
 /* a table that has other tables joined to it — obvious badge + ring */
 .tbl--grouped{box-shadow:0 0 0 3px rgba(31,71,63,.35)}
-.tbl__join{position:absolute;top:-8px;right:-8px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;
+/* the "+N" sits to the RIGHT of the marker, vertically centred, so it never
+   covers the table number or the guest name */
+.tbl__join{position:absolute;left:100%;top:50%;transform:translateY(-50%);margin-left:4px;
+  min-width:18px;height:18px;padding:0 5px;border-radius:9px;white-space:nowrap;
   background:#1f473f;color:#fff;font-size:10px;font-weight:700;line-height:18px;text-align:center;
-  box-shadow:0 1px 4px rgba(0,0,0,.3);z-index:2}
+  box-shadow:0 1px 4px rgba(0,0,0,.3);z-index:3}
 .tbl--joinsel{box-shadow:0 0 0 3px rgba(176,141,62,.55);border-color:#b08d3e}
 .plan.merging .tbl{cursor:crosshair}
 .plan.locked .tbl{cursor:pointer}   /* locked: tap to view/edit, but no dragging */
@@ -455,6 +461,14 @@ a.btn{text-decoration:none}
         <span class="muted" id="planCount"></span>
       </div>
       <div class="plan" id="plan"><div class="empty" style="padding:60px 0">Chargement…</div></div>
+      <div class="plan__ctrls" id="planCtrls">
+        <button id="planLock" type="button">🔒 Verrouillé</button>
+        <div class="plan__zoombar">
+          <button type="button" data-zoom="out" aria-label="Zoom arrière">−</button>
+          <button type="button" data-zoom="fit" aria-label="Taille par défaut">⤢</button>
+          <button type="button" data-zoom="in" aria-label="Zoom avant">+</button>
+        </div>
+      </div>
       <div class="legend2">
         <span><i class="dot dot--free"></i>Libre</span>
         <span><i class="dot dot--busy"></i>Réservée</span>
@@ -1618,27 +1632,36 @@ a.btn{text-decoration:none}
     /* tables live on an inner canvas so the whole plan can be panned and pinched
        without touching each table's stored position */
     applyPlanBg(el);
-    el.innerHTML='<div class="plan__canvas" id="planCanvas">'+list.map(function(t){ return tblHtml(t,false); }).join('')+'</div>'+
-      '<div class="plan__zoom">'+
-        '<button id="planLock" title="'+(planLocked?'Déverrouiller pour déplacer les tables':'Verrouiller le plan')+'">'+(planLocked?'🔒':'🔓')+'</button>'+
-        '<button data-zoom="out" aria-label="Zoom arrière">−</button>'+
-        '<button data-zoom="fit" aria-label="Tout afficher">⤢</button>'+
-        '<button data-zoom="in" aria-label="Zoom avant">+</button>'+
-      '</div>';
+    el.innerHTML='<div class="plan__canvas" id="planCanvas">'+list.map(function(t){ return tblHtml(t,false); }).join('')+'</div>';
     el.classList.toggle('locked', planLocked);
     el.classList.toggle('plan--dense', list.length>24);
+    var ctrls=document.getElementById('planCtrls'); if(ctrls) ctrls.hidden=false;
     var canvas=document.getElementById('planCanvas');
     list.forEach(function(t){ wireDrag(canvas.querySelector('[data-t="'+t.id+'"]'), t); });
     initPlanZoom(el, canvas, list);
+  }
+  /* the lock + zoom controls live UNDER the plan (static), wired once */
+  (function(){
+    function setLockLabel(){ var b=document.getElementById('planLock'); if(b){ b.textContent=(planLocked?'🔒 Verrouillé':'🔓 Déverrouillé'); } }
     var lock=document.getElementById('planLock');
     if(lock) lock.addEventListener('click', function(){
       planLocked=!planLocked;
-      el.classList.toggle('locked', planLocked);
-      lock.textContent=planLocked?'🔒':'🔓';
-      lock.title=planLocked?'Déverrouiller pour déplacer les tables':'Verrouiller le plan';
+      var el=document.getElementById('plan'); if(el) el.classList.toggle('locked', planLocked);
+      setLockLabel();
       toast(planLocked?'Plan verrouillé — les tables ne bougent plus.':'Plan déverrouillé — vous pouvez déplacer les tables.');
     });
-  }
+    var ctrls=document.getElementById('planCtrls');
+    if(ctrls) ctrls.addEventListener('click', function(e){
+      var z=e.target.closest('[data-zoom]'); if(!z) return;
+      var el=document.getElementById('plan'); if(!el) return;
+      var r=el.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
+      var v=z.getAttribute('data-zoom');
+      if(v==='in') planZoomAt(1.35,cx,cy);
+      else if(v==='out') planZoomAt(1/1.35,cx,cy);
+      else planFit(PLAN.list);
+    });
+    setLockLabel();
+  })();
 
   /* ---- plan zoom & pan ----
      80 tables do not fit a phone screen, so the plan is a viewport onto a
