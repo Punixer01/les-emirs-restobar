@@ -164,7 +164,7 @@ export async function pushTest(sql, payload) {
 
 /* ---------- email template ---------- */
 export function shell(inner) {
-  return `<!doctype html><html><body style="margin:0;background:#f3efe6;padding:28px 0;font-family:Helvetica,Arial,sans-serif;color:#17150f">
+  return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body style="margin:0;background:#f3efe6;padding:28px 0;font-family:Helvetica,Arial,sans-serif;color:#17150f">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
     <table role="presentation" width="520" cellpadding="0" cellspacing="0" style="background:#fff;border:1px solid #e2dccf;border-radius:8px;overflow:hidden">
       <tr><td style="height:4px;background:#1f473f"></td></tr>
@@ -249,8 +249,12 @@ export async function notifyClientDecision(r) {
     return;
   }
   if (r.status === "declined") {
-    const html = shell(`Bonjour ${r.name},<br><br>Nous sommes navrés : nous ne pouvons pas honorer votre demande du <b>${when}</b>.<br><br>N'hésitez pas à nous rappeler pour trouver un autre créneau. Merci de votre compréhension.`);
-    const sms = `Les Emirs: desole, la reservation du ${when} n'est pas disponible. Rappelez-nous svp.`;
+    const html = shell(
+      `Bonjour ${r.name},<br><br>` +
+      `Nous sommes navrés : nous ne pouvons pas honorer votre demande pour le <b>${when}</b> par manque de places disponibles.<br><br>` +
+      `N'hésitez pas à réserver de nouveau en essayant un autre créneau. Merci de votre compréhension.`
+    );
+    const sms = `Les Emirs: desole, nous ne pouvons pas honorer votre demande pour le ${when} par manque de places disponibles. N'hesitez pas a reserver un autre creneau.`;
     await reachClient(r, "À propos de votre réservation — Les Émirs", html, sms);
     return;
   }
