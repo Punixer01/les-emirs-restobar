@@ -38,13 +38,15 @@ export async function sendEmail(to, subject, html) {
 /* Send with an explicit From — used by the dashboard's compose/reply so the
    owner writes as the restaurant. Reply-To is the same address, so any answer
    lands back in his inbox. */
-export async function sendMail(from, to, subject, html) {
+export async function sendMail(from, to, subject, html, attachments) {
   const resend = getResend();
   if (!resend || !to) return { skipped: true };
   /* Replies must reach the dashboard inbox (contact@lesemirs.tn), never the
      from-address — which may be a .com that has no mailbox behind it. */
   const rt = replyTo() || (String(from).match(/<([^>]+)>/) || [])[1] || from;
-  try { return await resend.emails.send({ from, to, subject, html, reply_to: rt }); }
+  const payload = { from, to, subject, html, reply_to: rt };
+  if (Array.isArray(attachments) && attachments.length) payload.attachments = attachments;
+  try { return await resend.emails.send(payload); }
   catch (e) { console.error("[email send]", e); return { error: String((e && e.message) || e).slice(0, 200) }; }
 }
 

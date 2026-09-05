@@ -247,6 +247,11 @@ a.btn{text-decoration:none}
 .datepick__quick{flex:0 0 auto;padding:12px 16px;border-radius:12px;border:1px solid var(--line);
   background:var(--card);color:var(--ink);font-size:13.5px;font-weight:600;cursor:pointer}
 .datepick__quick:active{background:var(--bone)}
+/* the day currently shown is filled marine so it's obvious which is selected;
+   the date field greens when the chosen day is neither today nor tomorrow */
+.datepick__quick.is-active{background:var(--marine);color:#fff;border-color:var(--marine)}
+.datepick__field.is-active{background:var(--marine)}
+.datepick__field.is-active span{color:#fff}
 /* ---- plan de salle ---- */
 .plan{position:relative;width:100%;aspect-ratio:16/10;background:
   linear-gradient(#efe9dd 1px,transparent 1px) 0 0/100% 5%,
@@ -517,6 +522,11 @@ a.btn{text-decoration:none}
           <div class="fg"><label>Destinataire</label><input id="cmTo" type="email" placeholder="client@email.com" /></div>
           <div class="fg"><label>Objet</label><input id="cmSubject" type="text" placeholder="Objet du message" /></div>
           <div class="fg"><label>Message</label><textarea id="cmBody" rows="7" placeholder="Votre message…"></textarea></div>
+          <div class="fg">
+            <label>Pièces jointes <span class="muted" style="text-transform:none;letter-spacing:0">(fichier ou image, tout type)</span></label>
+            <input id="cmFiles" type="file" multiple />
+            <div id="cmFileList" class="muted" style="margin-top:6px"></div>
+          </div>
           <span id="cmMsg" class="muted"></span>
         </div>
         <div class="modal__row">
@@ -1163,14 +1173,23 @@ a.btn{text-decoration:none}
     function iso(d){
       return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     }
+    function marks(diff){
+      var td=document.getElementById('fToday'), tm=document.getElementById('fTomorrow'),
+          fld=document.querySelector('.datepick__field');
+      if(td) td.classList.toggle('is-active', diff===0);
+      if(tm) tm.classList.toggle('is-active', diff===1);
+      /* the "another date" indicator: the date field itself goes green */
+      if(fld) fld.classList.toggle('is-active', diff!==null && diff!==0 && diff!==1);
+    }
     function label(){
       var v = inp.value;
-      if(!v){ lab.textContent = 'Toutes les dates'; return; }
+      if(!v){ lab.textContent = 'Toutes les dates'; marks(null); return; }
       var d = new Date(v+'T00:00:00');
       var t = new Date(); t.setHours(0,0,0,0);
       var diff = Math.round((d - t) / 86400000);
       var name = diff === 0 ? "Aujourd\u2019hui" : diff === 1 ? 'Demain' : diff === -1 ? 'Hier' : DOW[d.getDay()];
       lab.textContent = name + ' ' + d.getDate() + ' ' + MON[d.getMonth()];
+      marks(diff);
     }
     function set(v){ inp.value = v; label(); loadReservations(); }
 
@@ -1290,9 +1309,27 @@ a.btn{text-decoration:none}
     document.getElementById('cmSubject').value = subject || '';
     document.getElementById('cmBody').value = '';
     document.getElementById('cmMsg').textContent = '';
+    var f=document.getElementById('cmFiles'); if(f) f.value='';
+    var fl=document.getElementById('cmFileList'); if(fl) fl.textContent='';
     document.getElementById('composeTitle').textContent = to ? 'Répondre' : 'Écrire un email';
     composeModal.classList.add('open');
     (to ? document.getElementById('cmBody') : document.getElementById('cmTo')).focus();
+  }
+  function humanSize(n){ return n<1024?n+' o':n<1048576?(n/1024).toFixed(0)+' Ko':(n/1048576).toFixed(1)+' Mo'; }
+  (function(){
+    var fi=document.getElementById('cmFiles'), fl=document.getElementById('cmFileList');
+    if(fi) fi.addEventListener('change', function(){
+      var files=[].slice.call(fi.files||[]);
+      fl.textContent = files.length ? files.map(function(f){ return f.name+' ('+humanSize(f.size)+')'; }).join(' · ') : '';
+    });
+  })();
+  /* read a File as a base64 string (no data: prefix) for the email attachment */
+  function fileToBase64(file){
+    return new Promise(function(res,rej){
+      var r=new FileReader();
+      r.onload=function(){ var s=String(r.result); res(s.slice(s.indexOf(',')+1)); };
+      r.onerror=rej; r.readAsDataURL(file);
+    });
   }
   function closeCompose(){ composeModal.classList.remove('open'); }
   document.getElementById('mailCompose').addEventListener('click', function(){ openCompose('', ''); });
@@ -1306,8 +1343,14 @@ a.btn{text-decoration:none}
     if(!/.+@.+\..+/.test(to)){ msg.style.color='#a4552f'; msg.textContent='Adresse invalide.'; return; }
     if(!body){ msg.style.color='#a4552f'; msg.textContent='Le message est vide.'; return; }
     var btn = this; btn.disabled = true; msg.style.color='var(--mute)'; msg.textContent='Envoi…';
+    /* attachments: any file type, base64-encoded; capped so the mail doesn't bounce */
+    var files=[].slice.call((document.getElementById('cmFiles')||{}).files||[]);
+    var total=files.reduce(function(s,f){ return s+f.size; },0);
+    if(total > 18*1024*1024){ msg.style.color='#a4552f'; msg.textContent='Pièces jointes trop lourdes (max ~18 Mo au total).'; btn.disabled=false; return; }
     try{
-      var res = await api('emails', {method:'POST', body:{action:'send', to:to, subject:subject, body:body}});
+      var attachments=[];
+      for(var i=0;i<files.length;i++){ attachments.push({ filename: files[i].name, content: await fileToBase64(files[i]) }); }
+      var res = await api('emails', {method:'POST', body:{action:'send', to:to, subject:subject, body:body, attachments:attachments}});
       if(res.data && res.data.ok){ msg.style.color='var(--green)'; msg.textContent='✔ Envoyé.'; setTimeout(function(){ closeCompose(); loadEmails(); }, 700); }
       else { msg.style.color='#a4552f'; msg.textContent=(res.data && res.data.error) || 'Envoi impossible.'; }
     }catch(e){ msg.style.color='#a4552f'; msg.textContent='Erreur réseau.'; }

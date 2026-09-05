@@ -57,14 +57,31 @@ export default async (req) => {
         text.replace(/[<>]/g, (c) => (c === "<" ? "&lt;" : "&gt;"))
       }</div>`;
 
-      const res = await sendMail(from, to, subject, html);
+      /* attachments: any file type. Sanitise to { filename, content(base64) } and
+         cap the total so the message doesn't bounce at the mail server. */
+      let attachments = [];
+      if (Array.isArray(b.attachments)) {
+        let total = 0;
+        for (const a of b.attachments) {
+          const filename = String((a && a.filename) || "fichier").slice(0, 200);
+          const content = String((a && a.content) || "");
+          if (!content) continue;
+          total += Math.floor(content.length * 0.75);   // base64 → raw bytes
+          attachments.push({ filename, content });
+        }
+        if (total > 20 * 1024 * 1024) return json({ error: "Pièces jointes trop lourdes (max ~18 Mo au total)." }, 413);
+      }
+
+      const res = await sendMail(from, to, subject, html, attachments);
       if (res && res.error) return json({ error: "Envoi impossible : " + res.error }, 502);
       if (res && res.skipped) return json({ error: "L'envoi d'emails n'est pas configuré." }, 400);
 
-      /* keep a copy in the thread, marked as sent */
+      /* keep a copy in the thread, marked as sent (attachment names noted) */
+      const names = attachments.map((a) => a.filename).join(", ");
+      const logBody = text + (names ? `\n\n[Pièces jointes : ${names}]` : "");
       try {
         await sql`insert into emails (from_addr, to_addr, subject, body, snippet, direction, is_read, size)
-                  values (${String(from)}, ${to}, ${subject}, ${text}, ${text.replace(/\s+/g, " ").slice(0, 180)}, 'out', 1, ${text.length})`;
+                  values (${String(from)}, ${to}, ${subject}, ${logBody}, ${logBody.replace(/\s+/g, " ").slice(0, 180)}, 'out', 1, ${logBody.length})`;
       } catch (e) { console.error("[email out log]", e); }
 
       return json({ ok: true, id: res && res.data && res.data.id });
