@@ -69,7 +69,7 @@ a{color:inherit}
 .actions .wt{background:transparent;color:var(--gold);border-color:rgba(208,168,78,.4)}
 .actions button{padding:14px 8px;border-radius:10px;font-weight:600;font-size:14px;border:1px solid var(--line);background:var(--card-2);color:var(--cream)}
 .actions button:active{transform:scale(.96)}
-.actions button.is-pressed{box-shadow:0 0 0 3px rgba(122,169,158,.35);filter:brightness(1.08)}
+.is-pressed{box-shadow:0 0 0 3px rgba(122,169,158,.5)!important;filter:brightness(1.12);transform:scale(.96)!important;transition:transform .06s ease}
 .actions button:disabled{opacity:.5}
 .actions .ar{background:var(--marine);color:#04110c;border-color:var(--marine)}
 .actions .st{background:var(--green);color:#04110c;border-color:var(--green)}
@@ -193,12 +193,17 @@ a{color:inherit}
   if(/iphone|ipad|ipod/i.test(navigator.userAgent) && !window.navigator.standalone){ installBtn.style.display='inline-block'; }
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
-  /* visible "you tapped this" flash — no hover on phones */
-  document.addEventListener('pointerdown', function(e){
-    var b=e.target.closest && e.target.closest('.actions button, .callbtn, .fabbar button');
-    if(!b) return; b.classList.add('is-pressed');
-    setTimeout(function(){ b.classList.remove('is-pressed'); }, 260);
-  }, true);
+  /* visible "you tapped this" feedback — held while pressed, kept a beat after
+     release so it reads as a real click, not a flicker (no hover on phones) */
+  (function(){
+    var held=null, until=0;
+    function release(){ if(!held) return; var el=held; held=null; setTimeout(function(){ el.classList.remove('is-pressed'); }, Math.max(0,until-Date.now())); }
+    document.addEventListener('pointerdown', function(e){
+      var b=e.target.closest && e.target.closest('.actions button, .callbtn, .fabbar button, .tab, .seg button');
+      if(!b) return; held=b; b.classList.add('is-pressed'); until=Date.now()+320;
+    }, true);
+    ['pointerup','pointercancel','pointerleave','blur'].forEach(function(ev){ document.addEventListener(ev, release, true); });
+  })();
   async function api(path, opts){
     opts=opts||{}; var headers={'content-type':'application/json'};
     if(opts.auth!==false && TOKEN) headers['authorization']='Bearer '+TOKEN;

@@ -81,6 +81,11 @@ a{color:inherit}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);overflow:hidden}
 .row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line-2)}
 .row:last-child{border-bottom:none}
+/* day separator in the En attente queue */
+.date-h{position:sticky;top:0;z-index:2;background:var(--bone-2);color:var(--marine);
+  font-weight:700;font-size:13px;letter-spacing:.02em;padding:9px 16px;border-bottom:1px solid var(--line);
+  text-transform:capitalize}
+.date-h .date-h__n{float:right;font-weight:500;color:var(--stone)}
 .row__main{flex:1;min-width:0}
 .row__name{font-family:var(--serif);font-size:17px}
 .row__sub{color:var(--stone);font-size:13px;margin-top:3px;line-height:1.5}
@@ -108,7 +113,8 @@ a.btn{text-decoration:none}
 .btn--ghost{background:var(--bone-2)}
 .btn:active{transform:scale(.96)}
 /* clear "you tapped this" feedback — matters on phones where there is no hover */
-.btn.is-pressed{box-shadow:0 0 0 3px rgba(31,71,63,.28);filter:brightness(.93)}
+.is-pressed{box-shadow:0 0 0 3px rgba(31,71,63,.35)!important;filter:brightness(.9);transform:scale(.96)!important;transition:transform .06s ease}
+.btn.is-pressed{filter:brightness(.9)}
 .btn:disabled{opacity:.55;cursor:default}
 .btn.is-busy{color:transparent!important;position:relative;pointer-events:none}
 .btn.is-busy::after{content:"";position:absolute;top:50%;left:50%;width:14px;height:14px;margin:-7px 0 0 -7px;
@@ -885,14 +891,26 @@ a.btn{text-decoration:none}
   function hideToast(){ if(_toastEl) _toastEl.classList.remove('show'); }
   /* show a spinner on a button while its action runs */
   function busy(btn,on){ if(!btn) return; btn.disabled=!!on; btn.classList.toggle('is-busy',!!on); }
-  /* global "you tapped this" flash on every .btn — phones have no hover, so a
-     tap must visibly register even before the list reloads */
-  document.addEventListener('pointerdown', function(e){
-    var b=e.target.closest && e.target.closest('.btn, .tab, .kpi');
-    if(!b) return;
-    b.classList.add('is-pressed');
-    setTimeout(function(){ b.classList.remove('is-pressed'); }, 260);
-  }, true);
+  /* global "you tapped this" feedback on every control — phones have no hover,
+     so a tap must clearly register. The pressed look is HELD while the finger is
+     down and kept for a short beat after release, so it reads as a real
+     click-and-release rather than a flicker. */
+  (function(){
+    var held=null, until=0;
+    function press(el){ held=el; el.classList.add('is-pressed'); until=Date.now()+320; }
+    function release(){
+      if(!held) return; var el=held; held=null;
+      var wait=Math.max(0, until-Date.now());
+      setTimeout(function(){ el.classList.remove('is-pressed'); }, wait);
+    }
+    document.addEventListener('pointerdown', function(e){
+      var b=e.target.closest && e.target.closest('.btn, .tab, .kpi, .datepick__quick, .datepick__group button');
+      if(b) press(b);
+    }, true);
+    ['pointerup','pointercancel','pointerleave','blur'].forEach(function(ev){
+      document.addEventListener(ev, release, true);
+    });
+  })();
   /* capture the fields Undo needs to put a booking back exactly as it was */
   function snap(r){ return {status:r.status, table_id:r.table_id, waiting:r.waiting?1:0,
     arrived_at:r.arrived_at||null, seated_at:r.seated_at||null, late_minutes:r.late_minutes==null?null:r.late_minutes}; }
@@ -959,7 +977,7 @@ a.btn{text-decoration:none}
     document.getElementById('listCount').textContent=list.length+' réservation'+(list.length>1?'s':'');
     var el=document.getElementById('resList');
     if(!list.length){ el.innerHTML='<div class="empty">Aucune réservation.</div>'; return; }
-    el.innerHTML=list.map(function(r){
+    var cards=list.map(function(r){
       /* the owner runs the door himself during a rush, so he gets the same
          controls the reception app has, plus a one-tap call */
       var call='<a class="btn btn--sm btn--ghost btn--ico" href="tel:'+esc(r.phone)+'" aria-label="Appeler '+esc(r.name)+'" title="Appeler le client">'+
@@ -1007,7 +1025,19 @@ a.btn{text-decoration:none}
         '</div>'+
         '<span class="pill pill--'+r.status+'">'+statusFr(r.status)+(r.arrived_at&&r.status==='accepted'?' · arrivé':'')+'</span>'+
         '<div class="act">'+a+'</div></div>';
-    }).join('');
+    });
+    /* En attente only: separate each day with a sticky date header (#) */
+    if(pendingAll){
+      var out='', curD=null;
+      list.forEach(function(r,i){
+        var d=String(r.res_date).slice(0,10);
+        if(d!==curD){ curD=d; out+='<div class="date-h">'+esc(fdate(r.res_date))+'</div>'; }
+        out+=cards[i];
+      });
+      el.innerHTML=out;
+    } else {
+      el.innerHTML=cards.join('');
+    }
     el.querySelectorAll('[data-act]').forEach(function(b){ b.addEventListener('click', async function(){
       var act=b.getAttribute('data-act');
       if(act==='no_show'||act==='declined'||act==='cancelled'){

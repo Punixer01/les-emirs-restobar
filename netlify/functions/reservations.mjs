@@ -43,9 +43,16 @@ async function list(req) {
     rows = await sql.query(`${SELECT} where r.res_date = date('now') order by r.res_time asc`);
   } else if (scope === "accepted") {
     /* the accepted family keeps arrived/seated guests visible here too, so a
-       booking stays in "Acceptées" after the client walks in (#2) */
-    rows = await sql.query(`${SELECT} where r.res_date = date('now')
-                            and r.status in ('accepted','arrived','seated') order by r.res_time asc`);
+       booking stays in "Acceptées" after the client walks in (#2).
+       Honours the date picker: a chosen day shows that day, no date shows every
+       upcoming day so the owner can page through with Aujourd'hui / Demain. */
+    if (date) {
+      rows = await sql.query(`${SELECT} where r.res_date = ?
+                              and r.status in ('accepted','arrived','seated') order by r.res_time asc`, [date]);
+    } else {
+      rows = await sql.query(`${SELECT} where r.res_date >= date('now')
+                              and r.status in ('accepted','arrived','seated') order by r.res_date asc, r.res_time asc`);
+    }
   } else if (scope === "upcoming") {
     rows = await sql.query(`${SELECT} where r.res_date >= date('now') and r.status in ('accepted','arrived','seated')
                             order by r.res_date asc, r.res_time asc`);
