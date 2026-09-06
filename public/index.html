@@ -716,7 +716,7 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
     <figure class="sig__fig" data-r data-d="3">
       <div class="frame">
         <video id="vidA" muted loop playsinline preload="auto" poster="assets/media/signature-gargoulette.jpg">
-          <source src="assets/media/signature.mp4" type="video/mp4" />
+          <source src="assets/media/signature-court.mp4" type="video/mp4" />
         </video>
         <button class="sig__sound" id="sigSound" aria-pressed="false" aria-label="Activer le son">
           <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -938,9 +938,9 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
     <div class="passlb__when" id="passWhen">—</div>
     <div class="passlb__meta" id="passMeta">—</div>
     <div class="passlb__occ" id="passOcc" hidden></div>
-    <p class="passlb__note">Merci ! Votre demande vient d’arriver chez nous.<br />
-      Notre équipe la confirme <b>très rapidement par email</b> — vous recevrez alors
-      votre code d’entrée et un lien pour modifier votre réservation.</p>
+    <p class="passlb__note">Merci, nous avons reçu votre demande de réservation. La réservation n’est
+      considérée valide que seulement après la confirmation de notre équipe envoyée par email.<br /><br />
+      Nous vous enverrons une réponse à votre demande dans les plus brefs délais.</p>
     <button class="passlb__link" type="button" data-passclose>Parfait, merci</button>
   </div>
 </div>
@@ -1232,7 +1232,7 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
     {s:"assets/media/safran.jpg",         c:"Gambas & moules au safran", w:0},
     {s:"assets/media/penne-gambas-port.jpg", c:"Penne aux gambas, face au port", w:0},
     {s:"assets/media/carpaccio-port.jpg", c:"Carpaccio de bœuf, face au port", w:1},
-    {v:"assets/media/signature.mp4", s:"assets/media/signature-gargoulette.jpg", c:"La Gargoulette des Émirs", w:0},
+    {v:"assets/media/signature-court.mp4", s:"assets/media/signature-gargoulette.jpg", c:"La Gargoulette des Émirs", w:0},
     {s:"assets/media/plat-terrasse.jpg",  c:"Dressage en terrasse", w:1},
     {v:"assets/media/plateau.mp4", s:"assets/media/plateau.jpg", c:"Les assiettes de la maison", w:0},
     {s:"assets/media/penne-crevettes.jpg",c:"Penne aux crevettes", w:0},
@@ -1414,7 +1414,7 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
     if(!lb) return false;
     function put(id, txt){ var el=document.getElementById(id); if(el) el.textContent=txt; }
     put("passRef", res.reference);
-    put("passName", "Merci "+nom);
+    put("passName", "Merci Mr/Mme "+nom);
     var r=res.reservation||{};
     put("passWhen", r.res_date
       ? fdatePass(r.res_date)+" · "+String(r.res_time||"").slice(0,5).replace(":","h")

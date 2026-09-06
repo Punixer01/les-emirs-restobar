@@ -190,7 +190,6 @@ export function shell(inner) {
       <tr><td style="padding:26px 30px">
         <img src="${base()}/assets/logo-ink.png" alt="Les Émirs" width="196" height="44"
              style="display:block;width:196px;height:auto;max-width:60%" />
-        <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8b8271;margin-top:8px">Port El Kantaoui · Sousse</div>
         <div style="height:1px;background:#e2dccf;margin:18px 0"></div>
         <div style="font-size:15px;line-height:1.7;color:#3b352b">${inner}</div>
       </td></tr>
