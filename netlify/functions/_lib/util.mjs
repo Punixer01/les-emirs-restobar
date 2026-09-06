@@ -39,7 +39,10 @@ export function validateBooking(b) {
   const errors = [];
   if (!b.name || String(b.name).trim().length < 2) errors.push("nom");
   const phone = normPhone(b.phone);
-  if (phone.replace(/\D/g, "").length < 6) errors.push("téléphone");
+  const hasPhone = phone.replace(/\D/g, "").length >= 6;
+  /* Public bookings must give a number; a staff booking (owner/reception) may
+     have none — it then stays empty, no placeholder is invented. */
+  if (!hasPhone && !b.staff) errors.push("téléphone");
   if (!b.date || !/^\d{4}-\d{2}-\d{2}$/.test(b.date)) errors.push("date");
   if (!b.time || !/^\d{2}:\d{2}/.test(b.time)) errors.push("heure");
   const party = parseInt(b.party, 10);
@@ -54,7 +57,7 @@ export function validateBooking(b) {
     errors,
     value: {
       name: String(b.name || "").trim(),
-      phone,
+      phone: hasPhone ? phone : "",
       email,
       date: b.date,
       time: fmtTime(b.time),

@@ -112,6 +112,10 @@ a.btn{text-decoration:none}
 /* the section you are viewing: filled marine so it's unmistakable which list is open */
 .kpi--sel{background:var(--marine)!important;border-color:var(--marine)!important;box-shadow:0 8px 22px rgba(31,71,63,.32)!important}
 .kpi--sel .n,.kpi--sel .l{color:#fff!important}
+/* something new needs attention (new pending / new cancellation): a calm pulse */
+@keyframes kpiAlert{0%,100%{box-shadow:0 0 0 0 rgba(165,130,75,.0)}50%{box-shadow:0 0 0 4px rgba(165,130,75,.45)}}
+.kpi--alert{border-color:var(--gold)!important;animation:kpiAlert 1.8s ease-in-out infinite}
+.kpi--alert .n{color:var(--gold)}
 .btn--ico .ico{width:16px;height:16px;flex:0 0 auto}
 .btn__lbl{display:none}
 .btn--m{background:var(--marine);color:#fff;border-color:var(--marine)}
@@ -861,9 +865,9 @@ a.btn{text-decoration:none}
     if(active && active.classList.contains('hide')){ var d=document.querySelector('.tab[data-tab="demandes"]'); if(d) d.click(); }
   }
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
-  /* the dashboard opens on TODAY (no status filter + today's date) so during a
-     rush the owner immediately sees every booking of the day, no date to pick */
-  var CUR_FILTER='';
+  /* the dashboard always opens on "En attente" — the pending queue is the first
+     thing staff must act on (#8) */
+  var CUR_FILTER='pending';
   var FILTER_LABELS={
     'pending':'En attente', 'accepted':'Acceptées', 'declined':'Refusées', 'no_show':'No-shows',
     'expired':'Expirées', 'cancelled':'Annulées',
@@ -1032,13 +1036,19 @@ a.btn{text-decoration:none}
   /* KPIs */
   function renderKpis(s){
     var t=s.totals||{}, d=s.today||{};
+    /* new pending / new cancellation → the box pulses until its list is opened */
+    var pendN=d.pending||0, cancN=d.cancelled||0;
+    if(seen('emirs_seen_pending')==null) setSeen('emirs_seen_pending', pendN);
+    if(seen('emirs_seen_cancelled')==null) setSeen('emirs_seen_cancelled', cancN);
+    var alertPending = pendN > seen('emirs_seen_pending');
+    var alertCancelled = cancN > seen('emirs_seen_cancelled');
     /* Grouped exactly as he reads a service: what needs a decision, then where
        people are seated, then who is actually in the room. */
     var rows=[
-      [ {n:d.pending||0,   l:'En attente', f:'status:pending', a:(d.pending||0)>0},
+      [ {n:d.pending||0,   l:'En attente', f:'status:pending', a:(d.pending||0)>0, alert:alertPending},
         {n:d.accepted||0,  l:'Acceptées',  f:'scope:accepted'},
         {n:d.covers||0,    l:'Couverts'},
-        {n:d.cancelled||0, l:'Annulées',   f:'status:cancelled'} ],
+        {n:d.cancelled||0, l:'Annulées',   f:'status:cancelled', alert:alertCancelled} ],
       [ {n:d.no_table||0,  l:'Sans table',       f:'scope:no_table', a:(d.no_table||0)>0},
         {n:d.with_table||0,l:'Avec table',       f:'scope:with_table'},
         {n:d.walkins||0,   l:'Sans réservation', f:'scope:walkins'} ],
@@ -1049,7 +1059,7 @@ a.btn{text-decoration:none}
     ];
     document.getElementById('kpis').innerHTML=rows.map(function(row){
       return '<div class="kpirow kpirow--'+row.length+'">'+row.map(function(x){
-        return '<'+(x.f?'button':'div')+' class="kpi'+(x.a?' kpi--a':'')+(x.f?' kpi--go':'')+'"'+
+        return '<'+(x.f?'button':'div')+' class="kpi'+(x.a?' kpi--a':'')+(x.alert?' kpi--alert':'')+(x.f?' kpi--go':'')+'"'+
           (x.f?' data-kpi="'+x.f+'" aria-label="'+x.l+' : '+x.n+'"':'')+'>'+
           '<div class="n">'+x.n+'</div><div class="l">'+x.l+'</div></'+(x.f?'button':'div')+'>';
       }).join('')+'</div>';
@@ -1069,9 +1079,19 @@ a.btn{text-decoration:none}
     });
   }
 
+  /* opening the En attente / Annulées list acknowledges its alert (stops the pulse) */
+  function ackAlert(target){
+    var d=(LAST_STATS&&LAST_STATS.today)||{};
+    if(target==='pending'){ setSeen('emirs_seen_pending', d.pending||0); }
+    if(target==='cancelled'){ setSeen('emirs_seen_cancelled', d.cancelled||0); }
+    document.querySelectorAll('#kpis .kpi--alert').forEach(function(b){
+      var f=b.getAttribute('data-kpi')||''; if(f==='status:'+target) b.classList.remove('kpi--alert');
+    });
+  }
   /* a KPI box either switches tab, or filters the reservation list */
   function applyKpiFilter(f){
     var kind=f.split(':')[0], val=f.split(':')[1];
+    if(kind==='status' && (val==='pending'||val==='cancelled')) ackAlert(val);
     if(kind==='tab'){ var tb=[...document.querySelectorAll('.tab')].find(function(t){return t.getAttribute('data-tab')===val;}); if(tb) tb.click(); return; }
     var tb=[...document.querySelectorAll('.tab')].find(function(t){return t.getAttribute('data-tab')==='demandes';});
     if(tb) tb.click();
@@ -1111,7 +1131,7 @@ a.btn{text-decoration:none}
         freeButtons(r);   /* one "Libérer" per assigned table, freed individually (#8) */
       var a='';
       if(r.status==='pending'){
-        a='<button class="btn btn--ok btn--sm" data-pick="'+r.id+'">Accepter</button>'+
+        a='<button class="btn btn--sm btn--ghost" data-pick="'+r.id+'">Accepter</button>'+
           '<button class="btn btn--no btn--sm" data-act="declined" data-id="'+r.id+'">Refuser</button>'+call;
       } else if(r.status==='accepted'||r.status==='arrived'||r.status==='seated'){
         /* the arrival is a PERSISTENT toggle in the Acceptées list: once tapped
@@ -1120,23 +1140,21 @@ a.btn{text-decoration:none}
            not enough on its own. Every cancellation is counted as a mis-click. */
         var arrToggle = r.arrived_at
           ? '<button class="btn btn--sm btn--arrived" data-unarr="'+r.id+'" title="Annuler l\'arrivée (corriger un clic)">Arrivé</button>'
-          : '<button class="btn btn--ok btn--sm" data-arr="'+r.id+'">Arrivé</button>';
+          : '<button class="btn btn--sm btn--ghost" data-arr="'+r.id+'">Arrivé</button>';
         var seatBtn = (r.arrived_at && r.status!=='seated')
-          ? '<button class="btn btn--sm" data-act="seated" data-id="'+r.id+'">Installer</button>' : '';
-        var waitBtn = (!r.arrived_at)
-          ? '<button class="btn btn--sm btn--warn" data-wait="'+r.id+'">Fait patienter</button>' : '';
+          ? '<button class="btn btn--sm btn--ghost" data-act="seated" data-id="'+r.id+'">Installer</button>' : '';
         var nsBtn = (r.status!=='seated')
           ? '<button class="btn btn--no btn--sm" data-act="no_show" data-id="'+r.id+'">No-show</button>' : '';
-        a=tableBtns+arrToggle+seatBtn+waitBtn+nsBtn+call;   /* table still editable after arrival/seating (#6) */
+        a=tableBtns+arrToggle+seatBtn+nsBtn+call;   /* table still editable after arrival/seating (#6) */
       } else if(r.status==='expired'){
         /* a late guest the 30-min rule auto-expired: the owner can still seat
            them if they turn up, or mark a manual No-show (which removes them
            from Pas encore arrivé and Expirées) */
-        a='<button class="btn btn--ok btn--sm" data-arr="'+r.id+'">Arrivé</button>'+
+        a='<button class="btn btn--sm btn--ghost" data-arr="'+r.id+'">Arrivé</button>'+
           '<button class="btn btn--no btn--sm" data-act="no_show" data-id="'+r.id+'">No-show</button>'+
           (r.table_code?'<button class="btn btn--sm btn--ghost" data-free="'+r.id+'">Libérer '+esc(r.table_code)+'</button>':'')+call;
       } else if(r.status==='no_show'){
-        a='<button class="btn btn--sm btn--ok" data-restore="'+r.id+'">Rétablir</button>'+call+
+        a='<button class="btn btn--sm btn--ghost" data-restore="'+r.id+'">Rétablir</button>'+call+
           (r.table_code?'<button class="btn btn--sm btn--ghost" data-free="'+r.id+'">Libérer '+esc(r.table_code)+'</button>':'');
       } else { a=call; }
       a+='<button class="btn btn--sm btn--ghost btn--ico" data-msg="'+r.id+'" data-nm="'+esc(r.name)+'" data-ph="'+esc(r.phone)+'" data-em="'+esc(r.email||'')+'" aria-label="Écrire à '+esc(r.name)+'" title="Écrire au client"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 7 8.2 5.6a1.5 1.5 0 0 0 1.6 0L21 7"/></svg><span class="btn__lbl">Message</span></button>';
@@ -1184,17 +1202,6 @@ a.btn{text-decoration:none}
       if(res.status===200 && res.data.on_time===false) alert(res.data.late_minutes+' min de retard — noté au dossier du client.');
       await loadReservations(); await loadStats();
       toast('Arrivée enregistrée.', before?function(){ return undo(id,'arrived',before); }:null);
-    }); });
-    el.querySelectorAll('[data-wait]').forEach(function(b){ b.addEventListener('click', async function(){
-      var a=await ask('Faire patienter ?','Sa table sera libérée et il passera dans la liste d’attente.',{yes:'Oui'});
-      if(!a.ok) return;
-      var id=+b.getAttribute('data-wait');
-      var r=list.find(function(x){ return x.id===id; });
-      var before=r?snap(r):null;
-      b.disabled=true;
-      await api('assign',{method:'POST',body:{id:id,action:'wait'}});
-      await loadReservations(); await loadStats();
-      toast('Client en attente.', before?function(){ return undo(id,'wait',before); }:null);
     }); });
     el.querySelectorAll('[data-free]').forEach(function(b){ b.addEventListener('click', async function(){
       var id=+b.getAttribute('data-free');
@@ -1307,13 +1314,26 @@ a.btn{text-decoration:none}
     });
     document.getElementById('fToday').addEventListener('click', function(){ set(iso(new Date())); });
     document.getElementById('fTomorrow').addEventListener('click', function(){ var d=new Date(); d.setDate(d.getDate()+1); set(iso(d)); });
+    /* show the real date on the quick buttons so a day is never picked by mistake (#9) */
+    (function(){
+      var t=new Date(), tm=new Date(); tm.setDate(t.getDate()+1);
+      var bt=document.getElementById('fToday'), btm=document.getElementById('fTomorrow');
+      if(bt) bt.textContent="Aujourd’hui · "+t.getDate()+" "+MON[t.getMonth()];
+      if(btm) btm.textContent="Demain · "+tm.getDate()+" "+MON[tm.getMonth()];
+    })();
     /* open on today's date automatically (loadReservations runs after login) */
     inp.value = iso(new Date());
     label();
   })();
 
   /* stats */
-  async function loadStats(){ var res=await api('stats'); if(res.status!==200)return; renderKpis(res.data); renderCharts(res.data); }
+  var LAST_STATS=null;
+  /* alert baselines: a box glows when its count rises above what was last seen,
+     until the owner opens that list (acknowledge). Persisted so a new pending or
+     cancellation still pulses after a reload. */
+  function seen(k){ try{ var v=localStorage.getItem(k); return v==null?null:+v; }catch(e){ return null; } }
+  function setSeen(k,v){ try{ localStorage.setItem(k,String(v)); }catch(e){} }
+  async function loadStats(){ var res=await api('stats'); if(res.status!==200)return; LAST_STATS=res.data; renderKpis(res.data); renderCharts(res.data); }
   function renderCharts(s){
     var days=s.perDay||[], maxD=Math.max(1,Math.max.apply(null,days.map(function(d){return d.n;})||[1]));
     document.getElementById('chartDays').innerHTML=days.length?days.map(function(d){return '<div class="bar" style="height:'+(d.n/maxD*100)+'%" title="'+d.day+': '+d.n+'"><span>'+d.day.slice(8)+'</span></div>';}).join(''):'<div class="empty" style="width:100%">—</div>';
@@ -2185,11 +2205,15 @@ a.btn{text-decoration:none}
   /* ---- walk-in: someone at the door with no booking ---- */
   document.getElementById('walkinAdd').addEventListener('click', async function(){
     var res=await api('tables?date='+todayStr());
+    var busy=(res.data&&res.data.busy)||{};
+    /* only tables free right now (not reserved, blocked, merged or out of service),
+       in numeric order, shown as "Table N" — nothing else (#6) */
     var free=((res.data&&res.data.tables)||[]).filter(function(t){
-      return t.active && !t.merged_into && !t.blocked && !(res.data.busy||{})[t.id];
-    });
+      return t.active && !t.merged_into && !t.blocked && !busy[t.id];
+    }).sort(function(a,b){ var na=parseInt(a.code,10), nb=parseInt(b.code,10);
+      if(!isNaN(na)&&!isNaN(nb)&&na!==nb) return na-nb; return String(a.code).localeCompare(String(b.code)); });
     var opts='<option value="">— sans table pour l’instant —</option>'+free.map(function(t){
-      return '<option value="'+t.id+'">'+esc(t.code)+' · '+(t.merged_seats||t.seats)+' pl. · '+seat(t.zone)+'</option>';
+      return '<option value="'+t.id+'">Table '+esc(t.code)+'</option>';
     }).join('');
     document.getElementById('wkTable').innerHTML=opts;
     document.getElementById('wkName').value='';

@@ -25,11 +25,11 @@ export default async (req) => {
   const today = await sql`
     select
       sum(case when status='pending' then 1 else 0 end)                        as pending,
-      sum(case when status in ('accepted','arrived','seated') and coalesce(source,'') != 'walkin' then 1 else 0 end) as accepted,
-      coalesce(sum(case when status in ('accepted','arrived','seated') then party_size else 0 end),0) as covers,
-      sum(case when status in ('accepted','arrived','seated') and table_id is null then 1 else 0 end) as no_table,
-      sum(case when status in ('accepted','arrived','seated') and table_id is not null then 1 else 0 end) as with_table,
-      sum(case when arrived_at is not null then 1 else 0 end)                   as arrived,
+      sum(case when status in ('accepted','arrived','seated','expired') and coalesce(source,'') != 'walkin' then 1 else 0 end) as accepted,
+      coalesce(sum(case when status in ('accepted','arrived','seated','expired') and coalesce(source,'') != 'walkin' then party_size else 0 end),0) as covers,
+      sum(case when status in ('accepted','arrived','seated','expired') and coalesce(source,'') != 'walkin' and table_id is null then 1 else 0 end) as no_table,
+      sum(case when status in ('accepted','arrived','seated','expired') and coalesce(source,'') != 'walkin' and table_id is not null then 1 else 0 end) as with_table,
+      sum(case when arrived_at is not null and coalesce(source,'') != 'walkin' then 1 else 0 end) as arrived,
       sum(case when arrived_at is null and status in ('accepted','expired') then 1 else 0 end) as not_arrived,
       sum(case when status='no_show' then 1 else 0 end)                        as no_shows,
       sum(case when waiting=1 then 1 else 0 end)                               as waiting,

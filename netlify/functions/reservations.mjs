@@ -49,29 +49,32 @@ async function list(req) {
        upcoming day so the owner can page through with Aujourd'hui / Demain. */
     /* walk-ins live in their own "Sans réservation" section and must not appear
        here; owner-added reservations (source 'owner') stay in Acceptées. */
+    /* ACCEPTED IS PERSISTENT: once accepted a booking stays here through arrival
+       AND expiry. The family accepted/arrived/seated/expired all mean "was
+       accepted and is still live" — only cancelled/declined/no-show leave. */
     if (date) {
       rows = await sql.query(`${SELECT} where r.res_date = ?
-                              and r.status in ('accepted','arrived','seated')
+                              and r.status in ('accepted','arrived','seated','expired')
                               and coalesce(r.source,'') != 'walkin' order by r.res_time asc`, [date]);
     } else {
       rows = await sql.query(`${SELECT} where r.res_date >= date('now')
-                              and r.status in ('accepted','arrived','seated')
+                              and r.status in ('accepted','arrived','seated','expired')
                               and coalesce(r.source,'') != 'walkin' order by r.res_date asc, r.res_time asc`);
     }
   } else if (scope === "upcoming") {
-    rows = await sql.query(`${SELECT} where r.res_date >= date('now') and r.status in ('accepted','arrived','seated')
+    rows = await sql.query(`${SELECT} where r.res_date >= date('now') and r.status in ('accepted','arrived','seated','expired')
                             order by r.res_date asc, r.res_time asc`);
   } else if (scope === "no_table") {
-    rows = await sql.query(`${SELECT} where r.res_date >= date('now') and r.status in ('accepted','arrived','seated')
-                            and r.table_id is null order by r.res_date, r.res_time`);
+    rows = await sql.query(`${SELECT} where r.res_date >= date('now') and r.status in ('accepted','arrived','seated','expired')
+                            and r.table_id is null and coalesce(r.source,'') != 'walkin' order by r.res_date, r.res_time`);
   } else if (scope === "with_table") {
-    rows = await sql.query(`${SELECT} where r.res_date >= date('now') and r.status in ('accepted','arrived','seated')
-                            and r.table_id is not null order by r.res_date, r.res_time`);
+    rows = await sql.query(`${SELECT} where r.res_date >= date('now') and r.status in ('accepted','arrived','seated','expired')
+                            and r.table_id is not null and coalesce(r.source,'') != 'walkin' order by r.res_date, r.res_time`);
   } else if (scope === "arrived") {
-    /* arrival is tracked by arrived_at, independent of the acceptance status,
-       so an arrived booking shows here AND stays in Acceptées (#2) */
+    /* arrival is tracked by arrived_at. Walk-ins (Sans réservation) are NOT
+       shown here — that list is only guests explicitly marked Arrivé (#1). */
     rows = await sql.query(`${SELECT} where r.res_date = date('now')
-                            and r.arrived_at is not null order by r.res_time`);
+                            and r.arrived_at is not null and coalesce(r.source,'') != 'walkin' order by r.res_time`);
   } else if (scope === "not_arrived") {
     /* Everyone expected today who has not walked in — the still-waited-for
        (accepted) AND the ones the 30-minute rule auto-expired, so a late guest
@@ -124,27 +127,18 @@ async function create(req) {
       return json({ error: "Trop de demandes envoyées. Merci de nous appeler au +216 73 348 700." }, 429);
   }
 
-  /* A walk-in usually gives no name and no number — they are just a table of
-     four at the door. Fill the gaps so the record is still valid and countable,
-     with a placeholder phone unique per booking (clients.phone is UNIQUE). */
+  /* A walk-in usually gives no name — just a table at the door. Fill name/date/
+     time so the record is valid, but NEVER invent a phone number: an empty phone
+     stays empty (no placeholder). */
   if (staff && body.walkin === true) {
     if (!body.name || !String(body.name).trim()) body.name = "Client sans réservation";
-    if (!body.phone || String(body.phone).replace(/[^0-9]/g, "").length < 6)
-      body.phone = "+000" + Date.now();      // survives normPhone, unique per walk-in
     const now = new Date(Date.now() + 60 * 60 * 1000);            // Tunisia = UTC+1
     if (!body.date) body.date = now.toISOString().slice(0, 10);
     if (!body.time) body.time = now.toISOString().slice(11, 16);
   }
 
-  /* The owner adds a booking for a friend who may leave no number — phone is
-     optional for staff. Fill a unique placeholder so the record stays valid and
-     clients.phone (UNIQUE) never collides; it just carries no contact. */
-  if (staff && (!body.phone || String(body.phone).replace(/[^0-9]/g, "").length < 6)) {
-    body.phone = "+000" + Date.now();
-  }
-
   /* Reception takes bookings over the phone, where there is often no email;
-     only the public form is required to supply one. */
+     staff bookings may also carry no phone at all — it stays empty. */
   if (staff) body.staff = true;
   const { errors, value } = validateBooking(body);
   if (errors.length) return json({ error: "Champs incomplets : " + errors.join(", ") }, 400);
@@ -166,15 +160,20 @@ async function create(req) {
       return json({ error: "Ce créneau est complet. Merci de choisir un autre horaire.", code: "full" }, 409);
   }
 
-  const clientRows = await sql`
-    insert into clients (phone, name, email, bookings_total)
-    values (${value.phone}, ${value.name}, ${value.email}, 1)
-    on conflict (phone) do update
-      set bookings_total = bookings_total + 1,
-          name  = excluded.name,
-          email = coalesce(excluded.email, email)
-    returning id, is_blocked`;
-  const clientId = clientRows[0].id;
+  /* No phone → no client record (client rows are keyed by unique phone). The
+     reservation is still saved, just without a linked client / contact. */
+  let clientId = null;
+  if (value.phone) {
+    const clientRows = await sql`
+      insert into clients (phone, name, email, bookings_total)
+      values (${value.phone}, ${value.name}, ${value.email}, 1)
+      on conflict (phone) do update
+        set bookings_total = bookings_total + 1,
+            name  = excluded.name,
+            email = coalesce(excluded.email, email)
+      returning id, is_blocked`;
+    clientId = clientRows[0].id;
+  }
 
   const reference = makeRef();
   /* A walk-in has no booking to confirm — they are already standing in the
