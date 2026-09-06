@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { sql } from "./db.mjs";
 
 // Env is read at call time (works on Cloudflare, where env is populated per-request).
 function secret() { return process.env.AUTH_SECRET || "dev-insecure-change-me"; }
@@ -39,10 +40,28 @@ function sameSecret(a, b) {
   try { return crypto.timingSafeEqual(x, y); } catch { return false; }
 }
 
-export function codeToRole(code) {
+/* Access codes can be changed from the dashboard (owner only): the new code is
+   stored HASHED in settings and takes precedence over the deploy-time secret.
+   Until the owner changes a code, the env secret still works. */
+export function hashCode(code) {
+  return crypto.createHmac("sha256", secret()).update("code:" + String(code)).digest("base64url");
+}
+function sameHash(a, b) {
+  const x = Buffer.from(String(a)), y = Buffer.from(String(b));
+  return x.length === y.length && (function(){ try { return crypto.timingSafeEqual(x, y); } catch { return false; } })();
+}
+export async function codeToRole(code) {
   const c = String(code || "");
-  if (sameSecret(c, process.env.OWNER_CODE)) return "owner";
-  if (sameSecret(c, process.env.RECEPTION_CODE)) return "reception";
+  if (!c) return null;
+  let stored = {};
+  try {
+    const rows = await sql`select key, value from settings where key in ('owner_code','reception_code')`;
+    rows.forEach((r) => { stored[r.key] = r.value; });
+  } catch (e) { /* settings unavailable — fall back to env */ }
+  const h = hashCode(c);
+  // owner: DB hash if set, else the deploy-time secret
+  if (stored.owner_code ? sameHash(h, stored.owner_code) : sameSecret(c, process.env.OWNER_CODE)) return "owner";
+  if (stored.reception_code ? sameHash(h, stored.reception_code) : sameSecret(c, process.env.RECEPTION_CODE)) return "reception";
   return null;
 }
 

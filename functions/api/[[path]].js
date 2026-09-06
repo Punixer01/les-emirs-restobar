@@ -6,6 +6,7 @@ import reservationStatus from "../../netlify/functions/reservation-status.mjs";
 import reservationEdit from "../../netlify/functions/reservation-edit.mjs";
 import reservationRestore from "../../netlify/functions/reservation-restore.mjs";
 import blocks from "../../netlify/functions/blocks.mjs";
+import credentials from "../../netlify/functions/credentials.mjs";
 import blacklist from "../../netlify/functions/blacklist.mjs";
 import clients from "../../netlify/functions/clients.mjs";
 import stats from "../../netlify/functions/stats.mjs";
@@ -33,6 +34,7 @@ const routes = {
   "reservation-edit": reservationEdit,
   "reservation-restore": reservationRestore,
   blocks,
+  credentials,
   blacklist,
   clients,
   stats,

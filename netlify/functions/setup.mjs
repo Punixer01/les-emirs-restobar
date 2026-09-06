@@ -97,7 +97,7 @@ const SEEDS = [
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "method" }, 405);
   const body = await readBody(req);
-  const me = auth(req, ["owner"]) || (codeToRole(body && body.code) === "owner" ? { role: "owner" } : null);
+  const me = auth(req, ["owner"]) || ((await codeToRole(body && body.code)) === "owner" ? { role: "owner" } : null);
   if (!me) return json({ error: "unauthorized" }, 401);
 
   const split = (s) => s.split(";").map((x) => x.trim()).filter(Boolean);

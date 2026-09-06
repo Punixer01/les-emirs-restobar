@@ -410,7 +410,7 @@ a.btn{text-decoration:none}
 <div class="login" id="login">
   <div class="login__box">
     <img src="/assets/logo-ink.png" alt="Les Émirs" />
-    <p>Espace Direction</p>
+    <p id="loginSub">Espace Direction</p>
     <input id="code" type="password" placeholder="Code d'accès" autocomplete="off"
            autocapitalize="off" autocorrect="off" spellcheck="false" />
     <button id="loginBtn">Entrer</button>
@@ -422,7 +422,7 @@ a.btn{text-decoration:none}
 <div id="app" class="hide">
   <div class="top">
     <div class="top__in">
-      <div class="brand"><img src="/assets/logo-ink.png" alt="" /><small>Direction</small></div>
+      <div class="brand"><img src="/assets/logo-ink.png" alt="" /><small id="brandRole">Direction</small></div>
       <div class="top__act">
         <button class="ico" id="installBtn" title="Installer l'application" style="display:none">⤓</button>
         <button class="ico" id="pushBtn" title="Alertes sur ce téléphone">🔔</button>
@@ -442,6 +442,7 @@ a.btn{text-decoration:none}
       <div class="tab" data-tab="complet">Complet</div>
       <div class="tab" data-tab="blacklist">Blacklist</div>
       <div class="tab" data-tab="envois">Envois</div>
+      <div class="tab" data-tab="acces">Accès</div>
     </div>
   </div>
 
@@ -504,12 +505,28 @@ a.btn{text-decoration:none}
       </div>
     </section>
 
+    <!-- Accès (owner only) : change the access codes -->
+    <section data-panel="acces" class="hide">
+      <div class="section-h"><h2>Codes d'accès</h2><span class="muted">Vous seul pouvez modifier les codes.</span></div>
+      <div class="form" style="max-width:460px">
+        <p class="muted" style="margin:0 0 12px">Laissez un champ vide pour ne pas le changer. Minimum 6 caractères. Le nouveau code remplace l'ancien immédiatement.</p>
+        <div class="fg"><label>Nouveau code Direction (vous)</label>
+          <input id="acOwner" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Nouveau code owner" /></div>
+        <div class="fg"><label>Nouveau code Réception</label>
+          <input id="acReception" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Nouveau code réception" /></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px">
+          <button class="btn btn--m" id="acSave">Enregistrer les codes</button>
+          <span id="acMsg" class="muted"></span>
+        </div>
+      </div>
+    </section>
+
     <!-- Demandes -->
     <section data-panel="demandes">
       <div class="tools">
         <button class="btn btn--sm" id="resAdd">+ Nouvelle réservation</button>
         <button class="btn btn--sm btn--ghost" id="walkinAdd">+ Sans réservation</button>
-        <span class="filterchip" id="filterChip" role="button" tabindex="0" hidden></span>
+        <button class="btn btn--sm" id="openScan">⛶ Scanner un QR</button>
         <div class="datepick">
           <div class="datepick__group">
             <button type="button" data-day="-1" aria-label="Jour précédent">‹</button>
@@ -816,8 +833,17 @@ a.btn{text-decoration:none}
   "use strict";
   var TOKEN=null; try{ TOKEN=localStorage.getItem('emirs_admin_token'); }catch(e){}
   var ROLE=null; try{ ROLE=localStorage.getItem('emirs_role'); }catch(e){}
+  /* the reception page is the same dashboard served at /reception — label it
+     "Réception" instead of "Direction" */
+  var IS_RECEPTION = /reception/i.test(location.pathname);
+  (function(){
+    if(!IS_RECEPTION) return;
+    var s=document.getElementById('loginSub'); if(s) s.textContent='Espace Réception';
+    var b=document.getElementById('brandRole'); if(b) b.textContent='Réception';
+    try{ document.title='Les Émirs — Réception'; }catch(e){}
+  })();
   /* tabs only the owner sees; reception gets the same dashboard without them */
-  var OWNER_ONLY=['emails','analytics','marketing','site','complet','envois'];
+  var OWNER_ONLY=['emails','analytics','marketing','site','complet','envois','acces'];
   function applyRole(){
     var owner = ROLE==='owner';
     OWNER_ONLY.forEach(function(n){
@@ -1042,7 +1068,8 @@ a.btn{text-decoration:none}
     if(kind==='tab'){ var tb=[...document.querySelectorAll('.tab')].find(function(t){return t.getAttribute('data-tab')===val;}); if(tb) tb.click(); return; }
     var tb=[...document.querySelectorAll('.tab')].find(function(t){return t.getAttribute('data-tab')==='demandes';});
     if(tb) tb.click();
-    setFilter(kind==='status' ? val : ('@'+val));
+    var target = kind==='status' ? val : ('@'+val);
+    setFilter(CUR_FILTER===target ? '' : target);   // tap the lit box again to clear
     /* no auto-scroll — the owner scrolls himself when he wants to */
   }
 
@@ -1223,20 +1250,13 @@ a.btn{text-decoration:none}
     }); });
     el.querySelectorAll('[data-msg]').forEach(function(b){ b.addEventListener('click', function(){ openModal({reservationId:+b.getAttribute('data-msg'), name:b.getAttribute('data-nm'), phone:b.getAttribute('data-ph'), email:b.getAttribute('data-em')}); }); });
   }
-  /* the stat boxes are the filter; this chip says which one is active and clears it */
+  /* the stat boxes ARE the filter — the active one is highlighted (kpi--sel);
+     tapping the lit box again clears the filter. No separate chip. */
   function setFilter(v){
     CUR_FILTER = v || '';
-    var chip=document.getElementById('filterChip');
-    var label=FILTER_LABELS[CUR_FILTER];
-    if(label){ chip.textContent=label+' ×'; chip.hidden=false; }
-    else chip.hidden=true;
     markActiveKpi();
     loadReservations();
   }
-  document.getElementById('filterChip').addEventListener('click', function(){ setFilter(''); });
-  document.getElementById('filterChip').addEventListener('keydown', function(e){
-    if(e.key==='Enter'||e.key===' '){ e.preventDefault(); setFilter(''); }
-  });
   /* ---------- date filter, written out ---------- */
   (function(){
     var inp = document.getElementById('fDate');
@@ -2212,6 +2232,25 @@ a.btn{text-decoration:none}
       ? '✓ Envoyé à '+to+' ('+res.data.sent_at+'). Vérifiez la réception.'
       : '✗ '+((res.data&&res.data.error)||'Échec de l\'envoi.');
   });
+
+  /* change the access codes (owner only) */
+  (function(){
+    var btn=document.getElementById('acSave'); if(!btn) return;
+    btn.addEventListener('click', async function(){
+      var m=document.getElementById('acMsg');
+      var owner=document.getElementById('acOwner').value.trim();
+      var rec=document.getElementById('acReception').value.trim();
+      if(!owner && !rec){ m.style.color='#a4552f'; m.textContent='Renseignez au moins un code.'; return; }
+      btn.disabled=true; m.style.color='var(--mute)'; m.textContent='Enregistrement…';
+      var body={}; if(owner) body.owner_code=owner; if(rec) body.reception_code=rec;
+      var res=await api('credentials',{method:'POST',body:body});
+      btn.disabled=false;
+      if(res.status===200 && res.data.ok){
+        m.style.color='var(--green)'; m.textContent='✓ Codes mis à jour. Le nouveau code est actif immédiatement.';
+        document.getElementById('acOwner').value=''; document.getElementById('acReception').value='';
+      } else { m.style.color='#a4552f'; m.textContent='✗ '+((res.data&&res.data.error)||'Erreur.'); }
+    });
+  })();
 
 
   /* Tapping the dimmed background closes whatever is open.

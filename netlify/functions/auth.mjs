@@ -22,7 +22,7 @@ export default async (req) => {
   }
 
   const { code } = await readBody(req);
-  const role = codeToRole(code);
+  const role = await codeToRole(code);
   if (!role) return json({ error: "Code invalide" }, 401);
 
   await sweepLimits();
