@@ -1662,16 +1662,19 @@ body.via-carte .sheet__book:hover{background:var(--marine-soft)}
         if(btn) btn.disabled=false;
         var res=o.res;
         if(o.status>=200 && o.status<300 && res && res.ok){
-          msg.style.color="var(--marine)";
-          msg.innerHTML="Merci "+esc(nom)+" — demande reçue. Référence : <b>"+esc(res.reference)+"</b>. "+
-            "Nous vous confirmons très rapidement "+(email?"par email":"par téléphone")+".";
           window.__lastBooking={res:res, nom:nom, party:party, seating:seating, note:note, at:Date.now()};
           try{ track('reservation_submit',{ref:res.reference, party:party, seating:seating}); }catch(err){}
           var shown=false;
           try{ shown=showReceived(res, nom, party, seating, note); }catch(err){ shown=false; }
-          /* the sheet is the confirmation; if it could not be drawn, make sure
-             the written one is at least in front of the guest's eyes */
-          if(!shown && msg.scrollIntoView) msg.scrollIntoView({block:"center", behavior:"smooth"});
+          /* the pop-up sheet IS the confirmation — no duplicate text under the
+             button. Only if the sheet couldn't be drawn do we fall back to a line. */
+          if(shown){ msg.textContent=""; }
+          else {
+            msg.style.color="var(--marine)";
+            msg.innerHTML="Merci "+esc(nom)+" — demande reçue. Référence : <b>"+esc(res.reference)+"</b>. "+
+              "Nous vous confirmons très rapidement "+(email?"par email":"par téléphone")+".";
+            if(msg.scrollIntoView) msg.scrollIntoView({block:"center", behavior:"smooth"});
+          }
           form.reset(); if(d) d.min=new Date().toISOString().split("T")[0];
         } else {
           msg.style.color="#a4552f"; msg.textContent=(res&&res.error)?res.error:"Un souci est survenu. Merci de réessayer ou de nous appeler.";
