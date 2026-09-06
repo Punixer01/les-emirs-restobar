@@ -226,7 +226,7 @@ export async function notifyClientReceived(r) {
   const when = `${frDateLong(r.res_date)} ${frHour(r.res_time)}`;
   const html = shell(
     `<div style="font-family:Georgia,serif;font-size:19px;color:#17150f;margin-bottom:18px">Demande de réservation reçue</div>
-     Merci ${r.name},<br>
+     Merci Mr/Mme ${r.name},<br>
      Référence : <b>${r.reference}</b><br><br>
      <b>${when}</b><br>
      ${r.party_size} couverts · ${seatPhrase(r.seating)}<br>` +
@@ -249,7 +249,7 @@ export async function notifyClientDecision(r) {
       `<a href="${href}" style="display:inline-block;margin:6px 6px 0 0;padding:12px 18px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;` +
       (primary ? `background:#1f473f;color:#fff` : `background:#fff;color:#1f473f;border:1px solid #cdbfa3`) + `">${label}</a>`;
     const html = shell(
-      `Bonjour Mr ${r.name},<br><br>` +
+      `Bonjour Mr/Mme ${r.name},<br><br>` +
       `<div style="font-family:Georgia,serif;font-size:21px;color:#1f473f;margin:2px 0 18px">Votre réservation est confirmée</div>` +
       `<b>${frDateLong(r.res_date)} · ${frHour(r.res_time)}</b> · ${r.party_size} personne${r.party_size > 1 ? "s" : ""}<br>` +
       `${seatPhraseCap(r.seating)}<br>` +
@@ -277,7 +277,7 @@ export async function notifyClientDecision(r) {
   }
   if (r.status === "declined") {
     const html = shell(
-      `Bonjour ${r.name},<br><br>` +
+      `Bonjour Mr/Mme ${r.name},<br><br>` +
       `Nous sommes navrés : nous ne pouvons pas honorer votre demande pour le <b>${when}</b> par manque de places disponibles.<br><br>` +
       `N'hésitez pas à réserver de nouveau en essayant un autre créneau. Merci de votre compréhension.`
     );
@@ -358,14 +358,14 @@ export async function notifyOwnerCancel(sql, r, before) {
 export function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
 export async function sendClientMessage({ email, phone, name, text }) {
-  const html = shell(`Bonjour ${name || ""},<br><br>${String(text).replace(/\n/g, "<br>")}<br><br>— L'équipe des Émirs`);
+  const html = shell(`Bonjour Mr/Mme ${name || ""},<br><br>${String(text).replace(/\n/g, "<br>")}<br><br>— L'équipe des Émirs`);
   if (email) { const res = await sendEmail(email, "Un message de Les Émirs", html); await logOutbound(email, "Un message de Les Émirs", html); return res; }
   if (phone) return sendSms(phone, "Les Emirs: " + text);
   return { skipped: true };
 }
 
 export async function sendMarketingEmail(email, name, subject, body) {
-  const html = shell(`${name ? "Bonjour " + name + ",<br><br>" : ""}${String(body).replace(/\n/g, "<br>")}<br><br>
+  const html = shell(`${name ? "Bonjour Mr/Mme " + name + ",<br><br>" : ""}${String(body).replace(/\n/g, "<br>")}<br><br>
      <span style="color:#8b8271;font-size:12px">Les Émirs · Port El Kantaoui, Sousse — vous recevez ce message en tant que client fidèle.</span>`);
   return sendEmail(email, subject, html);
 }
