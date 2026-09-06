@@ -845,7 +845,9 @@ a.btn{text-decoration:none}
   /* tabs only the owner sees; reception gets the same dashboard without them */
   var OWNER_ONLY=['emails','analytics','marketing','site','complet','envois','acces'];
   function applyRole(){
-    var owner = ROLE==='owner';
+    /* on the /reception page the owner-only tabs are ALWAYS hidden, whatever role
+       or token happens to be stored on that device — reception never sees them */
+    var owner = ROLE==='owner' && !IS_RECEPTION;
     OWNER_ONLY.forEach(function(n){
       document.querySelectorAll('.tab[data-tab="'+n+'"]').forEach(function(t){ t.classList.toggle('hide', !owner); });
       if(!owner) document.querySelectorAll('[data-panel="'+n+'"]').forEach(function(p){ p.classList.add('hide'); });
