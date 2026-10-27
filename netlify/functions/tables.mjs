@@ -1,6 +1,6 @@
 import { sql } from "./_lib/db.mjs";
-import { json, readBody } from "./_lib/util.mjs";
-import { auth } from "./_lib/auth.mjs";
+import { json, readBody, zoneOf } from "./_lib/util.mjs";
+import { auth, STAFF, isWatcher } from "./_lib/auth.mjs";
 
 /* Floor plan.
    GET    /api/tables?date=&time=      -> every table + who occupies it in that window
@@ -18,8 +18,10 @@ function mins(t) {
 }
 
 export default async (req) => {
-  const me = auth(req, ["owner", "reception"]);
+  const me = auth(req, STAFF);
   if (!me) return json({ error: "unauthorized" }, 401);
+  /* a watcher account is read-only: it may look at the service, never change it */
+  if (isWatcher(me) && req.method !== "GET") return json({ error: "Compte en lecture seule." }, 403);
   const url = new URL(req.url);
 
   if (req.method === "GET") {
@@ -38,7 +40,7 @@ export default async (req) => {
     let busy = {};
     if (date) {
       const held = await sql`
-        select id, table_id, name, phone, res_time, party_size, status, waiting
+        select id, table_id, name, phone, res_time, party_size, status, waiting, source
         from reservations
         where res_date = ${date}
           and table_id is not null
@@ -49,6 +51,7 @@ export default async (req) => {
         busy[r.table_id] = {
           reservation_id: r.id, name: r.name, phone: r.phone,
           time: r.res_time, party: r.party_size, status: r.status,
+          walkin: r.source === "walkin",        // sans réservation gets its own colour on the plan
         };
       }
     }
@@ -118,7 +121,7 @@ export default async (req) => {
     const t = b.table || b;
     const code = String(t.code || "").trim();
     if (!code) return json({ error: "Le nom de la table est requis." }, 400);
-    const zone = t.zone === "terrace" ? "terrace" : "inside";
+    const zone = zoneOf(t.zone);
     const seats = Math.max(1, Math.min(30, parseInt(t.seats, 10) || 2));
     const shape = ["round", "square", "rect"].includes(t.shape) ? t.shape : "round";
     const x = Math.max(0, Math.min(100, Number(t.x) || 10));

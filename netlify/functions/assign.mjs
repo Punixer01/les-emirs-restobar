@@ -1,6 +1,6 @@
 import { sql } from "./_lib/db.mjs";
 import { json, readBody } from "./_lib/util.mjs";
-import { auth } from "./_lib/auth.mjs";
+import { auth, WRITERS } from "./_lib/auth.mjs";
 
 /* Seating desk.
    POST /api/assign { id, table_id }        -> put a booking on a table (null frees it)
@@ -37,7 +37,7 @@ async function logTableEvent(tableId, resId, kind, byRole, reason, guest) {
 
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "method" }, 405);
-  const me = auth(req, ["owner", "reception"]);
+  const me = auth(req, WRITERS);
   if (!me) return json({ error: "unauthorized" }, 401);
 
   const b = await readBody(req);
@@ -80,14 +80,16 @@ export default async (req) => {
 
   if (action === "arrived") {
     const late = Math.max(0, nowMinutesInTunis() - mins(r.res_time));
-    const onTime = late <= GRACE_MIN;
+    /* the owner's rule: "Arrivé" means he came — the booking is honoured and he
+       counts as on time. The minutes stay on the booking, for information only. */
+    const onTime = true;
     const rows = await sql`update reservations
       set status = 'arrived', arrived_at = datetime('now'), late_minutes = ${late},
           updated_at = datetime('now')
       where id = ${id} returning *`;
-    if (r.client_id) {
-      if (onTime) await sql`update clients set on_time = on_time + 1 where id = ${r.client_id}`;
-      else await sql`update clients set late_count = late_count + 1 where id = ${r.client_id}`;
+    if (r.client_id && !r.arrived_at) {
+      await sql`update clients set on_time = on_time + 1, bookings_completed = bookings_completed + 1,
+                last_visit = datetime('now') where id = ${r.client_id}`;
     }
     return json({ ok: true, reservation: rows[0], late_minutes: late, on_time: onTime });
   }
@@ -99,8 +101,8 @@ export default async (req) => {
   if (action === "unarrive") {
     if (!r.arrived_at) return json({ ok: true, reservation: r, unchanged: true });
     if (r.client_id) {
-      if ((r.late_minutes || 0) <= GRACE_MIN) await sql`update clients set on_time = max(0, on_time - 1) where id = ${r.client_id}`;
-      else await sql`update clients set late_count = max(0, late_count - 1) where id = ${r.client_id}`;
+      await sql`update clients set on_time = max(0, on_time - 1),
+                bookings_completed = max(0, bookings_completed - 1) where id = ${r.client_id}`;
     }
     const rows = await sql`update reservations
       set status = 'accepted', arrived_at = null, seated_at = null, late_minutes = null,
@@ -119,7 +121,8 @@ export default async (req) => {
     const rows = await sql`update reservations
       set status = 'seated', seated_at = datetime('now'), waiting = 0, updated_at = datetime('now')
       where id = ${id} returning *`;
-    if (r.client_id) {
+    /* already counted when he arrived — a seat alone never counts twice */
+    if (r.client_id && !r.arrived_at) {
       await sql`update clients set bookings_completed = bookings_completed + 1,
                 last_visit = datetime('now') where id = ${r.client_id}`;
     }

@@ -1,6 +1,7 @@
 import { sql } from "./_lib/db.mjs";
+import { dueIndex } from "./_lib/dues.mjs";
 import { json, readBody } from "./_lib/util.mjs";
-import { auth, verifyPassToken } from "./_lib/auth.mjs";
+import { auth, verifyPassToken, WRITERS } from "./_lib/auth.mjs";
 
 /* POST /api/scan  (staff)
      { r, t }                  -> look up the pass, no side effects
@@ -44,7 +45,7 @@ function parseTarget(body) {
 
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "method" }, 405);
-  const me = auth(req, ["owner", "reception"]);
+  const me = auth(req, WRITERS);
   if (!me) return json({ error: "unauthorized" }, 401);
 
   const body = await readBody(req);
@@ -71,6 +72,7 @@ export default async (req) => {
     left join clients c on c.id = r.client_id
     where r.id = ${id}`;
   if (!rows.length) return json({ error: "Réservation introuvable." }, 404);
+  { const d = (await dueIndex())(rows[0].client_id, rows[0].phone); rows[0].client_due = d ? d.due : 0; }
   const r = rows[0];
 
   const late = Math.max(0, nowMinutesInTunis() - mins(r.res_time));
@@ -83,13 +85,16 @@ export default async (req) => {
     date: r.res_date,
     party_size: r.party_size,
     seating: r.seating,
+    table_id: r.table_id,
     table_code: r.table_code,
     table_zone: r.table_zone,
     status: r.status,
     is_today: r.res_date === today,
     late_minutes: r.res_date === today ? late : null,
-    on_time: r.res_date === today ? late <= GRACE_MIN : null,
+    on_time: r.res_date === today ? true : null,
     loyal: (r.bookings_completed || 0) >= 5,
+    no_shows: r.no_shows || 0,
+    client_due: r.client_due || 0,
     history: { on_time: r.on_time || 0, late: r.late_count || 0, no_shows: r.no_shows || 0 },
     already_arrived: !!r.arrived_at,
   };
@@ -110,9 +115,10 @@ export default async (req) => {
            updated_at = datetime('now')
      where id = ${id} returning *`;
 
+  /* arrived = honoured and on time (the owner's rule), same as the Arrivé button */
   if (r.client_id) {
-    if (late <= GRACE_MIN) await sql`update clients set on_time = on_time + 1 where id = ${r.client_id}`;
-    else await sql`update clients set late_count = late_count + 1 where id = ${r.client_id}`;
+    await sql`update clients set on_time = on_time + 1, bookings_completed = bookings_completed + 1,
+              last_visit = datetime('now') where id = ${r.client_id}`;
   }
 
   /* Who scanned — the owner or reception — so the history can tell them apart. */
@@ -121,11 +127,11 @@ export default async (req) => {
     await sql`insert into events (type, path, meta) values (
       'scan', ${"scan:" + id},
       ${JSON.stringify({ reservation_id: id, by, guest: r.name, reference: r.reference,
-        late_minutes: late, on_time: late <= GRACE_MIN })}
+        late_minutes: late, on_time: true })}
     )`;
   } catch (e) { console.error("[scan event]", e); }
 
   info.status = "arrived";
   info.already_arrived = true;
-  return json({ ok: true, scanned: true, by, reservation: info, late_minutes: late, on_time: late <= GRACE_MIN });
+  return json({ ok: true, scanned: true, by, reservation: info, late_minutes: late, on_time: true });
 };

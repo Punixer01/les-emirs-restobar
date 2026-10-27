@@ -1,13 +1,15 @@
 import { sql } from "./_lib/db.mjs";
 import { json, readBody, normPhone } from "./_lib/util.mjs";
-import { auth } from "./_lib/auth.mjs";
+import { auth, STAFF, isWatcher } from "./_lib/auth.mjs";
 
 // GET /api/blacklist  (owner)
 // POST /api/blacklist (owner) { phone, name, reason }
 // DELETE /api/blacklist (owner) { phone }
 export default async (req) => {
-  const me = auth(req, ["owner", "reception"]);
+  const me = auth(req, STAFF);
   if (!me) return json({ error: "unauthorized" }, 401);
+  /* a watcher account is read-only: it may look at the service, never change it */
+  if (isWatcher(me) && req.method !== "GET") return json({ error: "Compte en lecture seule." }, 403);
 
   if (req.method === "GET") {
     const rows = await sql`select * from blacklist order by created_at desc`;

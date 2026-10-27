@@ -1,5 +1,5 @@
 import { json, readBody } from "./_lib/util.mjs";
-import { codeToRole, issueToken } from "./_lib/auth.mjs";
+import { codeToRole, issueToken, sessionGens } from "./_lib/auth.mjs";
 import { rateLimit, sweepLimits } from "./_lib/ratelimit.mjs";
 
 /* The dashboard is protected by a short code a human types, which is
@@ -26,5 +26,6 @@ export default async (req) => {
   if (!role) return json({ error: "Code invalide" }, 401);
 
   await sweepLimits();
-  return json({ token: issueToken(role), role });
+  const gens = await sessionGens();
+  return json({ token: issueToken(role, undefined, gens[role] || 0), role });
 };

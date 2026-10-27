@@ -101,7 +101,7 @@ h1{font-family:var(--font-serif);font-weight:300;font-size:clamp(1.6rem,6vw,2rem
   function fdate(d){ var x=new Date(d+"T00:00:00");
     return DOW[x.getDay()]+" "+x.getDate()+" "+MON[x.getMonth()]; }
   function ftime(t){ return String(t||"").slice(0,5).replace(":","h"); }
-  function seat(s){ return s==="terrace"?"Terrasse":"Salle intérieure"; }
+  function seat(s){ return {terrace:"Terrasse plein air", verriere:"Terrasse verrière"}[s]||"Salle intérieure"; }
   function statusFr(s){ return ({pending:"En attente de confirmation",accepted:"Confirmée",
     declined:"Refusée",arrived:"Arrivé",seated:"Arrivée",no_show:"Non honorée",
     cancelled:"Annulée"})[s]||s; }
@@ -143,13 +143,9 @@ h1{font-family:var(--font-serif);font-weight:300;font-size:clamp(1.6rem,6vw,2rem
           '<div class="row"><span class="k">Heure</span><span class="v big">'+esc(ftime(r.res_time))+'</span></div>'+
           '<div class="row"><span class="k">Couverts</span><span class="v">'+esc(String(r.party_size))+'</span></div>'+
           '<div class="row"><span class="k">Place</span><span class="v">'+esc(seat(r.seating))+'</span></div>'+
-          (r.table_code ? '<div class="row"><span class="k">Table</span><span class="v"><span class="table-badge">'+esc(r.table_code)+'</span></span></div>' : '')+
         '</div>'+
         (dead ? '' :
-          '<p class="note">Présentez ce code à l\'accueil en arrivant.<br />'+
-          'Pour changer l\'heure ou le nombre de couverts, utilisez le lien '+
-          '« Modifier ma réservation » dans votre email de confirmation '+
-          '(jusqu\'à 3 h avant).</p>')
+          '<p class="note">Présentez ce code à l\'accueil en arrivant.</p>')
       );
     })
     .catch(function(){
@@ -157,5 +153,6 @@ h1{font-family:var(--font-serif);font-weight:300;font-size:clamp(1.6rem,6vw,2rem
     });
 })();
 </script>
+<script src="/i18n.js" defer></script>
 </body>
 </html>

@@ -1,10 +1,16 @@
 User-agent: *
 Allow: /$
 Allow: /index.html
+Allow: /favicon.ico
+Allow: /assets/
 Disallow: /admin
 Disallow: /admin.html
 Disallow: /reception
 Disallow: /reception.html
+Disallow: /gerant
+Disallow: /gerant.html
+Disallow: /watcher
+Disallow: /watcher.html
 Disallow: /api/
 
 Sitemap: https://lesemirs.com/sitemap.xml

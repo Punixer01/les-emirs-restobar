@@ -12,24 +12,44 @@
   Cache-Control: no-cache, must-revalidate
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: SAMEORIGIN
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src https://www.google.com https://maps.google.com
 
 /carte
   Cache-Control: no-cache, must-revalidate
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: SAMEORIGIN
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src https://www.google.com https://maps.google.com
+
+/qr
+  Cache-Control: no-cache, must-revalidate
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src https://www.google.com https://maps.google.com
 
 # The dashboards act on a single click, so they must never be framed: an
 # invisible iframe over a decoy page is exactly how those clicks get stolen.
 /admin
   Cache-Control: no-cache, must-revalidate
   X-Frame-Options: DENY
-  Content-Security-Policy: frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'
+  Referrer-Policy: no-referrer
+
+/gerant
+  Cache-Control: no-cache, must-revalidate
+  X-Frame-Options: DENY
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'
+  Referrer-Policy: no-referrer
+
+/watcher
+  Cache-Control: no-cache, must-revalidate
+  X-Frame-Options: DENY
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'
   Referrer-Policy: no-referrer
 
 /reception
   Cache-Control: no-cache, must-revalidate
   X-Frame-Options: DENY
-  Content-Security-Policy: frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'
   Referrer-Policy: no-referrer
 
 # The guest's pass and change link carry a token in the URL — keep it out of
@@ -37,11 +57,13 @@
 /pass
   Cache-Control: no-cache, must-revalidate
   X-Frame-Options: DENY
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'
   Referrer-Policy: no-referrer
 
 /modifier
   Cache-Control: no-cache, must-revalidate
   X-Frame-Options: DENY
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'
   Referrer-Policy: no-referrer
 
 /assets/*

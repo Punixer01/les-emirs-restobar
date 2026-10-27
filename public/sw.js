@@ -6,7 +6,12 @@ self.addEventListener("push", function (event) {
   event.waitUntil(
     self.registration.showNotification(title, {
       body: data.body || "",
-      tag: "emirs-reservation",
+      /* a unique tag per alert so a cancellation never silently replaces an
+         earlier notification; renotify + vibrate make the phone alert again */
+      tag: data.tag || ("emirs-" + Date.now()),
+      renotify: true,
+      requireInteraction: true,   /* stay on screen until the staff taps it — never auto-dismiss */
+      vibrate: [200, 90, 200, 90, 200],
       data: { url: data.url || "/admin" },
     })
   );

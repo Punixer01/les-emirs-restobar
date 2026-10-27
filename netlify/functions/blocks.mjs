@@ -11,7 +11,7 @@ export default async (req) => {
     const date = url.searchParams.get("date");
     const rows = date
       ? await sql`select * from blocks where block_date = ${date} order by start_time`
-      : await sql`select * from blocks where block_date >= date('now') order by block_date, start_time`;
+      : await sql`select * from blocks where block_date >= date('now','-3 hours') order by block_date, start_time`;
     return json({ blocks: rows });
   }
 
@@ -21,7 +21,7 @@ export default async (req) => {
   if (req.method === "POST") {
     const b = await readBody(req);
     if (!b.date || !b.start || !b.end) return json({ error: "date, début et fin requis" }, 400);
-    const seating = ["inside", "terrace", "all"].includes(b.seating) ? b.seating : "all";
+    const seating = ["inside", "terrace", "verriere", "all"].includes(b.seating) ? b.seating : "all";
     const rows = await sql`
       insert into blocks (block_date, start_time, end_time, seating, reason)
       values (${b.date}, ${b.start}, ${b.end}, ${seating}, ${b.reason || "Complet"})

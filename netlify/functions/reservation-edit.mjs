@@ -1,6 +1,7 @@
 import { sql } from "./_lib/db.mjs";
-import { json, readBody, fmtTime } from "./_lib/util.mjs";
+import { json, readBody, fmtTime, zoneOf, seatFr } from "./_lib/util.mjs";
 import { verifyEditToken } from "./_lib/auth.mjs";
+import { rateLimit } from "./_lib/ratelimit.mjs";
 import { notifyOwnerChange, notifyOwnerCancel } from "./_lib/notify.mjs";
 
 // Public, token-protected self-service edit of a reservation — hour, room and
@@ -22,7 +23,7 @@ function editability(r) {
     return { editable: false, reason: "Cette réservation ne peut plus être modifiée en ligne." };
   const dt = resDateTime(r);
   if (!isNaN(dt) && dt.getTime() - Date.now() < CUTOFF_MS)
-    return { editable: false, reason: "Les modifications ferment 3 h avant l’heure prévue. Merci de nous appeler." };
+    return { editable: false, reason: "" };
   return { editable: true, reason: "" };
 }
 function publicView(r) {
@@ -35,6 +36,9 @@ function publicView(r) {
 export default async (req) => {
   const url = new URL(req.url);
   const method = req.method;
+  /* the guest's own link: generous for a person, closed to someone guessing links */
+  const gate = await rateLimit(req, "edit", 40, 60 * 60);
+  if (!gate.ok) return json({ error: "Trop de tentatives. Merci de nous appeler au +216 73 348 700." }, 429);
   let id, token, body = {};
   if (method === "GET") { id = url.searchParams.get("r"); token = url.searchParams.get("t"); }
   else if (method === "POST") { body = await readBody(req); id = body.r; token = body.t; }
@@ -58,7 +62,8 @@ export default async (req) => {
       return json({ error: "Cette réservation ne peut plus être annulée en ligne. Merci de nous appeler." }, 409);
     const upd = await sql`
       update reservations
-         set status = 'cancelled', table_id = null, waiting = 0, updated_at = datetime('now')
+         set status = 'cancelled', table_id = null, waiting = 0,
+             mod_summary = 'Annulé par le client', updated_at = datetime('now')
        where id = ${id} returning *`;
     try {
       await sql`insert into events (type, path, meta) values (
@@ -78,7 +83,7 @@ export default async (req) => {
   /* the same window the booking form offers: midday to 21h30 */
   if (!(hm >= 12 * 60 && hm <= 21 * 60 + 30))
     return json({ error: "Merci de choisir une heure entre 12h00 et 21h30." }, 400);
-  const seating = body.seating === "terrace" ? "terrace" : "inside";
+  const seating = zoneOf(body.seating);
   // covers: optional; default to the current count if not sent
   let party = parseInt(body.party, 10);
   if (!Number.isFinite(party)) party = r.party_size;
@@ -104,7 +109,7 @@ export default async (req) => {
      accepted booking becomes pending again so the owner re-validates it. */
   const summaryBits = [];
   if (time !== fmtTime(r.res_time)) summaryBits.push(`heure ${fmtTime(r.res_time)}→${time}`);
-  if (seating !== r.seating) summaryBits.push(`salle ${r.seating === "terrace" ? "terrasse" : "intérieur"}→${seating === "terrace" ? "terrasse" : "intérieur"}`);
+  if (seating !== r.seating) summaryBits.push(`place ${seatFr(r.seating).toLowerCase()}→${seatFr(seating).toLowerCase()}`);
   if (coversChanged) summaryBits.push(`couverts ${r.party_size}→${party}`);
   const summary = summaryBits.join(" · ");
 
@@ -117,7 +122,7 @@ export default async (req) => {
            waiting    = 0,
            status     = 'pending',
            modified   = 1,
-           mod_summary = ${summary},
+           mod_summary = ${"Modifié par le client · " + summary},
            updated_at = datetime('now')
      where id = ${id} returning *`;
   const now = upd[0];

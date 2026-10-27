@@ -1,11 +1,13 @@
 import { sql } from "./_lib/db.mjs";
 import { json } from "./_lib/util.mjs";
-import { auth } from "./_lib/auth.mjs";
+import { auth, STAFF, isWatcher } from "./_lib/auth.mjs";
 
 // GET /api/clients?q=  (owner) — client book, sorted by loyalty
 export default async (req) => {
-  const me = auth(req, ["owner", "reception"]);
+  const me = auth(req, STAFF);
   if (!me) return json({ error: "unauthorized" }, 401);
+  /* a watcher account is read-only: it may look at the service, never change it */
+  if (isWatcher(me) && req.method !== "GET") return json({ error: "Compte en lecture seule." }, 403);
 
   const url = new URL(req.url);
   const q = url.searchParams.get("q");

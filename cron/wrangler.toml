@@ -1,0 +1,20 @@
+# Les Émirs — the clock.
+#  - every 10 minutes: asks the site to send the reminder emails that are due and
+#    to run the expiry sweep (Pages has no cron of its own)
+#  - every night at 03:30 Tunisia time: a full copy of the database into KV,
+#    kept 35 days (scripts/backup-pull.mjs downloads one)
+name = "les-emirs-cron"
+main = "index.js"
+compatibility_date = "2026-10-01"
+
+[triggers]
+crons = ["*/10 * * * *", "30 2 * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "les-emirs-db"
+database_id = "230eb171-adc7-4ea2-9ea9-e089db5d4274"
+
+[[kv_namespaces]]
+binding = "BACKUPS"
+id = "17ff75f0301d4449bf69f1bb0b4d215d"

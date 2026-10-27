@@ -1,6 +1,6 @@
 import { sql } from "./_lib/db.mjs";
 import { json } from "./_lib/util.mjs";
-import { auth } from "./_lib/auth.mjs";
+import { auth, STAFF, isWatcher } from "./_lib/auth.mjs";
 
 /* GET /api/history            -> what happened to the tables lately
    GET /api/history?table=<id> -> just that table
@@ -9,13 +9,36 @@ import { auth } from "./_lib/auth.mjs";
    Reads the `events` rows written by /api/assign, and joins the table code back
    on so the owner sees "T4" rather than an id. */
 export default async (req) => {
-  const me = auth(req, ["owner", "reception"]);
+  const me = auth(req, STAFF);
   if (!me) return json({ error: "unauthorized" }, 401);
+  /* a watcher account is read-only: it may look at the service, never change it */
+  if (isWatcher(me) && req.method !== "GET") return json({ error: "Compte en lecture seule." }, 403);
 
   const url = new URL(req.url);
   const table = parseInt(url.searchParams.get("table"), 10) || null;
   const res = parseInt(url.searchParams.get("res"), 10) || null;
   const limit = Math.min(200, parseInt(url.searchParams.get("limit"), 10) || 60);
+
+  /* Health — what the dashboard watchdog caught. Errors are grouped by message
+     so one recurring fault reads as one line with a count, not fifty. */
+  if (url.searchParams.get("errors")) {
+    const rows = await sql`
+      select meta, created_at from events
+       where type = 'jserror' and created_at >= datetime('now','-14 days')
+       order by created_at desc limit 400`;
+    const byMsg = new Map();
+    for (const e of rows) {
+      let m = {};
+      try { m = typeof e.meta === "string" ? JSON.parse(e.meta) : (e.meta || {}); } catch (x) { continue; }
+      const key = (m.where || "?") + " · " + (m.msg || "").slice(0, 120);
+      const cur = byMsg.get(key) || { where: m.where || "?", msg: m.msg || "", n: 0, last: e.created_at };
+      cur.n++;
+      if (e.created_at > cur.last) cur.last = e.created_at;
+      byMsg.set(key, cur);
+    }
+    const errors = [...byMsg.values()].sort((a, b) => b.n - a.n).slice(0, 20);
+    return json({ errors, total: rows.length, days: 14 });
+  }
 
   /* Scan log — who checked each guest in, the owner or reception. */
   if (url.searchParams.get("scans")) {

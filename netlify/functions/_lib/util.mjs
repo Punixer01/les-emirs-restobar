@@ -30,8 +30,13 @@ export function fmtTime(t) {
   return String(t || "").slice(0, 5);
 }
 
+/* the places a guest can sit. Winter mode splits the terrace in two: the glass
+   "verrière" and the open-air terrace ("terrace" keeps its name: same tables). */
+export const SEATS = ["inside", "terrace", "verriere"];
+export const zoneOf = (s) => (SEATS.includes(s) ? s : "inside");
+const SEAT_FR = { inside: "Salle intérieure", terrace: "Terrasse plein air", verriere: "Terrasse verrière" };
 export function seatFr(s) {
-  return s === "terrace" ? "Terrasse" : "Intérieur";
+  return SEAT_FR[zoneOf(s)];
 }
 
 // Basic validation for a public booking payload
@@ -47,7 +52,7 @@ export function validateBooking(b) {
   if (!b.time || !/^\d{2}:\d{2}/.test(b.time)) errors.push("heure");
   const party = parseInt(b.party, 10);
   if (!party || party < 1 || party > 30) errors.push("couverts");
-  const seating = b.seating === "terrace" ? "terrace" : "inside";
+  const seating = zoneOf(b.seating);
   /* The confirmation, the QR pass and the change link all travel by email,
      so a booking without one cannot actually be served. Staff-entered
      bookings are exempt: they are taken over the phone. */

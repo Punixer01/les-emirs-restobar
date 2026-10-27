@@ -60,7 +60,7 @@ a.home{color:var(--marine);font-size:13px}
       var v=d.reservation;
       var wantCancel=p.get('annuler')==='1';
       var canCancel=(v.status==='pending'||v.status==='accepted');
-      var head='<h1>Bonjour '+esc(v.name)+'</h1><div class="res">Réservation <b>'+esc(v.reference)+'</b><br>'+fdate(v.date)+' · <b>'+esc(v.time)+'</b> · '+v.party+' couverts · '+(v.seating==='terrace'?'Terrasse':'Salle intérieure')+'</div>';
+      var head='<h1>Bonjour '+esc(v.name)+'</h1><div class="res">Réservation <b>'+esc(v.reference)+'</b><br>'+fdate(v.date)+' · <b>'+esc(v.time)+'</b> · '+v.party+' couverts · '+(({terrace:'Terrasse plein air',verriere:'Terrasse verrière'})[v.seating]||'Salle intérieure')+'</div>';
 
       /* Cancellation is always offered (even after the 3 h edit cutoff), because
          freeing the table late still beats a no-show. Two-step to avoid an
@@ -97,7 +97,7 @@ a.home{color:var(--marine);font-size:13px}
       }
 
       if(!d.editable){
-        content.innerHTML=head+'<p style="color:var(--stone);font-size:13px">'+esc(d.reason||'Modification indisponible.')+'</p>'+cancelSection()+(canCancel?'':'<p class="center note"><a class="home" href="/">Retour au site</a></p>');
+        content.innerHTML=head+(d.reason?'<p style="color:var(--stone);font-size:13px">'+esc(d.reason)+'</p>':'')+cancelSection()+(canCancel?'':'<p class="center note"><a class="home" href="/">Retour au site</a></p>');
         bindCancel(); return;
       }
       /* same window the booking form offers, so a guest can never pick an
@@ -115,8 +115,9 @@ a.home{color:var(--marine);font-size:13px}
         '<div class="fg"><label for="party">Nombre de couverts</label><select id="party">'+popts+
           '<option value="__more"'+(Number(v.party)>20?' selected':'')+'>Plus de 20 — nous appeler</option></select></div>'+
         '<div class="fg"><label for="seating">Place</label><select id="seating">'+
-          '<option value="terrace"'+(v.seating==='terrace'?' selected':'')+'>Terrasse</option>'+
-          '<option value="inside"'+(v.seating!=='terrace'?' selected':'')+'>Salle intérieure</option></select></div>'+
+          '<option value="terrace"'+(v.seating==='terrace'?' selected':'')+'>Terrasse plein air</option>'+
+          '<option value="verriere"'+(v.seating==='verriere'?' selected':'')+'>Terrasse verrière</option>'+
+          '<option value="inside"'+(v.seating!=='terrace'&&v.seating!=='verriere'?' selected':'')+'>Salle intérieure</option></select></div>'+
         '<button class="btn" id="save">Enregistrer les modifications</button>'+
         '<div class="msg" id="msg"></div>'+
         cancelSection();
@@ -132,7 +133,7 @@ a.home{color:var(--marine);font-size:13px}
             if(out.ok){
               var w=out.reservation;
               msg.style.color='var(--green)';
-              msg.innerHTML='✔ C’est noté : <b>'+esc(w.time)+'</b> · '+w.party+' couverts · '+(w.seating==='terrace'?'Terrasse':'Salle intérieure')+'.<br>'+(out.review?'Votre demande est envoyée au restaurant pour confirmation.':'Le restaurant est prévenu.');
+              msg.innerHTML='✔ C’est noté : <b>'+esc(w.time)+'</b> · '+w.party+' couverts · '+(({terrace:'Terrasse plein air',verriere:'Terrasse verrière'})[w.seating]||'Salle intérieure')+'.<br>'+(out.review?'Votre demande est envoyée au restaurant pour confirmation.':'Le restaurant est prévenu.');
               btn.disabled=false;
             } else { msg.style.color='var(--red)'; msg.textContent=out.error||'Modification impossible.'; btn.disabled=false; }
           })
@@ -142,5 +143,6 @@ a.home{color:var(--marine);font-size:13px}
     .catch(function(){ fail('Lien invalide ou expiré.'); });
 })();
 </script>
+<script src="/i18n.js" defer></script>
 </body>
 </html>

@@ -8,6 +8,13 @@ import { qrPng } from "./_lib/qr.mjs";
    image itself. */
 export default async (req) => {
   const url = new URL(req.url);
+  /* ?test=1 → a harmless QR of the home page, so the owner's WhatsApp template
+     test (Envois) can carry a real image without exposing any booking */
+  if (url.searchParams.get("test") === "1") {
+    const home = ((typeof process !== "undefined" && process.env && process.env.PUBLIC_BASE_URL) || "https://lesemirs.com") + "/";
+    const png = qrPng(home, { scale: 8, margin: 4 });
+    return new Response(png, { headers: { "content-type": "image/png", "cache-control": "public, max-age=86400", "content-length": String(png.length) } });
+  }
   const id = parseInt(url.searchParams.get("r"), 10);
   const token = url.searchParams.get("t") || "";
   if (!id || !verifyPassToken(id, token)) {

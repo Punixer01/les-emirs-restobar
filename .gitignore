@@ -10,3 +10,7 @@ node_modules/
 wrangler.local.toml
 backup/
 *.sql.bak
+
+tests/.tmp/
+tests/.tmp2/
+archive/

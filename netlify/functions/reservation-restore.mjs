@@ -1,6 +1,6 @@
 import { sql } from "./_lib/db.mjs";
 import { json, readBody } from "./_lib/util.mjs";
-import { auth } from "./_lib/auth.mjs";
+import { auth, WRITERS } from "./_lib/auth.mjs";
 
 /* Undo for the reversible desk actions (#7).
    POST /api/reservation-restore { id, type, snapshot }
@@ -18,7 +18,7 @@ const UNDOABLE = new Set(["arrived", "seated", "accept", "assign", "free", "wait
 
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "method" }, 405);
-  const me = auth(req, ["owner", "reception"]);
+  const me = auth(req, WRITERS);
   if (!me) return json({ error: "unauthorized" }, 401);
 
   const b = await readBody(req);
@@ -33,10 +33,10 @@ export default async (req) => {
 
   // reverse the client punctuality / completion counters this action had bumped
   if (type === "arrived" && cur.client_id && cur.arrived_at) {
-    if ((cur.late_minutes || 0) <= 15) await sql`update clients set on_time = max(0, on_time - 1) where id = ${cur.client_id}`;
-    else await sql`update clients set late_count = max(0, late_count - 1) where id = ${cur.client_id}`;
+    await sql`update clients set on_time = max(0, on_time - 1),
+              bookings_completed = max(0, bookings_completed - 1) where id = ${cur.client_id}`;
   }
-  if (type === "seated" && cur.client_id) {
+  if (type === "seated" && cur.client_id && !cur.arrived_at) {
     await sql`update clients set bookings_completed = max(0, bookings_completed - 1) where id = ${cur.client_id}`;
   }
 
