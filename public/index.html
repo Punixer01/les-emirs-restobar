@@ -460,6 +460,9 @@ p{margin:0}
 .field select option{background:var(--bone);color:var(--ink)}
 .field input::placeholder,.field textarea::placeholder{color:var(--stone-soft)}
 /* a box the guest forgot: red outline, light red ground and "Champ obligatoire" */
+/* the message section's heading is a full sentence: a size that reads as one */
+.msg__title{font-size:clamp(1.55rem,3.6vw,2.4rem);line-height:1.18;text-wrap:balance}
+.msg__title em{display:block;font-style:italic;font-weight:300;color:var(--marine);margin-top:.15em}
 .field--err label{color:#c0392b;font-weight:700}
 .field--err input,.field--err select{border:2px solid #c0392b;border-radius:8px;background:rgba(192,57,43,.06);padding-inline:12px}
 .field--err .slots{outline:2px solid #c0392b;outline-offset:4px;border-radius:12px;background:rgba(192,57,43,.05)}
@@ -1176,8 +1179,8 @@ p{margin:0}
 <!-- message -->
 <section class="msgsec" id="message">
   <div class="wrap" style="max-width:760px">
-    <span class="label" data-r id="msgLabel">Une question ?</span>
-    <h2 data-r data-d="1" id="msgTitle">Écrivez-nous.</h2>
+    <span class="label" data-r id="msgLabel">Écrivez-nous</span>
+    <h2 data-r data-d="1" id="msgTitle" class="msg__title">Une remarque ou quelque chose qui vous a déplu&nbsp;? <em>Nous sommes à votre écoute.</em></h2>
     <form id="msgForm" data-r data-d="2" style="margin-top:26px" novalidate>
       <div class="frow">
         <div class="field"><label for="mName">Nom</label><input id="mName" type="text" placeholder="Votre nom" /></div>
@@ -2319,7 +2322,7 @@ p{margin:0}
     window.__reclam=true;
     var l=document.getElementById("msgLabel"), t=document.getElementById("msgTitle"), b=document.getElementById("mBody");
     if(l) l.textContent="Réclamation";
-    if(t) t.textContent="Dites-nous ce qui n’a pas été.";
+
     if(b){ b.placeholder="Votre réclamation : ce qui s’est passé, le jour, l’heure… Nous vous répondons rapidement."; b.rows=5; }
     var sec=document.getElementById("message");
     if(sec){ sec.querySelectorAll("[data-r]").forEach(function(x){ x.classList.add("in"); });
