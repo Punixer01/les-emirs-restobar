@@ -499,6 +499,8 @@ body.is-gerant .op__acts:not(:has(.op__thumb)), body.is-readonly .op__acts:not(:
 /* day / time chips in the new-reservation modal (same idea as the public site) */
 .chiprow{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
 .chiprow--months{gap:6px;padding-bottom:6px}
+.btn--winter{background:var(--bone-2)}
+.btn--winter[aria-pressed="true"]{background:#2b5d9a;border-color:#2b5d9a;color:#fff}
 /* no network: a calm bar across the top */
 #netBar{position:fixed;left:0;right:0;top:0;z-index:300;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
   background:#7a2e21;color:#fff;font-size:13.5px;text-align:center;transform:translateY(-110%);transition:transform .3s ease}
@@ -993,6 +995,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
       </div>
       <div class="tools">
         <select id="planZone"><option value="terrace">Terrasse au plein air</option><option value="verriere">Terrasse verrière</option><option value="inside">Salle intérieure</option></select>
+        <button type="button" class="btn btn--sm btn--winter owner-only" id="winterBtn" aria-pressed="true">❄ Mode hiver</button>
         <input type="date" id="planDate" />
         <button class="btn btn--sm" id="tblAdd">+ Ajouter une table</button>
         <button class="btn btn--sm btn--ghost" id="mergeMode">Joindre des tables</button>
@@ -1869,7 +1872,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
 
   /* auth */
   var loginEl=document.getElementById('login'), appEl=document.getElementById('app');
-  function showApp(){ loginEl.classList.add('hide'); appEl.classList.remove('hide'); applyRole(); loadAll(); startPolling(); safe(checkPushBanner,'push-banner'); safe(wlCount,'wl-count'); }
+  function showApp(){ loginEl.classList.add('hide'); appEl.classList.remove('hide'); applyRole(); loadAll(); startPolling(); safe(checkPushBanner,'push-banner'); safe(wlCount,'wl-count'); safe(loadWinter,'winter'); }
   function logout(){ TOKEN=null; ROLE=null; try{localStorage.removeItem('emirs_admin_token');localStorage.removeItem('emirs_role');}catch(e){} appEl.classList.add('hide'); loginEl.classList.remove('hide'); }
   document.getElementById('logoutBtn').addEventListener('click', logout);
   async function doLogin(){
@@ -1942,8 +1945,28 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
   function fdate(d){ var x=new Date(d+'T00:00:00'); return DOW[x.getDay()]+' '+x.getDate()+' '+MON[x.getMonth()]; }
   function ftime(t){ return String(t||'').slice(0,5); }
   /* winter: the terrace is split — glass verrière + open air */
-  function seat(s){ return {terrace:'Terrasse au plein air', verriere:'Terrasse verrière'}[s]||'Intérieur'; }
-  function zoneOf(s){ return (s==='terrace'||s==='verriere') ? s : 'inside'; }
+  function seat(s){ return {terrace:(WINTER?'Terrasse au plein air':'Terrasse'), verriere:'Terrasse verrière'}[s]||'Intérieur'; }
+  function zoneOf(s){ return (s==='terrace'||s==='verriere') ? (WINTER ? s : 'terrace') : 'inside'; }
+  /* Mode hiver: the terrace is split (glass verrière + open air). Off = the
+     usual plan, one Terrasse holding every terrace table. */
+  var WINTER=true;
+  function inZone(t, zone){ return zone==='terrace' && !WINTER ? (t.zone==='terrace' || t.zone==='verriere') : t.zone===zone; }
+  function applyWinter(){
+    ['planZone','pickZone','nrSeat','bkSeat'].forEach(function(id){
+      var sel=document.getElementById(id); if(!sel) return;
+      var v=sel.querySelector('option[value="verriere"]'), t=sel.querySelector('option[value="terrace"]');
+      if(v){ v.hidden=!WINTER; v.disabled=!WINTER; }
+      if(t) t.textContent = WINTER ? 'Terrasse au plein air' : 'Terrasse';
+      if(!WINTER && sel.value==='verriere') sel.value='terrace';
+    });
+    var b=document.getElementById('winterBtn');
+    if(b){ b.setAttribute('aria-pressed', String(WINTER)); b.textContent = WINTER ? '❄ Mode hiver : activé' : '☀ Mode hiver : désactivé'; }
+    var cw=document.getElementById('cWinter'); if(cw) cw.checked=WINTER;
+  }
+  async function loadWinter(){
+    var r=await api('content',{auth:false});
+    if(r.status===200){ WINTER = !(r.data.content && r.data.content.winter===false); applyWinter(); try{ renderPlan(); }catch(e){} }
+  }
   function statusFr(s){ return ({pending:'En attente',accepted:'Acceptée',declined:'Refusée',arrived:'Arrivé',seated:'Arrivée',no_show:'No-show',cancelled:'Annulée',expired:'Expirée'})[s]||s; }
   /* badges: where they sit, how they behave, how loyal they are */
   function tableLabel(r){
@@ -3997,6 +4020,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
     document.getElementById('cPhone').value=c.phone||''; document.getElementById('cFacebook').value=c.facebook||'';
     document.getElementById('cAddress').value=c.address||'';
     document.getElementById('cWinter').checked = c.winter!==false;          // on unless switched off
+    WINTER = c.winter!==false; applyWinter();
     var h=c.hours||{}; document.getElementById('cLunch').value=h.lunch||''; document.getElementById('cDinner').value=h.dinner||''; document.getElementById('cDays').value=h.days||'';
     document.getElementById('menuEditor').innerHTML=(c.menu||[]).map(menuRow).join(''); bindMenuDeletes();
   }
@@ -4185,7 +4209,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
   }
   function renderPlan(){
     var zone=document.getElementById('planZone').value;
-    var list=TABLES.filter(function(t){ return t.zone===zone && !t.merged_into; });
+    var list=TABLES.filter(function(t){ return inZone(t, zone) && !t.merged_into; });
     var el=document.getElementById('plan');
     document.getElementById('planCount').textContent=list.length+' table'+(list.length>1?'s':'')+
       ' · '+list.filter(function(t){return BUSY[t.id];}).length+' occupée(s)';
@@ -4339,6 +4363,24 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
     if(res.status===200){ planDirty=false; b.classList.add('hide'); }
   });
   document.getElementById('planZone').addEventListener('change', renderPlan);
+  /* ❄ Mode hiver, in one tap: the plan, the booking windows and the website follow */
+  document.getElementById('winterBtn').addEventListener('click', async function(){
+    var on=!WINTER;
+    var a=await ask(on ? 'Activer le mode hiver' : 'Désactiver le mode hiver',
+      on ? 'La terrasse est divisée : le site et le plan proposent « Terrasse verrière » et « Terrasse au plein air ».'
+         : 'Retour au plan habituel : une seule « Terrasse » avec toutes ses tables, sur le site comme dans le plan.',
+      {yes: on ? 'Activer' : 'Désactiver'});
+    if(!a.ok) return;
+    var b=this; b.disabled=true;
+    try{
+      var cur=await api('content',{auth:false});
+      var content=Object.assign({}, (cur.data&&cur.data.content)||{}, {winter:on});
+      var res=await api('content',{method:'POST',body:{content:content}});
+      if(res.status!==200){ toast((res.data&&res.data.error)||'Enregistrement impossible.'); return; }
+      WINTER=on; applyWinter(); renderPlan();
+      toast(on ? 'Mode hiver activé — sur le site aussi.' : 'Mode hiver désactivé — plan habituel, sur le site aussi.');
+    } finally { b.disabled=false; }
+  });
   document.getElementById('planDate').addEventListener('change', loadTables);
 
 
@@ -4594,7 +4636,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
   }
   function renderPicker(){
     var zone=document.getElementById('pickZone').value;
-    var list=TABLES.filter(function(t){ return t.zone===zone && !t.merged_into; });
+    var list=TABLES.filter(function(t){ return inZone(t, zone) && !t.merged_into; });
     var el=document.getElementById('pickPlan');
     if(!list.length){ el.innerHTML='<div class="empty" style="padding:40px 0">Aucune table dans cette zone.</div>'; return; }
     el.innerHTML=list.map(function(t){ return tblHtml(t,true); }).join('');
