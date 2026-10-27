@@ -1139,8 +1139,8 @@ p{margin:0}
       <div class="frow">
         <div class="field"><label>Place</label>
           <div class="slots slots--place" id="placeSlots">
-            <button type="button" class="slot slot--pl" data-place="terrace"><span class="slot__n" data-summer="Terrasse">Terrasse au plein air</span></button>
             <button type="button" class="slot slot--pl on" data-place="verriere"><span class="slot__n">Terrasse verrière</span></button>
+            <button type="button" class="slot slot--pl" data-place="terrace"><span class="slot__n" data-summer="Terrasse">Terrasse en plein air</span></button>
             <button type="button" class="slot slot--pl" data-place="inside"><span class="slot__n">Salle intérieure</span></button>
           </div>
           <input type="hidden" id="place" value="verriere" /></div>
@@ -1833,7 +1833,7 @@ p{margin:0}
     put("passWhen", r.res_date
       ? fdatePass(r.res_date)+" · "+String(r.res_time||"").slice(0,5).replace(":","h")
       : "");
-    put("passMeta", party+" couverts · "+({terrace:"Terrasse au plein air", verriere:"Terrasse verrière"}[seating]||"Salle intérieure"));
+    put("passMeta", party+" couverts · "+({terrace:"Terrasse en plein air", verriere:"Terrasse verrière"}[seating]||"Salle intérieure"));
     /* echo back the guest's special-occasion note so they see it was received */
     var occEl=document.getElementById("passOcc");
     if(occEl){ var n=(note||r.note||"").trim(); if(n){ occEl.textContent="✎ "+n; occEl.hidden=false; } else { occEl.textContent=""; occEl.hidden=true; } }
@@ -2104,7 +2104,7 @@ p{margin:0}
       var st=info.rooms||{}; if(!info.rooms){ st[info.requested]="full"; st[info.other]=info.otherFree?"free":"full"; }
       var winterOn=!document.querySelector('#placeSlots [data-place="verriere"]').hidden;
       document.getElementById("fullRooms").innerHTML=
-        roomCard(winterOn?"Terrasse au plein air":"Terrasse", st.terrace==="full") +
+        roomCard(winterOn?"Terrasse en plein air":"Terrasse", st.terrace==="full") +
         (winterOn ? roomCard("Terrasse verrière", st.verriere==="full") : "") +
         roomCard("Salle intérieure", st.inside==="full");
       var sw=document.getElementById("fullSwitch"), other=document.getElementById("fullPickOther");
