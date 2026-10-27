@@ -4789,7 +4789,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
     ['nrName','nrPhone','nrEmail','nrNote'].forEach(function(id){ document.getElementById(id).value=''; });
     document.getElementById('nrTime').value='';
     document.getElementById('nrParty').value='2';
-    document.getElementById('nrSeat').value='terrace';
+    document.getElementById('nrSeat').value=WINTER?'verriere':'terrace';   // winter: the verrière first
     document.getElementById('nrNotify').checked=true;   /* default: send the confirmation + QR */
     var nfg=document.getElementById('nrNotify').closest('.fg'); if(nfg) nfg.style.display='';
     document.querySelector('#newModal h3').textContent='Nouvelle réservation';

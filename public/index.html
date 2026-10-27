@@ -1139,11 +1139,11 @@ p{margin:0}
       <div class="frow">
         <div class="field"><label>Place</label>
           <div class="slots slots--place" id="placeSlots">
-            <button type="button" class="slot slot--pl on" data-place="terrace"><span class="slot__n" data-summer="Terrasse">Terrasse au plein air</span></button>
-            <button type="button" class="slot slot--pl" data-place="verriere"><span class="slot__n">Terrasse verrière</span></button>
+            <button type="button" class="slot slot--pl" data-place="terrace"><span class="slot__n" data-summer="Terrasse">Terrasse au plein air</span></button>
+            <button type="button" class="slot slot--pl on" data-place="verriere"><span class="slot__n">Terrasse verrière</span></button>
             <button type="button" class="slot slot--pl" data-place="inside"><span class="slot__n">Salle intérieure</span></button>
           </div>
-          <input type="hidden" id="place" value="terrace" /></div>
+          <input type="hidden" id="place" value="verriere" /></div>
         <div class="field"><label for="couverts">Combien de personnes&nbsp;?</label>
           <select id="couverts">
             <option value="1">1 personne</option>
@@ -2275,6 +2275,9 @@ p{margin:0}
             if(msg.scrollIntoView) msg.scrollIntoView({block:"center", behavior:"smooth"});
           }
           form.reset(); if(d) d.min=new Date().toISOString().split("T")[0];
+          /* the place buttons follow the reset (back to the pre-selected place) */
+          var pv=(document.getElementById("place")||{}).value;
+          document.querySelectorAll("#placeSlots .slot").forEach(function(x){ x.classList.toggle("on", x.getAttribute("data-place")===pv); });
         } else if(res && res.code==='full'){
           /* room is full — show the premium popup (not a red line), room-aware */
           msg.textContent="";
@@ -2333,7 +2336,7 @@ p{margin:0}
       /* winter mode off = one "Terrasse" (the verrière is not offered) */
       if(c.winter===false){
         var vb=document.querySelector('#placeSlots [data-place="verriere"]');
-        if(vb){ vb.hidden=true; if(vb.classList.contains("on")){ vb.classList.remove("on"); var tb=document.querySelector('#placeSlots [data-place="terrace"]'); tb.classList.add("on"); document.getElementById("place").value="terrace"; } }
+        if(vb){ vb.hidden=true; if(vb.classList.contains("on")){ vb.classList.remove("on"); var tb=document.querySelector('#placeSlots [data-place="terrace"]'); tb.classList.add("on"); var pi=document.getElementById("place"); pi.value="terrace"; pi.setAttribute("value","terrace"); } }
         var tl=document.querySelector('#placeSlots [data-summer]'); if(tl) tl.textContent=tl.getAttribute("data-summer");
       }
       if(c.quotes){
