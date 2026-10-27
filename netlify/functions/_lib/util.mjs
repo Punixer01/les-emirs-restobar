@@ -34,7 +34,7 @@ export function fmtTime(t) {
    "verrière" and the open-air terrace ("terrace" keeps its name: same tables). */
 export const SEATS = ["inside", "terrace", "verriere"];
 export const zoneOf = (s) => (SEATS.includes(s) ? s : "inside");
-const SEAT_FR = { inside: "Salle intérieure", terrace: "Terrasse plein air", verriere: "Terrasse verrière" };
+const SEAT_FR = { inside: "Salle intérieure", terrace: "Terrasse au plein air", verriere: "Terrasse verrière" };
 export function seatFr(s) {
   return SEAT_FR[zoneOf(s)];
 }

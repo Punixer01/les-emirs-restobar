@@ -992,7 +992,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
         <span class="muted" id="planHint">Touchez une table occupée pour la libérer · une table libre pour la modifier</span>
       </div>
       <div class="tools">
-        <select id="planZone"><option value="terrace">Terrasse plein air</option><option value="verriere">Terrasse verrière</option><option value="inside">Salle intérieure</option></select>
+        <select id="planZone"><option value="terrace">Terrasse au plein air</option><option value="verriere">Terrasse verrière</option><option value="inside">Salle intérieure</option></select>
         <input type="date" id="planDate" />
         <button class="btn btn--sm" id="tblAdd">+ Ajouter une table</button>
         <button class="btn btn--sm btn--ghost" id="mergeMode">Joindre des tables</button>
@@ -1245,7 +1245,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
       <div class="form" style="padding:16px">
         <div class="f2">
           <div class="fg"><label>Date</label><input type="date" id="bkDate" /></div>
-          <div class="fg"><label>Place</label><select id="bkSeat"><option value="all">Tout</option><option value="inside">Intérieur</option><option value="terrace">Terrasse plein air</option><option value="verriere">Terrasse verrière</option></select></div>
+          <div class="fg"><label>Place</label><select id="bkSeat"><option value="all">Tout</option><option value="inside">Intérieur</option><option value="terrace">Terrasse au plein air</option><option value="verriere">Terrasse verrière</option></select></div>
         </div>
         <div class="f2">
           <div class="fg"><label>De</label><input type="time" id="bkStart" value="12:00" /></div>
@@ -1650,7 +1650,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
         <div class="fg"><label>Couverts</label><input id="tblSeats" type="number" min="1" max="30" value="2" /></div>
       </div>
       <div class="f2">
-        <div class="fg"><label>Zone</label><select id="tblZone"><option value="inside">Salle intérieure</option><option value="terrace">Terrasse plein air</option><option value="verriere">Terrasse verrière</option></select></div>
+        <div class="fg"><label>Zone</label><select id="tblZone"><option value="inside">Salle intérieure</option><option value="terrace">Terrasse au plein air</option><option value="verriere">Terrasse verrière</option></select></div>
         <div class="fg"><label>Forme</label><select id="tblShape"><option value="round">Ronde</option><option value="square">Carrée</option><option value="rect">Rectangulaire</option></select></div>
       </div>
       <div class="fg"><label><input type="checkbox" id="tblActive" checked style="width:auto;margin-right:8px" />En service</label></div>
@@ -1673,7 +1673,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
     <h3>Choisir une table</h3>
     <div class="who" id="pickWho"></div>
     <div class="tools" style="margin:10px 0">
-      <select id="pickZone"><option value="inside">Salle intérieure</option><option value="terrace">Terrasse plein air</option><option value="verriere">Terrasse verrière</option></select>
+      <select id="pickZone"><option value="inside">Salle intérieure</option><option value="terrace">Terrasse au plein air</option><option value="verriere">Terrasse verrière</option></select>
       <span class="muted" id="pickHint">Les tables en rouge sont déjà prises sur ce créneau.</span>
     </div>
     <div class="plan" id="pickPlan" style="aspect-ratio:16/9"></div>
@@ -1697,7 +1697,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
       <div class="fg"><label>Heure</label><div class="chiprow" id="nrTimes"></div><input id="nrTime" type="hidden" /></div>
       <div class="f2">
         <div class="fg"><label>Couverts</label><input id="nrParty" type="number" min="1" max="40" value="2" /></div>
-        <div class="fg"><label>Place</label><select id="nrSeat"><option value="terrace">Terrasse plein air</option><option value="verriere">Terrasse verrière</option><option value="inside">Salle intérieure</option></select></div>
+        <div class="fg"><label>Place</label><select id="nrSeat"><option value="terrace">Terrasse au plein air</option><option value="verriere">Terrasse verrière</option><option value="inside">Salle intérieure</option></select></div>
       </div>
       <div class="f2">
         <div class="fg"><label>Email (facultatif)</label><input id="nrEmail" type="email" placeholder="Pour la confirmation" /></div>
@@ -1942,7 +1942,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
   function fdate(d){ var x=new Date(d+'T00:00:00'); return DOW[x.getDay()]+' '+x.getDate()+' '+MON[x.getMonth()]; }
   function ftime(t){ return String(t||'').slice(0,5); }
   /* winter: the terrace is split — glass verrière + open air */
-  function seat(s){ return {terrace:'Terrasse plein air', verriere:'Terrasse verrière'}[s]||'Intérieur'; }
+  function seat(s){ return {terrace:'Terrasse au plein air', verriere:'Terrasse verrière'}[s]||'Intérieur'; }
   function zoneOf(s){ return (s==='terrace'||s==='verriere') ? s : 'inside'; }
   function statusFr(s){ return ({pending:'En attente',accepted:'Acceptée',declined:'Refusée',arrived:'Arrivé',seated:'Arrivée',no_show:'No-show',cancelled:'Annulée',expired:'Expirée'})[s]||s; }
   /* badges: where they sit, how they behave, how loyal they are */
@@ -2421,7 +2421,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
     document.getElementById('chartHours').innerHTML=hrs.length?hrs.map(function(h){return '<div class="bar" style="height:'+(h.n/maxH*100)+'%" title="'+h.hour+'h"><span>'+h.hour+'</span></div>';}).join(''):'<div class="empty" style="width:100%">—</div>';
     var sa=s.seating||[], inside=0,terr=0,verr=0; sa.forEach(function(x){ if(x.seating==='terrace')terr=x.n; else if(x.seating==='verriere')verr=x.n; else inside+=x.n; }); var tot=inside+terr+verr||1;
     document.getElementById('chartSeat').innerHTML='<i style="width:'+(inside/tot*100)+'%;background:var(--marine)"></i><i style="width:'+(terr/tot*100)+'%;background:var(--gold)"></i><i style="width:'+(verr/tot*100)+'%;background:#2b5d9a"></i>';
-    document.getElementById('seatLegend').innerHTML='<span><span class="dot" style="background:var(--marine)"></span>Intérieur <b>'+inside+'</b></span><span><span class="dot" style="background:var(--gold)"></span>Terrasse plein air <b>'+terr+'</b></span><span><span class="dot" style="background:#2b5d9a"></span>Verrière <b>'+verr+'</b></span>';
+    document.getElementById('seatLegend').innerHTML='<span><span class="dot" style="background:var(--marine)"></span>Intérieur <b>'+inside+'</b></span><span><span class="dot" style="background:var(--gold)"></span>Terrasse au plein air <b>'+terr+'</b></span><span><span class="dot" style="background:#2b5d9a"></span>Verrière <b>'+verr+'</b></span>';
     var tc=s.topClients||[];
     document.getElementById('topClients').innerHTML=tc.length?tc.map(function(c){return '<div class="row" style="padding:9px 0"><div class="row__main"><b>'+esc(c.name)+'</b> <span class="muted">'+esc(c.phone)+'</span></div><span>'+c.bookings_completed+' visite'+(c.bookings_completed>1?'s':'')+(c.no_shows?' · <span style="color:var(--red)">'+c.no_shows+' NS</span>':'')+'</span></div>';}).join(''):'<div class="empty">—</div>';
   }
@@ -3637,7 +3637,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
         if(Array.isArray(b.tables)) return 'Plan de salle réorganisé';
         return (b.id?'Table modifiée':'Table ajoutée')+(b.code?' · '+b.code:'');
       case 'blocks': return e.method==='DELETE' ? 'Créneau « complet » retiré'
-        : ('Créneau déclaré complet · '+(b.date?fdate(b.date):'')+' '+(b.start||'')+'–'+(b.end||'')+' · '+({inside:'salle intérieure', terrace:'terrasse plein air', verriere:'terrasse verrière', all:'toutes les salles'}[b.seating]||'toutes les salles'));
+        : ('Créneau déclaré complet · '+(b.date?fdate(b.date):'')+' '+(b.start||'')+'–'+(b.end||'')+' · '+({inside:'salle intérieure', terrace:'terrasse au plein air', verriere:'terrasse verrière', all:'toutes les salles'}[b.seating]||'toutes les salles'));
       case 'blacklist': return e.method==='DELETE' ? ('Numéro retiré de la blacklist · '+(b.phone||'')) : ('Numéro ajouté à la blacklist · '+(b.name?b.name+' · ':'')+(b.phone||''));
       case 'send-message': return 'Message envoyé à '+(b.name||b.email||b.phone||(b.reservationId?R(b.reservationId):'un client'));
       case 'messages': return 'Messages marqués comme lus';

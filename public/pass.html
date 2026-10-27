@@ -101,7 +101,7 @@ h1{font-family:var(--font-serif);font-weight:300;font-size:clamp(1.6rem,6vw,2rem
   function fdate(d){ var x=new Date(d+"T00:00:00");
     return DOW[x.getDay()]+" "+x.getDate()+" "+MON[x.getMonth()]; }
   function ftime(t){ return String(t||"").slice(0,5).replace(":","h"); }
-  function seat(s){ return {terrace:"Terrasse plein air", verriere:"Terrasse verrière"}[s]||"Salle intérieure"; }
+  function seat(s){ return {terrace:"Terrasse au plein air", verriere:"Terrasse verrière"}[s]||"Salle intérieure"; }
   function statusFr(s){ return ({pending:"En attente de confirmation",accepted:"Confirmée",
     declined:"Refusée",arrived:"Arrivé",seated:"Arrivée",no_show:"Non honorée",
     cancelled:"Annulée"})[s]||s; }

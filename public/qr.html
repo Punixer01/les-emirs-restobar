@@ -46,22 +46,22 @@ main{position:relative;z-index:2;min-height:100svh;display:flex;flex-direction:c
   padding:calc(64px + env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom));max-width:460px;margin:0 auto}
 
 /* intro: a gold line draws, the logo comes into focus, then everything settles up */
-.mark{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:16vh;
+.mark{display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:14vh;
   transition:margin-top 1.3s var(--ease)}
-body.ready .mark{margin-top:2vh}
+body.ready .mark{margin-top:0}
 .rule{width:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);animation:rule 1.1s var(--ease) .2s forwards}
 @keyframes rule{to{width:120px}}
-.logo{width:min(250px,64vw);height:auto;margin:22px 0 16px;opacity:0;filter:blur(12px) drop-shadow(0 10px 30px rgba(0,0,0,.5));
+.logo{width:min(190px,46vw);height:auto;margin:18px 0 4px;opacity:0;filter:blur(12px) drop-shadow(0 10px 30px rgba(0,0,0,.5));
   transform:scale(.97);animation:logo 1.5s var(--ease) .55s forwards;-webkit-user-drag:none;user-select:none}
 @keyframes logo{to{opacity:1;filter:blur(0) drop-shadow(0 10px 30px rgba(0,0,0,.5));transform:none}}
 .since{font:italic 300 15px/1.4 var(--serif);color:var(--gold);letter-spacing:.04em;opacity:0;animation:fade 1s var(--ease) 1.25s forwards}
 .welcome{margin-top:6px;font:400 10.5px/1.6 var(--sans);letter-spacing:.32em;text-transform:uppercase;color:var(--soft);
   opacity:0;animation:fade 1s var(--ease) 1.45s forwards}
-.rule--b{margin-top:22px;animation-delay:1.6s}
+.rule--b{margin-top:16px;animation-delay:1.3s}
 @keyframes fade{to{opacity:1}}
 
 /* the four doors */
-.doors{width:100%;display:grid;gap:12px;margin-top:34px}
+.doors{width:100%;display:grid;gap:10px;margin-top:26px}
 .door{position:relative;display:flex;align-items:center;gap:16px;width:100%;padding:18px 18px 18px 16px;border-radius:16px;
   border:1px solid var(--line);background:rgba(18,25,21,.48);backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1);
   color:var(--bone);text-decoration:none;text-align:left;font:inherit;cursor:pointer;
@@ -69,6 +69,7 @@ body.ready .mark{margin-top:2vh}
 body.ready .door{animation:door .9s var(--ease) forwards}
 body.ready .door:nth-child(1){animation-delay:.05s} body.ready .door:nth-child(2){animation-delay:.16s}
 body.ready .door:nth-child(3){animation-delay:.27s} body.ready .door:nth-child(4){animation-delay:.38s}
+body.ready .door:nth-child(5){animation-delay:.49s} body.ready .doors>div .door{animation-delay:.49s}
 @keyframes door{to{opacity:1;transform:none}}
 .door:active{transform:scale(.985)}
 .door:hover{border-color:rgba(194,164,99,.55)}
@@ -124,8 +125,6 @@ body.ready .skip{display:none}
   <div class="mark">
     <div class="rule"></div>
     <img class="logo" src="/assets/logo-cream.png" alt="Restaurant Les Émirs — Port El Kantaoui" draggable="false" />
-    <p class="since" data-t="since">Depuis 1980</p>
-    <p class="welcome" data-t="welcome">Bienvenue aux Émirs</p>
     <div class="rule rule--b"></div>
   </div>
 
@@ -137,13 +136,23 @@ body.ready .skip{display:none}
     </a>
     <a class="door" id="reviewLink" href="#" target="_blank" rel="noopener" data-go="review">
       <span class="door__ico"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3.6l2.5 5.2 5.7.8-4.1 4 1 5.7L12 16.6l-5.1 2.7 1-5.7-4.1-4 5.7-.8z"/></svg></span>
-      <span class="door__txt"><span class="door__t" data-t="review">Laisser un avis</span><span class="door__sub"><span class="stars">★★★★★</span><span data-t="reviewSub">sur Google</span></span></span>
+      <span class="door__txt"><span class="door__t" data-t="review">Votre avis</span><span class="door__sub"><span class="stars">★★★★★</span><span data-t="reviewSub">sur Google</span></span></span>
+      <span class="door__arr" aria-hidden="true">›</span>
+    </a>
+    <a class="door" href="/reclamation" data-go="reclamation">
+      <span class="door__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 17H10l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 5z"/><path d="M12 8.5v3.5M12 14.6v.01"/></svg></span>
+      <span class="door__txt"><span class="door__t" data-t="claim">Réclamation</span><span class="door__sub" data-t="claimSub">Un souci ? Écrivez-nous</span></span>
+      <span class="door__arr" aria-hidden="true">›</span>
+    </a>
+    <a class="door" href="/" data-go="site" id="siteDoor">
+      <span class="door__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.5 3.6 5.3 3.6 8.5S14.4 18 12 20.5C9.6 18 8.4 15.2 8.4 12S9.6 6 12 3.5z"/></svg></span>
+      <span class="door__txt"><span class="door__t" data-t="site">Notre site web</span><span class="door__sub" data-t="siteSub">Réservation, galerie &amp; contact</span></span>
       <span class="door__arr" aria-hidden="true">›</span>
     </a>
     <div>
       <button type="button" class="door" id="socialBtn" aria-expanded="false" aria-controls="social" data-go="social" style="width:100%">
         <span class="door__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="3.8"/><circle cx="17.2" cy="6.8" r=".9" fill="currentColor"/></svg></span>
-        <span class="door__txt"><span class="door__t" data-t="social">Nos réseaux</span><span class="door__sub" data-t="socialSub">Instagram &amp; Facebook</span></span>
+        <span class="door__txt"><span class="door__t" data-t="social">Réseaux sociaux</span><span class="door__sub" data-t="socialSub">Instagram &amp; Facebook</span></span>
         <span class="door__arr" aria-hidden="true">›</span>
       </button>
       <div class="social" id="social"><div>
@@ -155,11 +164,6 @@ body.ready .skip{display:none}
           <b>Facebook</b><span>Restaurant Les Émirs</span></a>
       </div></div>
     </div>
-    <a class="door" href="/" data-go="site">
-      <span class="door__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.5 3.6 5.3 3.6 8.5S14.4 18 12 20.5C9.6 18 8.4 15.2 8.4 12S9.6 6 12 3.5z"/></svg></span>
-      <span class="door__txt"><span class="door__t" data-t="site">Notre site</span><span class="door__sub" data-t="siteSub">Réservation, galerie &amp; contact</span></span>
-      <span class="door__arr" aria-hidden="true">›</span>
-    </a>
   </nav>
 
   <footer>
@@ -176,12 +180,12 @@ body.ready .skip{display:none}
 
   /* ---- words, in the guest's language ---- */
   var T = {
-    fr:{since:"Depuis 1980", welcome:"Bienvenue aux Émirs", menu:"La Carte", menuSub:"Plats, spécialités & prix",
-        review:"Laisser un avis", reviewSub:"sur Google", social:"Nos réseaux", socialSub:"Instagram & Facebook",
-        site:"Notre site", siteSub:"Réservation, galerie & contact", skip:"Passer l'introduction"},
-    en:{since:"Since 1980", welcome:"Welcome to Les Émirs", menu:"The Menu", menuSub:"Dishes, specialities & prices",
-        review:"Leave a review", reviewSub:"on Google", social:"Follow us", socialSub:"Instagram & Facebook",
-        site:"Our website", siteSub:"Booking, gallery & contact", skip:"Skip the intro"}
+    fr:{menu:"La Carte", menuSub:"Plats, spécialités & prix", review:"Votre avis", reviewSub:"sur Google",
+        claim:"Réclamation", claimSub:"Un souci ? Écrivez-nous", site:"Notre site web", siteSub:"Réservation, galerie & contact",
+        social:"Réseaux sociaux", socialSub:"Instagram & Facebook", skip:"Passer l'introduction"},
+    en:{menu:"The Menu", menuSub:"Dishes, specialities & prices", review:"Your review", reviewSub:"on Google",
+        claim:"Complaint", claimSub:"Something wrong? Write to us", site:"Our website", siteSub:"Booking, gallery & contact",
+        social:"Social media", socialSub:"Instagram & Facebook", skip:"Skip the intro"}
   };
   var lang;
   function setLang(l){
@@ -194,14 +198,14 @@ body.ready .skip{display:none}
     try{ localStorage.setItem("emirs_menu_lang", l); }catch(e){}
   }
   var saved=null; try{ saved=localStorage.getItem("emirs_menu_lang"); }catch(e){}
-  setLang(saved==="en"||saved==="fr" ? saved : (/^en/i.test(navigator.language||"") ? "en" : "fr"));
+  setLang(saved==="en" ? "en" : "fr");          // French unless the guest picked EN
   document.querySelector(".lang").addEventListener("click", function(e){ var b=e.target.closest("[data-l]"); if(b) setLang(b.getAttribute("data-l")); });
 
   /* ---- intro, then the four doors (a tap skips it) ---- */
   var done=false;
   function ready(){ if(done) return; done=true; document.body.classList.add("ready"); }
   var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  setTimeout(ready, reduce ? 0 : 2300);
+  setTimeout(ready, reduce ? 0 : 1700);
   document.getElementById("skip").addEventListener("click", ready);
 
   /* ---- social opens in place ---- */

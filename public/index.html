@@ -289,7 +289,7 @@ p{margin:0}
 .sheet__bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
 .sheet__bar h2{font-size:clamp(1.8rem,3.6vw,2.7rem);font-weight:300}
 .sheet__brand{min-width:0}
-.sheet__logo{height:clamp(26px,4vw,34px);width:auto;display:block;margin-bottom:10px}
+.sheet__logo{width:clamp(116px,22vw,152px);height:auto;max-width:100%;display:block;margin-bottom:10px;object-fit:contain}
 .sheet__actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
 /* the way to book stays in the fixed header, so it is visible at every scroll */
 .sheet__reserve{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;
@@ -305,6 +305,14 @@ p{margin:0}
 .sheet__lang button{font:600 11px/1 var(--font-sans);letter-spacing:.1em;padding:8px 11px;border-radius:100px;border:0;
   background:transparent;color:var(--stone);cursor:pointer}
 .sheet__lang button.on{background:var(--marine);color:var(--bone)}
+/* phone: the bar's buttons get compact so the logo keeps its size */
+@media(max-width:520px){
+  .sheet__actions{gap:6px}
+  .sheet__lang{padding:2px}
+  .sheet__lang button{padding:7px 8px;font-size:10.5px}
+  .sheet__reserve{padding:10px 12px!important;letter-spacing:.08em!important}
+  .sheet__logo{width:112px;max-width:none}
+}
 .sheet__tabs{display:flex;gap:8px;overflow-x:auto;padding:20px 0 16px;margin-top:6px;
   border-bottom:1px solid var(--hair);scrollbar-width:none;-ms-overflow-style:none}
 .sheet__tabs::-webkit-scrollbar{display:none}
@@ -1131,7 +1139,7 @@ p{margin:0}
       <div class="frow">
         <div class="field"><label>Place</label>
           <div class="slots slots--place" id="placeSlots">
-            <button type="button" class="slot slot--pl on" data-place="terrace"><span class="slot__n" data-summer="Terrasse">Terrasse plein air</span></button>
+            <button type="button" class="slot slot--pl on" data-place="terrace"><span class="slot__n" data-summer="Terrasse">Terrasse au plein air</span></button>
             <button type="button" class="slot slot--pl" data-place="verriere"><span class="slot__n">Terrasse verrière</span></button>
             <button type="button" class="slot slot--pl" data-place="inside"><span class="slot__n">Salle intérieure</span></button>
           </div>
@@ -1168,8 +1176,8 @@ p{margin:0}
 <!-- message -->
 <section class="msgsec" id="message">
   <div class="wrap" style="max-width:760px">
-    <span class="label" data-r>Une question ?</span>
-    <h2 data-r data-d="1">Écrivez-nous.</h2>
+    <span class="label" data-r id="msgLabel">Une question ?</span>
+    <h2 data-r data-d="1" id="msgTitle">Écrivez-nous.</h2>
     <form id="msgForm" data-r data-d="2" style="margin-top:26px" novalidate>
       <div class="frow">
         <div class="field"><label for="mName">Nom</label><input id="mName" type="text" placeholder="Votre nom" /></div>
@@ -1509,7 +1517,7 @@ p{margin:0}
     /* the owner's saved menu arrives after load: redraw it in the chosen language */
     window.__menuRedraw=function(){ setLang(box.getAttribute("lang")||"fr"); };
     var start=null; try{ start=localStorage.getItem("emirs_menu_lang"); }catch(e){}
-    if(start!=="en" && start!=="fr") start=/^en/i.test(navigator.language||"") ? "en" : "fr";
+    if(start!=="en" && start!=="fr") start="fr";          // French unless the guest picked EN
     if(start==="en") setLang("en");
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", menuLangInit); else menuLangInit();
@@ -1825,7 +1833,7 @@ p{margin:0}
     put("passWhen", r.res_date
       ? fdatePass(r.res_date)+" · "+String(r.res_time||"").slice(0,5).replace(":","h")
       : "");
-    put("passMeta", party+" couverts · "+({terrace:"Terrasse plein air", verriere:"Terrasse verrière"}[seating]||"Salle intérieure"));
+    put("passMeta", party+" couverts · "+({terrace:"Terrasse au plein air", verriere:"Terrasse verrière"}[seating]||"Salle intérieure"));
     /* echo back the guest's special-occasion note so they see it was received */
     var occEl=document.getElementById("passOcc");
     if(occEl){ var n=(note||r.note||"").trim(); if(n){ occEl.textContent="✎ "+n; occEl.hidden=false; } else { occEl.textContent=""; occEl.hidden=true; } }
@@ -2096,7 +2104,7 @@ p{margin:0}
       var st=info.rooms||{}; if(!info.rooms){ st[info.requested]="full"; st[info.other]=info.otherFree?"free":"full"; }
       var winterOn=!document.querySelector('#placeSlots [data-place="verriere"]').hidden;
       document.getElementById("fullRooms").innerHTML=
-        roomCard(winterOn?"Terrasse plein air":"Terrasse", st.terrace==="full") +
+        roomCard(winterOn?"Terrasse au plein air":"Terrasse", st.terrace==="full") +
         (winterOn ? roomCard("Terrasse verrière", st.verriere==="full") : "") +
         roomCard("Salle intérieure", st.inside==="full");
       var sw=document.getElementById("fullSwitch"), other=document.getElementById("fullPickOther");
@@ -2292,6 +2300,7 @@ p{margin:0}
     var body=document.getElementById('mBody').value.trim(), name=document.getElementById('mName').value.trim(),
         contact=document.getElementById('mContact').value.trim(), out=document.getElementById('mMsg');
     if(body.length<2){ out.style.color='#a4552f'; out.textContent='Merci d\'écrire votre message.'; return; }
+    if(window.__reclam && body.indexOf('[Réclamation]')!==0) body='[Réclamation] '+body;
     var payload={ name:name, body:body }; if(/@/.test(contact)) payload.email=contact; else if(contact) payload.phone=contact;
     out.style.color=''; out.textContent='Envoi…';
     fetch('/api/messages',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
@@ -2299,6 +2308,20 @@ p{margin:0}
       .then(function(res){ if(res&&res.ok){ out.style.color='var(--marine)'; out.textContent='Merci — votre message a bien été envoyé.'; mf.reset(); } else { out.style.color='#a4552f'; out.textContent=(res&&res.error)||'Envoi impossible.'; } })
       .catch(function(){ out.style.color='#a4552f'; out.textContent='Envoi impossible.'; });
   }); }
+
+  /* ---------- réclamation: lesemirs.com/reclamation (or ?reclamation=1) ---------- */
+  (function(){
+    var q=null; try{ q=new URLSearchParams(location.search).get("reclamation"); }catch(e){}
+    if(q!=="1") return;
+    window.__reclam=true;
+    var l=document.getElementById("msgLabel"), t=document.getElementById("msgTitle"), b=document.getElementById("mBody");
+    if(l) l.textContent="Réclamation";
+    if(t) t.textContent="Dites-nous ce qui n’a pas été.";
+    if(b){ b.placeholder="Votre réclamation : ce qui s’est passé, le jour, l’heure… Nous vous répondons rapidement."; b.rows=5; }
+    var sec=document.getElementById("message");
+    if(sec){ sec.querySelectorAll("[data-r]").forEach(function(x){ x.classList.add("in"); });
+      setTimeout(function(){ sec.scrollIntoView({block:"start"}); var n=document.getElementById("mName"); if(n) try{ n.focus({preventScroll:true}); }catch(e){} }, 400); }
+  })();
 
   /* ---------- CMS overrides ---------- */
   (async function(){

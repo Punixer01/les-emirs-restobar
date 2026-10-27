@@ -306,7 +306,7 @@ function frDateLong(d) {
   return s.replace(/([a-zà-ÿ])([a-zà-ÿ']*)/gi, (m, a, b) => a.toUpperCase() + b);   // "Vendredi 04 Septembre"
 }
 function frHour(t) { return fmtTime(t).replace(":", "h"); }
-function seatPhrase(s) { return { terrace: "terrasse en plein air", verriere: "terrasse verrière" }[s] || "salle intérieure"; }
+function seatPhrase(s) { return { terrace: "terrasse au plein air", verriere: "terrasse verrière" }[s] || "salle intérieure"; }
 /* The guest picked a language on the site; it travels with the booking so every
    message they get back — email, SMS, the pass — speaks it too. */
 const isEn = (r) => !!r && String(r.lang || "").toLowerCase() === "en";

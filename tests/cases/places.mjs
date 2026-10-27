@@ -7,7 +7,7 @@ assert.equal(zoneOf("verriere"), "verriere");
 assert.equal(zoneOf("terrace"), "terrace");
 assert.equal(zoneOf("garden"), "inside", "unknown place falls back to the salle");
 assert.equal(seatFr("verriere"), "Terrasse verrière");
-assert.equal(seatFr("terrace"), "Terrasse plein air");
+assert.equal(seatFr("terrace"), "Terrasse au plein air");
 const ok = validateBooking({ name: "Amira", phone: "22123456", email: "a@b.co", date: "2026-11-20", time: "20:00", party: 2, seating: "verriere" });
 assert.equal(ok.errors.length, 0); assert.equal(ok.value.seating, "verriere");
 
