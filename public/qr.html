@@ -69,7 +69,7 @@ body.ready .mark{margin-top:0}
 body.ready .door{animation:door .9s var(--ease) forwards}
 body.ready .door:nth-child(1),body.ready .doors>div:first-child .door{animation-delay:.05s} body.ready .door:nth-child(2){animation-delay:.16s}
 body.ready .door:nth-child(3){animation-delay:.27s} body.ready .door:nth-child(4){animation-delay:.38s}
-body.ready .door:nth-child(5){animation-delay:.49s} body.ready .doors>div .door{animation-delay:.49s}
+body.ready .door:nth-child(5){animation-delay:.49s} body.ready .doors>div .door{animation-delay:.49s} body.ready .door:nth-child(6){animation-delay:.6s}
 @keyframes door{to{opacity:1;transform:none}}
 .door:active{transform:scale(.985)}
 .door:hover{border-color:rgba(194,164,99,.55)}
@@ -81,6 +81,7 @@ body.ready .door:nth-child(5){animation-delay:.49s} body.ready .doors>div .door{
 .door__txt{flex:1 1 auto;min-width:0}
 .door__t{display:block;font:400 21px/1.15 var(--serif);letter-spacing:-.005em}
 .door__sub{display:block;margin-top:4px;font:500 10.5px/1.4 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--soft)}
+.wifi__code{font:600 17px/1 var(--sans);letter-spacing:.12em;color:var(--gold);margin-left:6px}
 .stars{color:var(--gold);letter-spacing:2px;font-size:12px;margin-right:6px}
 .door__arr{flex:0 0 auto;opacity:.55;font-size:18px;transition:transform .3s var(--ease)}
 .door[aria-expanded="true"] .door__arr{transform:rotate(90deg)}
@@ -184,6 +185,11 @@ body.ready .skip{display:none}
           <b>Facebook</b><span>Restaurant Les Émirs</span></a>
       </div></div>
     </div>
+    <button type="button" class="door" id="wifiBtn" data-go="wifi" style="width:100%">
+      <span class="door__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.4a9.5 9.5 0 0 1 13 0M8.6 15.7a5 5 0 0 1 6.8 0"/><path d="M12 19.2v.01"/></svg></span>
+      <span class="door__txt"><span class="door__t">Wi-Fi <span class="wifi__code" id="wifiCode">73348700</span></span><span class="door__sub" data-t="wifiSub" id="wifiSub">Touchez pour copier</span></span>
+      <span class="door__arr wifi__ok" aria-hidden="true" id="wifiOk">⧉</span>
+    </button>
   </nav>
 
   <footer>
@@ -202,10 +208,12 @@ body.ready .skip{display:none}
   var T = {
     fr:{menu:"La Carte", menuSub:"Menu, boissons & tapas", cMenu:"Menu", cDrinks:"Boissons", cTapas:"Tapas", review:"Votre avis", reviewSub:"sur Google",
         claim:"Réclamation", claimSub:"Un souci ? Écrivez-nous", site:"Notre site web", siteSub:"Réservation, galerie & contact",
-        social:"Réseaux sociaux", socialSub:"Instagram & Facebook", skip:"Passer l'introduction"},
+        social:"Réseaux sociaux", socialSub:"Instagram & Facebook", skip:"Passer l'introduction",
+        wifiSub:"Touchez pour copier", wifiDone:"Code copié ✓"},
     en:{menu:"The Menu", menuSub:"Food, drinks & tapas", cMenu:"Menu", cDrinks:"Drinks", cTapas:"Tapas", review:"Your review", reviewSub:"on Google",
         claim:"Complaint", claimSub:"Something wrong? Write to us", site:"Our website", siteSub:"Booking, gallery & contact",
-        social:"Social media", socialSub:"Instagram & Facebook", skip:"Skip the intro"}
+        social:"Social media", socialSub:"Instagram & Facebook", skip:"Skip the intro",
+        wifiSub:"Tap to copy", wifiDone:"Password copied ✓"}
   };
   var lang;
   function setLang(l){
@@ -233,6 +241,16 @@ body.ready .skip{display:none}
   opener(document.getElementById("socialBtn"), document.getElementById("social"));
   /* La Carte: Menu · Boissons · Tapas */
   opener(document.getElementById("menuBtn"), document.getElementById("cartes"));
+
+  /* ---- Wi-Fi: a tap copies the code ---- */
+  document.getElementById("wifiBtn").addEventListener("click", function(){
+    var code=document.getElementById("wifiCode").textContent, sub=document.getElementById("wifiSub");
+    function done(){ sub.textContent=T[lang].wifiDone; document.getElementById("wifiOk").textContent="✓";
+      setTimeout(function(){ sub.textContent=T[lang].wifiSub; document.getElementById("wifiOk").textContent="⧉"; }, 2500); }
+    function old(){ var t=document.createElement("textarea"); t.value=code; t.setAttribute("readonly",""); t.style.position="fixed"; t.style.opacity="0";
+      document.body.appendChild(t); t.select(); try{ document.execCommand("copy"); }catch(e){} t.remove(); done(); }
+    if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(done, old); else old();
+  });
 
   /* ---- the terrace film, only on a connection that can afford it ---- */
   var c=navigator.connection||{};
