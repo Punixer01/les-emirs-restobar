@@ -162,7 +162,7 @@ body.is-readonly #tblSave, body.is-readonly #tblDelete, body.is-readonly #tblSpl
 body.is-readonly #tblFree, body.is-readonly #daSave, body.is-readonly #doSave,
 body.is-readonly #nrSave, body.is-readonly #modalSend, body.is-readonly #cmSend,
 body.is-readonly #cmDraft, body.is-readonly #acSave, body.is-readonly #wkPickCancel,
-body.is-readonly #pickSave, body.is-readonly #blAdd{display:none!important}
+body.is-readonly #pickSave, body.is-readonly #blAdd, body.is-readonly [data-msbook], body.is-readonly [data-msclose]{display:none!important}
 /* seating a guest, blacklisting, un-blacklisting, closing a wait entry */
 body.is-readonly [data-pick], body.is-readonly [data-place], body.is-readonly [data-bl],
 body.is-readonly [data-un], body.is-readonly [data-wlclose], body.is-readonly [data-wlbook],
@@ -399,6 +399,8 @@ body.is-gerant .op__acts:not(:has(.op__thumb)), body.is-readonly .op__acts:not(:
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .menu-item{display:grid;grid-template-columns:30px 130px 1fr 70px auto;gap:8px;align-items:center;padding:12px 0;border-top:1px solid var(--line-2)}
 .menu-item .mi-wide{grid-column:2/-1}
+#menuEditor .menu-item.mi-off{display:none!important}
+#menuCarte .chip i{font-style:normal;opacity:.6;margin-left:4px}
 .mi-lang{font:700 10.5px/1 var(--sans,inherit);letter-spacing:.08em;color:var(--marine);background:rgba(31,71,63,.09);border-radius:6px;padding:5px 0;text-align:center}
 .mi-lang--en{color:#1f5fbf;background:rgba(31,95,191,.1)}
 .mi-same{font-size:11px;color:var(--mute);text-align:center}
@@ -959,6 +961,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
       <div class="tab" data-tab="analytics">Analytics</div>
       <div class="tab" data-tab="clients">Clients</div>
       <div class="tab" data-tab="attente">Liste d'attente <span class="badge hide" id="wlBadge">0</span></div>
+      <div class="tab" data-tab="manquees">Réservations manquées <span class="badge hide" id="msBadge">0</span></div>
       <div class="tab" data-tab="histo">Historique</div>
       <div class="tab" data-tab="marketing">Marketing</div>
       <div class="tab" data-tab="site">Site</div>
@@ -1232,8 +1235,14 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
           <span class="muted" style="font-size:12.5px">Décoché : une seule « Terrasse » est proposée sur le site, comme en été.</span></span></label></div>
 
         <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)">La Carte</label>
+        <div class="chiprow" id="menuCarte" style="margin-top:8px">
+          <button type="button" class="chip on" data-carte="menu">Menu <i>0</i></button>
+          <button type="button" class="chip" data-carte="boissons">Boissons <i>0</i></button>
+          <button type="button" class="chip" data-carte="tapas">Tapas <i>0</i></button>
+        </div>
+        <div class="muted" style="font-size:12.5px;margin-top:4px">Sur le site et le QR, le client choisit Menu, Boissons ou Tapas. Choisissez la carte ci-dessus, puis ajoutez ou modifiez ses lignes.</div>
         <div id="menuEditor" style="margin:8px 0 12px"></div>
-        <button class="btn btn--ghost btn--sm" id="menuAdd">+ Ajouter un plat</button>
+        <button class="btn btn--ghost btn--sm" id="menuAdd">+ Ajouter une ligne</button>
 
         <div style="display:flex;gap:10px;align-items:center;margin-top:18px">
           <button class="btn btn--m" id="cmsSave">Enregistrer</button>
@@ -1268,6 +1277,17 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
         <button type="button" class="chip" data-wlview="all">Historique</button>
       </div>
       <div class="panel" id="wlList"><div class="empty">Chargement…</div></div>
+    </section>
+
+    <!-- Réservations manquées: the site said "complet" and the guest left -->
+    <section data-panel="manquees" class="hide">
+      <div class="section-h"><h2>Réservations manquées</h2>
+        <span class="muted">Les clients qui ont demandé une table sur le site quand c'était complet — même s'ils ont fermé la fenêtre sans rien choisir. Rappelez-les.</span></div>
+      <div class="chiprow" id="msView">
+        <button type="button" class="chip on" data-msview="open">À rappeler</button>
+        <button type="button" class="chip" data-msview="all">Historique</button>
+      </div>
+      <div class="panel" id="msList"><div class="empty">Chargement…</div></div>
     </section>
 
     <!-- Blacklist -->
@@ -1759,9 +1779,9 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
   /* the tabs each dashboard serves (null = everything, for the direction) */
   var TABS_BY_ROLE={
     owner:null,
-    reception:['demandes','salle','messages','clients','attente','blacklist'],
-    gerant:['demandes','salle','messages','clients','attente','blacklist','ardoise'],
-    watcher:['demandes','salle','clients','attente','blacklist','ardoise']
+    reception:['demandes','salle','messages','clients','attente','manquees','blacklist'],
+    gerant:['demandes','salle','messages','clients','attente','manquees','blacklist','ardoise'],
+    watcher:['demandes','salle','clients','attente','manquees','blacklist','ardoise']
   };
   function applyRole(){
     var role = PAGE==='owner' ? (ROLE||'owner') : PAGE;
@@ -1872,7 +1892,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
 
   /* auth */
   var loginEl=document.getElementById('login'), appEl=document.getElementById('app');
-  function showApp(){ loginEl.classList.add('hide'); appEl.classList.remove('hide'); applyRole(); loadAll(); startPolling(); safe(checkPushBanner,'push-banner'); safe(wlCount,'wl-count'); safe(loadWinter,'winter'); }
+  function showApp(){ loginEl.classList.add('hide'); appEl.classList.remove('hide'); applyRole(); loadAll(); startPolling(); safe(checkPushBanner,'push-banner'); safe(wlCount,'wl-count'); safe(msCount,'ms-count'); safe(loadWinter,'winter'); }
   function logout(){ TOKEN=null; ROLE=null; try{localStorage.removeItem('emirs_admin_token');localStorage.removeItem('emirs_role');}catch(e){} appEl.classList.add('hide'); loginEl.classList.remove('hide'); }
   document.getElementById('logoutBtn').addEventListener('click', logout);
   async function doLogin(){
@@ -1911,7 +1931,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
     /* Ardoise and Historique carry their own stats — hide the service KPIs there
        so the phone never shows two stacked grids */
     var gk=document.getElementById('kpis');
-    if(gk) gk.classList.toggle('hide', n==='ardoise' || n==='histo' || n==='attente');
+    if(gk) gk.classList.toggle('hide', n==='ardoise' || n==='histo' || n==='attente' || n==='manquees');
     /* every loader runs isolated — a failure shows a toast, never a dead tab */
     if(n==='messages') safe(loadMessages,'messages');
     if(n==='emails') safe(loadEmails,'emails');
@@ -1924,6 +1944,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
     if(n==='histo') safe(loadHisto,'histo');
     if(n==='complet'){ safe(loadBlocks,'complet'); }
     if(n==='attente'){ safe(loadWaitlist,'waitlist'); }
+    if(n==='manquees'){ safe(loadMissed,'missed'); }
     if(n==='salle'){ if(!document.getElementById('planDate').value) document.getElementById('planDate').value=todayStr(); safe(loadTables,'salle'); safe(loadHistory,'salle-histo'); }
     if(n==='envois') safe(loadChannels,'envois');
     if(n==='acces') safe(loadCodeStatus,'acces');
@@ -3972,6 +3993,65 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
     });
   })();
 
+  /* réservations manquées — the site said "complet"; name, phone and wish kept */
+  var MS_VIEW='open';
+  async function msCount(){ var r=await api('missed?count=1'); if(r.status===200){ var b=document.getElementById('msBadge'); if(b){ var n=(r.data||{}).n||0; b.textContent=n; b.classList.toggle('hide', !n); } } }
+  async function loadMissed(){
+    var el=document.getElementById('msList'); if(!el) return;
+    var res=await api('missed'); var all=(res.data&&res.data.missed)||[];
+    var today=todayStr();
+    all.forEach(function(m){ m._st = m.booked_ref ? 'booked' : m.on_waitlist ? 'wait' : m.status==='closed' ? 'closed' : m.res_date<today ? 'past' : 'open'; });
+    var list = MS_VIEW==='open' ? all.filter(function(m){ return m._st==='open'; }) : all;
+    safe(msCount,'ms-count');
+    if(!list.length){ el.innerHTML='<div class="empty">'+(MS_VIEW==='open'?'Personne à rappeler.':'Aucune réservation manquée.')+'</div>'; return; }
+    var ST={open:['À rappeler','pending'], booked:['A réservé','accepted'], wait:['Liste d\u2019attente','accepted'], closed:['Traité','cancelled'], past:['Date passée','cancelled']};
+    el.innerHTML=list.map(function(m){
+      var when=fdate(m.res_date)+(m.res_time?' · '+ftime(m.res_time):'')+' · '+m.party_size+' couv. · '+seat(m.seating);
+      var at=m.created_at ? tnTs(m.created_at) : '';
+      var st=ST[m._st], open=m._st==='open';
+      var wa=String(m.phone||'').replace(/\D/g,''); if(wa.length===8) wa='216'+wa;
+      return '<div class="row"><div class="row__main">'+
+        '<div class="row__name">'+esc(m.name)+'</div>'+
+        '<div class="row__sub">'+[esc(m.phone), m.email?esc(m.email):''].filter(Boolean).join(' · ')+'</div>'+
+        '<div class="row__when">Voulait : '+esc(when)+'</div>'+
+        (at?'<div class="row__sub">Complet affiché le '+esc(fdate(at.slice(0,10)))+' à '+esc(at.slice(11,16))+(m.tries>1?' · '+m.tries+' essais':'')+
+          (m.booked_ref?' · réservation '+esc(m.booked_ref):'')+'</div>':'')+
+        '</div><span class="pill pill--'+st[1]+'">'+st[0]+'</span>'+
+        (open?'<div class="act"><a class="btn btn--sm btn--m" href="tel:'+esc(m.phone)+'">Appeler</a>'+
+          '<a class="btn btn--sm" href="https://wa.me/'+esc(wa)+'" target="_blank" rel="noopener">WhatsApp</a>'+
+          '<button class="btn btn--sm" data-msbook="'+m.id+'">Réserver</button>'+
+          '<button class="btn btn--sm btn--ghost" data-msclose="'+m.id+'">Traité</button></div>':'')+
+      '</div>';
+    }).join('');
+    el.querySelectorAll('[data-msclose]').forEach(function(x){ x.addEventListener('click', async function(){
+      var r=await api('missed',{method:'POST',body:{action:'close',id:+x.getAttribute('data-msclose')}});
+      if(r.status!==200) toast((r.data&&r.data.error)||'Impossible.'); loadMissed();
+    }); });
+    /* "Réserver": the booking window, filled in with what they asked for — once
+       booked, the line shows "A réservé" by itself (same phone, same day) */
+    el.querySelectorAll('[data-msbook]').forEach(function(x){ x.addEventListener('click', async function(){
+      var m=list.filter(function(y){ return y.id===+x.getAttribute('data-msbook'); })[0]; if(!m) return;
+      document.getElementById('resAdd').click();
+      await new Promise(function(r){ setTimeout(r,60); });
+      document.getElementById('nrName').value=m.name||'';
+      document.getElementById('nrPhone').value=m.phone||'';
+      document.getElementById('nrEmail').value=m.email||'';
+      document.getElementById('nrParty').value=m.party_size||2;
+      document.getElementById('nrSeat').value=zoneOf(m.seating);
+      document.getElementById('nrNote').value='Rappelé (réservation manquée)';
+      setNrDay(m.res_date); if(m.res_time) setNrTime(ftime(m.res_time));
+      refreshNrTables();
+    }); });
+  }
+  (function(){
+    var v=document.getElementById('msView'); if(!v) return;
+    v.addEventListener('click', function(e){ var b=e.target.closest('[data-msview]'); if(!b) return;
+      MS_VIEW=b.getAttribute('data-msview');
+      v.querySelectorAll('[data-msview]').forEach(function(x){ x.classList.toggle('on', x===b); });
+      safe(loadMissed,'missed');
+    });
+  })();
+
   /* blocks */
   async function loadBlocks(){
     var res=await api('blocks',{auth:false}); var list=res.data.blocks||[]; var el=document.getElementById('bkList');
@@ -3999,17 +4079,29 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
   /* CMS */
   /* each dish in both languages: French on top, English under it, one price.
      Blank English is pre-filled from the site's English menu, to check and save. */
-  function menuRow(m){ m=m||{cat:'',name:'',desc:'',price:''};
+  var MENU_CARTE='menu';
+  function menuRow(m){ m=m||{cat:'',name:'',desc:'',price:'',carte:MENU_CARTE};
     var T=window.emirsT||function(){ return ''; };
     var cen=m.cat_en||T(m.cat||''), nen=m.name_en||T(m.name||''), den=m.desc_en||T(m.desc||'');
-    return '<div class="menu-item">'+
+    var k=m.carte||'menu';
+    return '<div class="menu-item'+(k===MENU_CARTE?'':' mi-off')+'" data-carte="'+esc(k)+'"><input type="hidden" data-k="carte" value="'+esc(k)+'"/>'+
       '<span class="mi-lang">FR</span><input placeholder="Catégorie" value="'+esc(m.cat)+'" data-k="cat"/><input placeholder="Nom du plat" value="'+esc(m.name)+'" data-k="name"/>'+
       '<input class="mi-price" placeholder="Prix" inputmode="decimal" value="'+esc(m.price)+'" data-k="price" title="Le prix est le même en français et en anglais"/><button class="del" title="Supprimer">×</button>'+
       '<span></span><input placeholder="Description" value="'+esc(m.desc)+'" data-k="desc" class="mi-wide"/>'+
       '<span class="mi-lang mi-lang--en">EN</span><input placeholder="Category" value="'+esc(cen)+'" data-k="cat_en"/><input placeholder="Dish name in English" value="'+esc(nen)+'" data-k="name_en"/><span class="mi-same">même prix</span><span></span>'+
       '<span></span><input placeholder="Description in English" value="'+esc(den)+'" data-k="desc_en" class="mi-wide"/>'+
     '</div>'; }
-  function bindMenuDeletes(){ document.querySelectorAll('#menuEditor .del').forEach(function(d){ d.onclick=function(){ d.closest('.menu-item').remove(); }; }); }
+  function menuCounts(){
+    document.querySelectorAll('#menuCarte [data-carte]').forEach(function(c){
+      c.querySelector('i').textContent=document.querySelectorAll('#menuEditor .menu-item[data-carte="'+c.getAttribute('data-carte')+'"]').length; });
+  }
+  function bindMenuDeletes(){ document.querySelectorAll('#menuEditor .del').forEach(function(d){ d.onclick=function(){ d.closest('.menu-item').remove(); menuCounts(); }; }); menuCounts(); }
+  document.getElementById('menuCarte').addEventListener('click', function(e){
+    var b=e.target.closest('[data-carte]'); if(!b) return;
+    MENU_CARTE=b.getAttribute('data-carte');
+    this.querySelectorAll('[data-carte]').forEach(function(x){ x.classList.toggle('on', x===b); });
+    document.querySelectorAll('#menuEditor .menu-item').forEach(function(r){ r.classList.toggle('mi-off', r.getAttribute('data-carte')!==MENU_CARTE); });
+  });
   var CMS_LOADED={};      // what is stored, so a save never erases a field this form does not show
   async function loadCms(){
     var res=await api('content',{auth:false}); var c=res.data.content||{};
@@ -4032,6 +4124,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
     rows.forEach(function(it){ var n=it.querySelector('[data-k="name"]').value.trim(), e=it.querySelector('[data-k="name_en"]').value.trim(); it.classList.toggle('mi-miss', !!n && !e); });
     var miss=rows.filter(function(it){ return it.classList.contains('mi-miss'); });
     if(miss.length){
+      var mc=document.querySelector('#menuCarte [data-carte="'+miss[0].getAttribute('data-carte')+'"]'); if(mc) mc.click();
       miss[0].scrollIntoView({block:'center'});
       var ok=await ask('Plats sans nom anglais', miss.length+' plat'+(miss.length>1?'s n\u2019ont':' n\u2019a')+' pas de nom en anglais (en rouge). Sur la carte anglaise, '+(miss.length>1?'ils restent':'il reste')+' en français. Enregistrer quand même ?', {yes:'Enregistrer', no:'Compléter'});
       if(!ok.ok) return;
@@ -4829,7 +4922,8 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
     if(WL_BOOK && !wasEdit){ var wid=WL_BOOK; WL_BOOK=null;
       try{ await api('waitlist',{method:'POST',body:{action:'booked',id:wid}}); }catch(e){}
       toast('Réservation créée — retirée de la liste d\u2019attente.'); safe(loadWaitlist,'waitlist'); }
-    show('newModal',false); loadReservations(); loadTables(); loadStats();
+    show('newModal',false); loadReservations(); loadTables(); loadStats(); safe(msCount,'ms-count');
+    if(!document.querySelector('[data-panel="manquees"]').classList.contains('hide')) safe(loadMissed,'missed');
     if(wasEdit) toast('Réservation modifiée.');
   });
 
@@ -5078,7 +5172,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
       /* a hidden tab (phone locked, other app, forgotten browser tab) must not
          keep querying the database all night */
       if(document.hidden) return;
-      safe(loadStats,'poll-stats'); safe(pollUnread,'poll-unread'); safe(wlCount,'poll-wl');
+      safe(loadStats,'poll-stats'); safe(pollUnread,'poll-unread'); safe(wlCount,'poll-wl'); safe(msCount,'poll-ms');
       var vis=function(p){ var e=document.querySelector('[data-panel="'+p+'"]'); return e && !e.classList.contains('hide'); };
       if(vis('demandes')) safe(loadReservations,'poll-reservations');
       if(vis('messages')) safe(loadMessages,'poll-messages');

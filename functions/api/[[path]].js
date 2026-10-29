@@ -31,6 +31,7 @@ import waWebhook from "../../netlify/functions/wa-webhook.mjs";
 import debts from "../../netlify/functions/debts.mjs";
 import clientsHistory from "../../netlify/functions/clients-history.mjs";
 import waitlist from "../../netlify/functions/waitlist.mjs";
+import missed from "../../netlify/functions/missed.mjs";
 import audit from "../../netlify/functions/audit.mjs";
 import cron from "../../netlify/functions/cron.mjs";
 import { verifyToken, sessionStillValid } from "../../netlify/functions/_lib/auth.mjs";
@@ -68,6 +69,7 @@ const routes = {
   debts,
   "clients-history": clientsHistory,
   waitlist,
+  missed,
   audit,
   cron,
 };

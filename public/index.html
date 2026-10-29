@@ -301,18 +301,29 @@ p{margin:0}
   flex-shrink:0;transition:background .3s,border-color .3s;font-size:19px;color:var(--stone)}
 .sheet__x:hover{background:var(--marine);border-color:var(--marine);color:var(--bone)}
 /* FR | EN for the menu only */
-.sheet__lang{display:inline-flex;border:1px solid var(--hair);border-radius:100px;padding:3px;gap:2px}
-.sheet__lang button{font:600 11px/1 var(--font-sans);letter-spacing:.1em;padding:8px 11px;border-radius:100px;border:0;
+.sheet__titlerow{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:6px}
+.sheet__titlerow h2{font-size:clamp(1.8rem,3.6vw,2.7rem);font-weight:300}
+.sheet__lang{display:inline-flex;align-items:center;border:1px solid var(--hair);border-radius:100px;padding:4px;gap:2px;background:#fff}
+.sheet__lang svg{width:17px;height:17px;color:var(--marine);margin:0 6px 0 8px;flex:0 0 auto}
+.sheet__lang button{font:600 12.5px/1 var(--font-sans);letter-spacing:.03em;padding:10px 15px;border-radius:100px;border:0;
   background:transparent;color:var(--stone);cursor:pointer}
 .sheet__lang button.on{background:var(--marine);color:var(--bone)}
 /* phone: the bar's buttons get compact so the logo keeps its size */
 @media(max-width:520px){
   .sheet__actions{gap:6px}
-  .sheet__lang{padding:2px}
-  .sheet__lang button{padding:7px 8px;font-size:10.5px}
+  .sheet__lang button{padding:9px 12px;font-size:12px}
+  .sheet__lang svg{margin:0 4px 0 6px}
+  .sheet__cats{margin-top:14px}
+  .sheet__cats button{padding:13px 6px;font-size:14.5px}
   .sheet__reserve{padding:10px 12px!important;letter-spacing:.08em!important}
   .sheet__logo{width:112px;max-width:none}
 }
+.sheet__cats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:18px;padding:5px;border-radius:18px;background:rgba(31,71,63,.07)}
+.sheet__cats button{font:500 15px/1 var(--font-serif);letter-spacing:.01em;padding:14px 8px;border:0;border-radius:14px;background:none;color:var(--marine);cursor:pointer;transition:background .25s,color .25s,box-shadow .25s}
+.sheet__cats button:hover{background:rgba(31,71,63,.08)}
+.sheet__cats button.on{background:var(--marine);color:var(--bone);box-shadow:0 6px 18px rgba(31,71,63,.25)}
+.msec--empty{padding:clamp(50px,8vw,90px) 0 10px;text-align:center;color:var(--stone);font-size:15px;line-height:1.7}
+.msec--empty b{display:block;font:300 clamp(1.4rem,2.6vw,1.9rem)/1.2 var(--font-serif);color:var(--marine);margin-bottom:8px}
 .sheet__tabs{display:flex;gap:8px;overflow-x:auto;padding:20px 0 16px;margin-top:6px;
   border-bottom:1px solid var(--hair);scrollbar-width:none;-ms-overflow-style:none}
 .sheet__tabs::-webkit-scrollbar{display:none}
@@ -633,8 +644,21 @@ p{margin:0}
 .fullb__mark{width:60px;height:60px;margin:22px auto 6px;border-radius:50%;background:#f6e7e2;
   display:flex;align-items:center;justify-content:center}
 .fullb__mark svg{width:28px;height:28px;color:#a4452f}
-.fullb__rooms{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0 4px}
-.fullb__room{border:1px solid var(--hair);border-radius:16px;padding:15px 12px;text-align:center;background:#fff;transition:border-color .2s}
+.fullb__rooms{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:22px 0 4px}
+.fullb__rooms--3{grid-template-columns:repeat(3,1fr)}
+.fullb__room{border:1px solid var(--hair);border-radius:16px;padding:15px 10px;text-align:center;background:#fff;transition:border-color .2s,transform .2s,box-shadow .2s;
+  font:inherit;cursor:pointer;width:100%;-webkit-tap-highlight-color:transparent}
+.fullb__room:active{transform:scale(.97)}
+.fullb__room.free:hover{box-shadow:0 10px 26px rgba(47,122,83,.2)}
+.fullb__room.on{border-color:#a4452f;box-shadow:0 0 0 2px rgba(164,69,47,.18)}
+.fullb__go{display:block;margin-top:8px;font:600 11px/1.2 var(--font-sans);letter-spacing:.06em;color:#2f7a53}
+.fullb__room.full .fullb__go{color:var(--stone)}
+.fullb__hint{margin:16px 0 0;text-align:center;font-size:13px;color:var(--stone)}
+@media(max-width:520px){
+  .fullb__rooms--3 .fullb__room{padding:12px 6px}
+  .fullb__rooms--3 .rm{font-size:.9rem!important}
+  .fullb__rooms--3 .fullb__stat{font-size:10px;padding:5px 8px}
+}
 .fullb__room .rm{font-family:var(--font-serif);font-weight:400;font-size:1.04rem;color:var(--ink);line-height:1.2}
 .fullb__stat{margin-top:10px;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-sans);
   font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:5px 11px;border-radius:100px}
@@ -1243,16 +1267,24 @@ p{margin:0}
       <div class="sheet__bar">
         <div class="sheet__brand">
           <img class="sheet__logo" src="assets/logo-ink.png" alt="Restaurant Les Émirs" draggable="false" />
-          <h2 id="sheetTitle">La Carte</h2>
         </div>
         <div class="sheet__actions">
-          <div class="sheet__lang" id="sheetLang" role="group" aria-label="Langue de la carte" data-no-i18n>
-            <button type="button" data-ml="fr" class="on" aria-pressed="true">FR</button>
-            <button type="button" data-ml="en" aria-pressed="false">EN</button>
-          </div>
           <a class="sheet__reserve" href="#reserver" id="sheetReserveTop">Réserver</a>
           <button class="sheet__x" data-close aria-label="Fermer la carte">&#10005;</button>
         </div>
+      </div>
+      <div class="sheet__titlerow">
+        <h2 id="sheetTitle">La Carte</h2>
+        <div class="sheet__lang" id="sheetLang" role="group" aria-label="Langue de la carte · Menu language" data-no-i18n>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.4 2.5 3.6 5.3 3.6 8.5S14.4 18 12 20.5C9.6 18 8.4 15.2 8.4 12S9.6 6 12 3.5z"/></svg>
+          <button type="button" data-ml="fr" class="on" aria-pressed="true">Français</button>
+          <button type="button" data-ml="en" aria-pressed="false">English</button>
+        </div>
+      </div>
+      <div class="sheet__cats" id="sheetCats" role="tablist" data-no-i18n>
+        <button type="button" role="tab" data-cat="menu" data-fr="Menu" data-en="Menu" class="on" aria-selected="true">Menu</button>
+        <button type="button" role="tab" data-cat="boissons" data-fr="Boissons" data-en="Drinks" aria-selected="false">Boissons</button>
+        <button type="button" role="tab" data-cat="tapas" data-fr="Tapas" data-en="Tapas" aria-selected="false">Tapas</button>
       </div>
       <div class="sheet__tabs" id="sheetTabs"></div>
     </div>
@@ -1293,12 +1325,11 @@ p{margin:0}
     <button class="passlb__x" data-fullclose aria-label="Fermer">&times;</button>
     <span class="passlb__tag passlb__tag--full">Créneau complet</span>
     <h3 id="fullTitle">Ce créneau est complet</h3>
-    <div class="fullb__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5"/><path d="M12 16h.01"/></svg></div>
     <div class="passlb__when" id="fullWhen">—</div>
+    <p class="fullb__hint" id="fullHint">Touchez une place pour réserver.</p>
     <div class="fullb__rooms" id="fullRooms"></div>
     <p class="passlb__note" id="fullMsg">—</p>
-    <button class="passlb__link" type="button" id="fullSwitch" hidden>—</button>
-    <button class="passlb__link passlb__link--ghost" type="button" id="fullPickOther">Choisir un autre horaire</button>
+    <button class="passlb__link" type="button" id="fullPickOther">Choisir un autre horaire</button>
     <button class="passlb__link passlb__link--ghost" type="button" id="fullWaitOpen">Prévenez-moi si une table se libère</button>
     <div class="waitb" id="fullWait" hidden>
       <div class="waitb__t">Nous vous appelons dès qu'une table se libère.</div>
@@ -1467,8 +1498,25 @@ p{margin:0}
       sheetTabs=document.getElementById("sheetTabs"), sheetFoot=sheetBody.querySelector(".sheet__foot");
 
   function slug(s){ return "sec-"+s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""); }
+  /* three cartes: Menu · Boissons · Tapas — the guest picks one at the top */
+  var CUR_CAT="menu", sheetCats=document.getElementById("sheetCats");
+  var CAT_EMPTY={
+    fr:{boissons:["Les boissons","La carte des boissons arrive bientôt en ligne — demandez-la à votre serveur."],
+        tapas:["Les tapas","La carte des tapas arrive bientôt en ligne — demandez-la à votre serveur."],
+        menu:["La carte","La carte arrive bientôt en ligne."]},
+    en:{boissons:["Drinks","Our drinks list is coming online soon — please ask your waiter."],
+        tapas:["Tapas","Our tapas list is coming online soon — please ask your waiter."],
+        menu:["The menu","Our menu is coming online soon."]}
+  };
   function buildMenu(data){
-    sheetTabs.innerHTML="";
+    data=data.filter(function(sec){ return (sec.k||"menu")===CUR_CAT; });
+    sheetTabs.innerHTML=""; sheetTabs.hidden=!data.length;
+    if(!data.length){
+      var en=sheet.querySelector(".sheet__box").getAttribute("lang")==="en", t=CAT_EMPTY[en?"en":"fr"][CUR_CAT];
+      var e=document.createElement("div"); e.className="msec msec--empty";
+      e.innerHTML="<b>"+esc(t[0])+"</b>"+esc(t[1]);
+      sheetBody.insertBefore(e, sheetFoot); return;
+    }
     var frag=document.createDocumentFragment();
     data.forEach(function(sec,si){
       var b=document.createElement("button"); b.textContent=sec.c; b.dataset.target=slug(sec.c);
@@ -1502,17 +1550,19 @@ p{margin:0}
     var closeLbl=(sheet.querySelector(".sheet__x")||{}).getAttribute ? sheet.querySelector(".sheet__x").getAttribute("aria-label") : "";
     function setLang(l){
       var on=sheetTabs.querySelector("button.on"), onIdx=on?[].indexOf.call(sheetTabs.children,on):0;
+      box.setAttribute("lang", l);
       sheetBody.querySelectorAll(".msec").forEach(function(x){ x.remove(); });
       /* same menu, same prices, in both languages: English uses what the owner
          wrote in his dashboard, and the dictionary for anything he left blank */
       buildMenu(l==="en" ? CUR_MENU.map(function(sec){
-        return {c:sec.c_en||sec.c, i:sec.i.map(function(it){ return [it[3]||it[0], it[4]||it[1], it[2]]; })};
+        return {c:sec.c_en||sec.c, k:sec.k, i:sec.i.map(function(it){ return [it[3]||it[0], it[4]||it[1], it[2]]; })};
       }) : CUR_MENU);
       fixed.forEach(function(el,i){ if(el) el.innerHTML=orig[i]; });
       var x=sheet.querySelector(".sheet__x"); if(x && closeLbl) x.setAttribute("aria-label", closeLbl);
       if(l==="en") window.emirsTranslate(box);
       [].forEach.call(sheetTabs.children,function(b,i){ b.classList.toggle("on", i===onIdx); });
       sw.querySelectorAll("[data-ml]").forEach(function(b){ var a=b.getAttribute("data-ml")===l; b.classList.toggle("on",a); b.setAttribute("aria-pressed",String(a)); });
+      sheetCats.querySelectorAll("[data-cat]").forEach(function(b){ b.textContent=b.getAttribute("data-"+l); });
       box.setAttribute("lang", l);
       try{ localStorage.setItem("emirs_menu_lang", l); }catch(e){}
     }
@@ -1524,6 +1574,23 @@ p{margin:0}
     if(start==="en") setLang("en");
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", menuLangInit); else menuLangInit();
+
+  function redrawMenu(){
+    if(window.__menuRedraw) window.__menuRedraw();
+    else { sheetBody.querySelectorAll(".msec").forEach(function(n){ n.remove(); }); buildMenu(CUR_MENU); }
+  }
+  function setCat(k){
+    if(!CAT_EMPTY.fr[k]) k="menu";
+    CUR_CAT=k;
+    sheetCats.querySelectorAll("[data-cat]").forEach(function(b){ var a=b.getAttribute("data-cat")===k; b.classList.toggle("on",a); b.setAttribute("aria-selected",String(a)); });
+    redrawMenu();
+    [].forEach.call(sheetTabs.children,function(b,i){ b.classList.toggle("on", i===0); });
+    sheetTabs.scrollLeft=0; sheetBody.scrollTop=0; lastCur=null;
+  }
+  sheetCats.addEventListener("click", function(e){
+    var b=e.target.closest("[data-cat]"); if(!b || b.getAttribute("data-cat")===CUR_CAT) return;
+    setCat(b.getAttribute("data-cat")); track('menu_cat',{cat:CUR_CAT});
+  });
 
   /* tab click -> scroll inside sheet.
      Native smooth scrolling gets aborted inside the animated sheet, so the
@@ -1613,6 +1680,8 @@ p{margin:0}
        to book has to be inside it. On the site itself the page already has
        Réserver buttons, so it would only be noise. */
     document.body.classList.add("via-carte");
+    var cm=/(^|[?&])cat=(menu|boissons|tapas)/.exec(location.search);
+    if(cm) setCat(cm[2]);
     setTimeout(openSheet, 260);
   })();
 
@@ -2093,9 +2162,10 @@ p{margin:0}
     var fullLb=document.getElementById("fullLb");
     function closeFull(){ if(!fullLb) return; fullLb.classList.remove("open"); fullLb.setAttribute("aria-hidden","true"); fullLb.dataset.openedAt="";
       if(!sheet.classList.contains("open")) document.body.classList.remove("locked"); }
-    function roomCard(nameFr, isFull){
-      return '<div class="fullb__room '+(isFull?'full':'free')+'"><div class="rm">'+nameFr+'</div>'+
-        '<div class="fullb__stat">'+(isFull?'Complet':'Disponible')+'</div></div>';
+    function roomCard(zone, nameFr, isFull){
+      return '<button type="button" class="fullb__room '+(isFull?'full':'free')+'" data-zone="'+zone+'"><span class="rm" style="display:block">'+nameFr+'</span>'+
+        '<span class="fullb__stat">'+(isFull?'Complet':'Disponible')+'</span>'+
+        '<span class="fullb__go">'+(isFull?'Me prévenir ›':'Réserver ici ›')+'</span></button>';
     }
     function showFull(info){
       if(!fullLb) return false;
@@ -2106,30 +2176,40 @@ p{margin:0}
          also blocked. Terrasse is always shown left, Salle intérieure right. */
       var st=info.rooms||{}; if(!info.rooms){ st[info.requested]="full"; st[info.other]=info.otherFree?"free":"full"; }
       var winterOn=!document.querySelector('#placeSlots [data-place="verriere"]').hidden;
-      document.getElementById("fullRooms").innerHTML=
-        roomCard(winterOn?"Terrasse en plein air":"Terrasse", st.terrace==="full") +
-        (winterOn ? roomCard("Terrasse verrière", st.verriere==="full") : "") +
-        roomCard("Salle intérieure", st.inside==="full");
-      var sw=document.getElementById("fullSwitch"), other=document.getElementById("fullPickOther");
+      /* in winter the verrière comes first, as on the form */
+      var rooms=winterOn
+        ? [["verriere","Terrasse verrière"],["terrace","Terrasse en plein air"],["inside","Salle intérieure"]]
+        : [["terrace","Terrasse"],["inside","Salle intérieure"]];
+      var box=document.getElementById("fullRooms");
+      box.className="fullb__rooms"+(rooms.length===3?" fullb__rooms--3":"");
+      box.innerHTML=rooms.map(function(r){ return roomCard(r[0], r[1], st[r[0]]==="full"); }).join("");
+      var other=document.getElementById("fullPickOther");
       if(info.otherFree){
         document.getElementById("fullTitle").textContent="La "+info.requestedFr+" est complète";
         document.getElementById("fullMsg").innerHTML="Il reste des tables en <b>"+info.otherFr+"</b> à "+timeTxt+".";
-        sw.hidden=false; sw.textContent="Réserver en "+info.otherFr;
-        other.textContent="Choisir un autre horaire";
-        sw.onclick=function(){
-          /* switch the Place chip to the free room and re-submit the same request */
-          var placeEl=document.getElementById("placeSlots"), placeIn=document.getElementById("place");
-          if(placeIn) placeIn.value=info.other;
-          if(placeEl) placeEl.querySelectorAll(".slot").forEach(function(x){ x.classList.toggle("on", x.getAttribute("data-place")===info.other); });
-          closeFull();
-          if(form.requestSubmit) form.requestSubmit(); else form.dispatchEvent(new Event("submit",{cancelable:true}));
-        };
+        document.getElementById("fullHint").textContent="Touchez une place disponible pour réserver.";
       } else {
         document.getElementById("fullTitle").textContent="Ce créneau est complet";
-        document.getElementById("fullMsg").innerHTML="La salle et la terrasse sont complètes à "+timeTxt+". Choisissez un autre horaire, ou appelez-nous au <b>+216 73 348 700</b>.";
-        sw.hidden=true; sw.onclick=null;
-        other.textContent="Choisir un autre horaire";
+        document.getElementById("fullMsg").innerHTML="Toutes les places sont complètes à "+timeTxt+". Choisissez un autre horaire, ou appelez-nous au <b>+216 73 348 700</b>.";
+        document.getElementById("fullHint").textContent="Touchez une place pour être prévenu si une table se libère.";
       }
+      /* a free place: switch the Place chip to it and send the same request again;
+         a full one: the waiting list, for that place */
+      box.onclick=function(e){
+        var b=e.target.closest("[data-zone]"); if(!b) return;
+        var z=b.getAttribute("data-zone");
+        if(b.classList.contains("free")){
+          var placeEl=document.getElementById("placeSlots"), placeIn=document.getElementById("place");
+          if(placeIn) placeIn.value=z;
+          if(placeEl) placeEl.querySelectorAll(".slot").forEach(function(x){ x.classList.toggle("on", x.getAttribute("data-place")===z); });
+          closeFull();
+          if(form.requestSubmit) form.requestSubmit(); else form.dispatchEvent(new Event("submit",{cancelable:true}));
+          return;
+        }
+        waitSeat=z;
+        box.querySelectorAll(".fullb__room").forEach(function(x){ x.classList.toggle("on", x===b); });
+        openBtn.click();
+      };
       other.onclick=function(){
         closeFull();
         var hours=document.getElementById("timeSlots")||document.getElementById("reserver");
@@ -2137,11 +2217,12 @@ p{margin:0}
       };
       /* a refusal should not be a lost guest: offer the waiting list */
       var wrap=document.getElementById("fullWait"), openBtn=document.getElementById("fullWaitOpen"),
-          wMsg=document.getElementById("waitMsg"), wSend=document.getElementById("waitSend");
+          wMsg=document.getElementById("waitMsg"), wSend=document.getElementById("waitSend"), waitSeat=info.requested;
       wrap.hidden=true; openBtn.hidden=false; wMsg.textContent="";
       document.getElementById("waitName").value=[(form.nom&&form.nom.value.trim())||"", (form.nomFam&&form.nomFam.value.trim())||""].join(" ").trim();
       document.getElementById("waitTel").value=(form.tel&&form.tel.value.trim())||"";
-      openBtn.onclick=function(){ wrap.hidden=false; openBtn.hidden=true; document.getElementById("waitName").focus(); };
+      openBtn.onclick=function(){ wrap.hidden=false; openBtn.hidden=true; document.getElementById("waitName").focus();
+        try{ wrap.scrollIntoView({block:"nearest",behavior:"smooth"}); }catch(err){} };
       wSend.onclick=function(){
         var nm=document.getElementById("waitName").value.trim(),
             tl=document.getElementById("waitTel").value.trim();
@@ -2152,7 +2233,7 @@ p{margin:0}
           body:JSON.stringify({name:nm,phone:tl,email:(form.email&&form.email.value.trim())||null,
             date:info.date,time:info.time,party:(document.getElementById('couverts')||{}).value,
             lang:(window.EMIRS_LANG||'fr'),
-            seating:info.requested})})
+            seating:waitSeat})})
           .then(function(r){ return r.json().catch(function(){return {};}); })
           .then(function(d){
             wSend.disabled=false;
@@ -2360,14 +2441,13 @@ p{margin:0}
       if(d.custom && Array.isArray(c.menu) && c.menu.length){
         var order=[], by={};
         c.menu.forEach(function(m){
-          var k=m.cat||"La Carte";
-          if(!by[k]){ by[k]=[]; order.push(k); }
+          var carte=m.carte||"menu", k=carte+"|"+(m.cat||"La Carte");
+          if(!by[k]){ by[k]=[]; by[k].carte=carte; by[k].name=m.cat||"La Carte"; order.push(k); }
           by[k].push([m.name, m.desc||"", m.price, m.name_en||"", m.desc_en||""]);
           if(m.cat_en && !by[k].cen) by[k].cen=m.cat_en;
         });
-        CUR_MENU=order.map(function(k){ return {c:k, c_en:by[k].cen||"", i:by[k]}; });
-        if(window.__menuRedraw) window.__menuRedraw();
-        else { sheetBody.querySelectorAll(".msec").forEach(function(n){ n.remove(); }); buildMenu(CUR_MENU); }
+        CUR_MENU=order.map(function(k){ return {c:by[k].name, c_en:by[k].cen||"", k:by[k].carte, i:by[k]}; });
+        redrawMenu();
       }
     }catch(err){ /* keep built-in content */ }
   })();

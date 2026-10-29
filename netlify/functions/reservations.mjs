@@ -1,4 +1,5 @@
 import { sql } from "./_lib/db.mjs";
+import { recordMissed } from "./missed.mjs";
 import { dueIndex } from "./_lib/dues.mjs";
 import { json, readBody, validateBooking, makeRef, fmtDate, fmtTime, seatFr } from "./_lib/util.mjs";
 import { auth, passToken, STAFF, WRITERS, isWatcher } from "./_lib/auth.mjs";
@@ -209,6 +210,8 @@ async function create(req) {
       const free = order.filter((z) => rooms[z] === "free");
       const other = free[0] || order[0];
       const otherFree = free.length > 0;
+      /* the guest may close the popup without choosing: keep their details */
+      try { await recordMissed(value); } catch (e) { console.error("[missed]", e); }
       return json({
         error: "Ce créneau est complet.", code: "full",
         requested: value.seating, requestedFr: fr(value.seating),

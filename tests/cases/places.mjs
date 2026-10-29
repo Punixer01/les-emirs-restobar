@@ -23,5 +23,6 @@ const d = await r.json();
 assert.equal(r.status, 409); assert.equal(d.code, "full");
 assert.equal(d.other, "verriere"); assert.equal(d.otherFree, true);
 assert.deepEqual(d.rooms, { terrace: "full", verriere: "free", inside: "full" });
+assert.ok(LOG.some((l) => /insert into missed/.test(l.q) && l.args.includes("22123456")), "a full slot keeps the guest in the missed list");
 answerWith(null);
 console.log("OK places: verrière accepted, labels, full terrace -> verrière offered first");

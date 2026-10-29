@@ -130,6 +130,8 @@ CREATE INDEX idx_res_table on reservations(table_id);
 CREATE INDEX idx_emails_created on emails(created_at desc);
 CREATE INDEX idx_debts_open ON debts(settled_at, created_at);
 CREATE INDEX idx_waitlist_day ON waitlist(res_date, status);
+CREATE TABLE missed (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, phone TEXT NOT NULL, email TEXT, res_date TEXT NOT NULL, res_time TEXT, party_size INTEGER NOT NULL DEFAULT 2, seating TEXT NOT NULL DEFAULT 'inside', tries INTEGER NOT NULL DEFAULT 1, status TEXT NOT NULL DEFAULT 'open', created_at TEXT NOT NULL DEFAULT (datetime('now')), closed_at TEXT);
+CREATE INDEX idx_missed_phone_day ON missed(phone, res_date);
 CREATE INDEX idx_ops_acct ON debt_ops(account_id, created_at);
 CREATE INDEX idx_emails_unread on emails(is_read, direction) where is_read = 0;
 CREATE INDEX idx_emails_peer ON emails(peer, created_at);
