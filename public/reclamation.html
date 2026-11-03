@@ -3,153 +3,298 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Réclamation — Les Émirs</title>
-<meta name="description" content="Restaurant Les Émirs, Port El Kantaoui : un souci lors de votre visite ? Écrivez-nous, la direction vous répond." />
-<meta name="theme-color" content="#f3efe6" />
+<title>Réclamation — Restaurant Les Émirs, Port El Kantaoui</title>
+<meta name="description" content="Restaurant Les Émirs, Port El Kantaoui : un souci lors de votre visite ? Déposez votre réclamation, la direction vous répond." />
+<meta name="theme-color" content="#0c110e" />
 <link rel="canonical" href="https://lesemirs.com/reclamation" />
-<link rel="icon" href="/assets/icons/icon-192.png" />
+<link rel="icon" href="/favicon.ico" sizes="any" />
+<link rel="icon" href="/assets/icons/icon-192.png" type="image/png" sizes="192x192" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200..600;1,9..144,200..500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
-:root{--bone:#f3efe6;--bone-2:#eee9dd;--ink:#17150f;--stone:#726a5c;--stone-soft:#9a9382;--marine:#1f473f;--marine-soft:#356054;--gold:#a98c4b;--rust:#a4552f;
-  --hair:rgba(23,21,15,.14);--serif:"Fraunces","Times New Roman",serif;--sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+:root{--bone:#f3efe6;--bone-2:#eee9dd;--ink:#17150f;--night:#0c110e;--stone:#726a5c;--stone-soft:#9a9382;--marine:#1f473f;--marine-soft:#356054;
+  --gold:#a98c4b;--rust:#a4552f;--hair:rgba(23,21,15,.14);--hair-soft:rgba(23,21,15,.08);
+  --serif:"Fraunces","Times New Roman",serif;--sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);--edge:clamp(16px,5.5vw,84px)}
 *,*::before,*::after{box-sizing:border-box}
-html,body{margin:0;background:var(--bone);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
-a{color:inherit}
-.wrap{max-width:620px;margin:0 auto;padding:max(22px,env(safe-area-inset-top)) 16px 48px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.top img{width:120px;height:auto;display:block}
-.lang{display:inline-flex;border:1px solid var(--hair);border-radius:100px;padding:3px;background:#fff}
-.lang button{font:600 12px/1 var(--sans);padding:9px 13px;border:0;border-radius:100px;background:none;color:var(--stone);cursor:pointer}
-.lang button.on{background:var(--marine);color:var(--bone)}
-.card{margin-top:28px;background:#fff;border:1px solid var(--hair);border-radius:22px;padding:clamp(22px,5vw,38px);box-shadow:0 18px 50px rgba(31,71,63,.08)}
-.kick{display:flex;align-items:center;gap:10px;color:var(--rust);font:600 11px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase}
-.kick svg{width:20px;height:20px}
-h1{margin:14px 0 0;font:300 clamp(1.7rem,6vw,2.3rem)/1.15 var(--serif);color:var(--ink)}
-h1 em{display:block;font-style:italic;color:var(--marine)}
-.lead{margin:14px 0 0;color:var(--stone);font-size:15px;line-height:1.7}
-form{margin-top:24px;display:grid;gap:16px}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:520px){.row{grid-template-columns:1fr}}
-label{display:block;font:500 11px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--stone);margin-bottom:8px}
-label small{text-transform:none;letter-spacing:0;color:var(--stone-soft);font-weight:400}
+html{background:var(--bone);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bone);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+.in{max-width:1240px;margin:0 auto;padding-inline:var(--edge)}
+
+/* ---- nav: the site's own bar ---- */
+.nav{position:absolute;top:0;left:0;right:0;z-index:10}
+.nav .in{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-block:22px}
+.nav__logo{height:28px;width:auto}
+.nav__links{display:flex;gap:30px}
+.nav__links a{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--bone);opacity:.82;transition:opacity .3s}
+.nav__links a:hover{opacity:1}
+.nav__right{display:flex;align-items:center;gap:10px}
+.nav__cta{font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:11px 20px;border:1px solid rgba(242,236,224,.55);color:var(--bone);transition:background .35s,color .35s}
+.nav__cta:hover{background:var(--bone);color:var(--ink)}
+.lang{display:inline-flex;border:1px solid rgba(242,236,224,.4);border-radius:100px;padding:3px}
+.lang button{font:600 11.5px/1 var(--sans);padding:8px 11px;border:0;border-radius:100px;background:none;color:var(--bone);opacity:.75;cursor:pointer}
+.lang button.on{background:var(--bone);color:var(--ink);opacity:1}
+@media(max-width:900px){.nav__links{display:none}}
+@media(max-width:420px){.nav__cta{display:none}}
+
+/* ---- hero ---- */
+.hero{position:relative;min-height:clamp(420px,62svh,620px);display:flex;align-items:flex-end;color:var(--bone);background:var(--night)}
+.hero__img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,17,14,.55) 0%,rgba(12,17,14,.15) 40%,rgba(12,17,14,.85) 100%)}
+.hero .in{position:relative;z-index:1;width:100%;padding-block:clamp(110px,14vw,150px) clamp(44px,6vw,72px)}
+.label{display:inline-flex;align-items:center;gap:12px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#d9c08a}
+.label::before{content:"";width:34px;height:1px;background:currentColor}
+.hero h1{margin:18px 0 0;font:300 clamp(2.4rem,7vw,4.6rem)/1.04 var(--serif);letter-spacing:-.01em;max-width:14ch}
+.hero h1 em{display:block;font-style:italic;color:#d9c08a;white-space:nowrap}
+.hero p{margin:18px 0 0;max-width:46ch;font-size:clamp(1rem,1.3vw,1.1rem);color:rgba(243,239,230,.82)}
+
+/* ---- body: form + what happens next ---- */
+.main{padding-block:clamp(56px,8vw,110px)}
+.grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(28px,5vw,72px);align-items:start}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--hair);border-radius:22px;padding:clamp(22px,4vw,44px);box-shadow:0 24px 60px rgba(31,71,63,.08)}
+.card h2{margin:0;font:300 clamp(1.6rem,3vw,2.2rem)/1.15 var(--serif)}
+.card .sub{margin:10px 0 0;color:var(--stone);font-size:15px}
+form{margin-top:26px;display:grid;gap:18px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:560px){.row{grid-template-columns:1fr}}
+label,.lbl{display:block;font:500 11px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--stone);margin-bottom:9px}
+label small,.lbl small{text-transform:none;letter-spacing:0;color:var(--stone-soft);font-weight:400}
 input,textarea{width:100%;font:16px/1.5 var(--sans);color:var(--ink);background:var(--bone);border:1px solid var(--hair);border-radius:12px;padding:13px 14px;outline:none;transition:border-color .2s,background .2s}
 input:focus,textarea:focus{border-color:var(--marine);background:#fff}
-textarea{resize:vertical;min-height:140px}
-.btn{font:600 13px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;padding:17px 24px;border:0;border-radius:100px;background:var(--marine);color:var(--bone);cursor:pointer;transition:background .25s}
+textarea{resize:vertical;min-height:160px}
+.topics{display:flex;flex-wrap:wrap;gap:8px}
+.topics button{font:500 13.5px/1 var(--sans);padding:11px 15px;border:1px solid var(--hair);border-radius:100px;background:#fff;color:var(--stone);cursor:pointer;transition:all .2s}
+.topics button:hover{border-color:var(--marine);color:var(--marine)}
+.topics button.on{background:var(--marine);border-color:var(--marine);color:var(--bone)}
+.btn{justify-self:start;font:600 12.5px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;padding:18px 30px;border:0;border-radius:1px;background:var(--marine);color:var(--bone);cursor:pointer;transition:background .3s}
 .btn:hover{background:var(--marine-soft)}
 .btn:disabled{opacity:.6;cursor:default}
+@media(max-width:560px){.btn{justify-self:stretch}}
 .msg{min-height:1.4em;font-size:14px;color:var(--rust)}
 .msg.ok{color:var(--marine)}
-.done{display:none;text-align:center;padding:10px 0}
-.done svg{width:54px;height:54px;color:var(--marine)}
-.done h2{margin:12px 0 0;font:300 1.6rem/1.2 var(--serif)}
-.done p{color:var(--stone);line-height:1.7}
+.done{display:none;text-align:center;padding:24px 0 8px}
+.done svg{width:58px;height:58px;color:var(--marine);margin:0 auto}
+.done h3{margin:14px 0 0;font:300 1.8rem/1.2 var(--serif)}
+.done p{color:var(--stone)}
 .sent .done{display:block}
-.sent form,.sent .lead{display:none}
-.mail{margin-top:22px;display:flex;align-items:center;gap:14px;padding:16px 18px;border:1px solid rgba(169,140,75,.4);border-radius:16px;background:linear-gradient(180deg,#fff,rgba(255,255,255,.5));text-decoration:none}
-.mail svg{width:22px;height:22px;color:var(--gold);flex:0 0 auto}
-.mail span{display:block;font-size:12.5px;color:var(--stone)}
-.mail b{display:block;font:500 15.5px/1.3 var(--sans);color:var(--marine);word-break:break-all}
-.back{display:inline-block;margin-top:26px;font-size:13.5px;color:var(--stone);text-decoration:none}
-.back:hover{color:var(--marine)}
+.sent form,.sent .head{display:none}
+
+.side h3{margin:0;font:300 clamp(1.4rem,2.4vw,1.8rem)/1.2 var(--serif)}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:18px}
+.steps li{display:grid;grid-template-columns:40px 1fr;gap:14px;align-items:start}
+.steps b{width:40px;height:40px;border-radius:50%;border:1px solid rgba(169,140,75,.5);display:flex;align-items:center;justify-content:center;font:400 15px/1 var(--serif);color:var(--gold)}
+.steps span{display:block;font-weight:500;color:var(--ink)}
+.steps small{display:block;color:var(--stone);font-size:14px;line-height:1.6}
+.contact{margin-top:30px;display:grid;gap:12px}
+.contact a{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1px solid rgba(169,140,75,.4);border-radius:16px;background:linear-gradient(180deg,#fff,rgba(255,255,255,.5));transition:border-color .25s}
+.contact a:hover{border-color:var(--gold)}
+.contact svg{width:22px;height:22px;color:var(--gold);flex:0 0 auto}
+.contact span{display:block;font-size:12.5px;color:var(--stone)}
+.contact strong{display:block;font-weight:500;color:var(--marine);word-break:break-all}
+.note{margin-top:22px;font-size:13.5px;color:var(--stone)}
+.note a{color:var(--marine);border-bottom:1px solid currentColor}
+
+/* ---- footer ---- */
+.foot{background:var(--night);color:rgba(243,239,230,.75);padding-block:clamp(44px,6vw,70px)}
+.foot__top{display:flex;flex-wrap:wrap;gap:28px 48px;align-items:flex-start;justify-content:space-between}
+.foot img{height:30px;width:auto}
+.foot p{margin:12px 0 0;max-width:34ch;font-size:14px}
+.foot .h{display:block;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:rgba(243,239,230,.5);margin-bottom:10px}
+.foot .col a,.foot .col span{display:block;font-size:14.5px;line-height:1.9}
+.foot .col a:hover{color:var(--bone)}
+.foot__base{margin-top:34px;padding-top:20px;border-top:1px solid rgba(243,239,230,.12);font-size:12.5px;color:rgba(243,239,230,.45)}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <a href="/"><img src="/assets/logo-ink.png" alt="Restaurant Les Émirs" draggable="false" /></a>
-    <div class="lang" role="group" aria-label="Langue · Language">
-      <button type="button" data-l="fr" class="on">FR</button><button type="button" data-l="en">EN</button>
+
+<header class="nav">
+  <div class="in">
+    <a href="/" aria-label="Les Émirs — accueil"><img class="nav__logo" src="/assets/logo-cream.png" alt="Les Émirs" /></a>
+    <nav class="nav__links">
+      <a href="/#maison" data-t="nMaison">La Maison</a>
+      <a href="/?carte=1" data-t="nCarte">La Carte</a>
+      <a href="/#galerie" data-t="nGal">Galerie</a>
+      <a href="/#message" data-t="nWrite">Écrivez-nous</a>
+      <a href="/#contact" data-t="nContact">Contact</a>
+    </nav>
+    <div class="nav__right">
+      <div class="lang" role="group" aria-label="Langue · Language"><button type="button" data-l="fr" class="on">FR</button><button type="button" data-l="en">EN</button></div>
+      <a href="/#reserver" class="nav__cta" data-t="nBook">Réserver</a>
     </div>
   </div>
+</header>
 
-  <div class="card" id="card">
-    <div class="kick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 17H10l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 5z"/><path d="M12 8.5v3.5M12 14.6v.01"/></svg><span data-t="kick">Réclamation</span></div>
+<section class="hero">
+  <img class="hero__img" src="/assets/media/terrasse-port.webp" alt="" aria-hidden="true" />
+  <div class="in">
+    <span class="label" data-t="label">Réclamation</span>
     <h1><span data-t="h1">Un souci lors de votre visite&nbsp;?</span> <em data-t="h1b">Dites-le-nous.</em></h1>
-    <p class="lead" data-t="lead">Votre réclamation est transmise directement à la direction. Nous vous recontactons rapidement.</p>
+    <p data-t="heroP">Chaque réclamation est lue par la direction. Nous prenons le temps de comprendre ce qui s’est passé et de vous répondre personnellement.</p>
+  </div>
+</section>
 
-    <form id="f" novalidate>
-      <div class="row">
-        <div><label for="name" data-t="lName">Nom</label><input id="name" autocomplete="name" maxlength="120" /></div>
-        <div><label for="phone" data-t="lPhone">Téléphone</label><input id="phone" type="tel" autocomplete="tel" inputmode="tel" /></div>
+<main class="main">
+  <div class="in grid">
+    <div class="card" id="card">
+      <div class="head">
+        <h2 data-t="fH">Déposer une réclamation</h2>
+        <p class="sub" data-t="fSub">Les champs marqués d’un astérisque sont nécessaires pour vous recontacter.</p>
       </div>
-      <div class="row">
-        <div><label for="email"><span data-t="lEmail">Email</span> <small data-t="opt">(facultatif)</small></label><input id="email" type="email" autocomplete="email" /></div>
-        <div><label for="day"><span data-t="lDay">Date de la visite</span> <small data-t="opt">(facultatif)</small></label><input id="day" type="date" /></div>
+      <form id="f" novalidate>
+        <div>
+          <span class="lbl"><span data-t="lTopic">Sujet</span> <small data-t="opt">(facultatif)</small></span>
+          <div class="topics" id="topics">
+            <button type="button" data-k="service" data-t="tService">Service</button>
+            <button type="button" data-k="plats" data-t="tFood">Plats &amp; boissons</button>
+            <button type="button" data-k="reservation" data-t="tBooking">Réservation</button>
+            <button type="button" data-k="addition" data-t="tBill">Addition</button>
+            <button type="button" data-k="autre" data-t="tOther">Autre</button>
+          </div>
+        </div>
+        <div class="row">
+          <div><label for="name"><span data-t="lName">Nom</span> *</label><input id="name" autocomplete="name" maxlength="120" /></div>
+          <div><label for="phone"><span data-t="lPhone">Téléphone</span> *</label><input id="phone" type="tel" autocomplete="tel" inputmode="tel" /></div>
+        </div>
+        <div class="row">
+          <div><label for="email"><span data-t="lEmail">Email</span> <small data-t="opt">(facultatif)</small></label><input id="email" type="email" autocomplete="email" /></div>
+          <div><label for="day"><span data-t="lDay">Date de la visite</span> <small data-t="opt">(facultatif)</small></label><input id="day" type="date" /></div>
+        </div>
+        <div><label for="body"><span data-t="lBody">Votre réclamation</span> *</label>
+          <textarea id="body" maxlength="1700"></textarea></div>
+        <button class="btn" type="submit" id="send" data-t="send">Envoyer la réclamation</button>
+        <div class="msg" id="msg" role="status"></div>
+      </form>
+      <div class="done" role="status">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M7.8 12.3l2.8 2.8 5.6-6"/></svg>
+        <h3 data-t="okH">Merci, c’est bien reçu.</h3>
+        <p data-t="okP">La direction a reçu votre réclamation et vous recontacte rapidement.</p>
       </div>
-      <div><label for="body" data-t="lBody">Votre réclamation</label>
-        <textarea id="body" maxlength="1800" data-tp="ph"></textarea></div>
-      <button class="btn" type="submit" id="send" data-t="send">Envoyer la réclamation</button>
-      <div class="msg" id="msg" role="status"></div>
-    </form>
-
-    <div class="done" role="status">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M7.8 12.3l2.8 2.8 5.6-6"/></svg>
-      <h2 data-t="okH">Merci, c’est bien reçu.</h2>
-      <p data-t="okP">La direction a reçu votre réclamation et vous recontacte rapidement.</p>
     </div>
 
-    <a class="mail" href="mailto:reclamation@lesemirs.com">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg>
-      <div><span data-t="mail">Ou écrivez directement à</span><b>reclamation@lesemirs.com</b></div>
-    </a>
+    <aside class="side">
+      <h3 data-t="sH">Comment nous la traitons</h3>
+      <ol class="steps">
+        <li><b>1</b><div><span data-t="s1">Transmise à la direction</span><small data-t="s1p">Votre réclamation arrive directement chez la direction, en entier.</small></div></li>
+        <li><b>2</b><div><span data-t="s2">Étudiée avec l’équipe</span><small data-t="s2p">Nous vérifions ce qui s’est passé le jour de votre visite.</small></div></li>
+        <li><b>3</b><div><span data-t="s3">Une réponse personnelle</span><small data-t="s3p">Nous vous rappelons ou vous écrivons pour trouver une solution.</small></div></li>
+      </ol>
+      <div class="contact">
+        <a href="mailto:reclamation@lesemirs.com">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg>
+          <div><span data-t="cMail">Par email</span><strong>reclamation@lesemirs.com</strong></div>
+        </a>
+        <a href="tel:+21673348700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
+          <div><span data-t="cPhone">Par téléphone</span><strong>+216 73 348 700</strong></div>
+        </a>
+      </div>
+      <p class="note"><span data-t="note">Une question, une demande d’information&nbsp;?</span> <a href="/#message" data-t="noteA">Écrivez-nous</a></p>
+    </aside>
   </div>
+</main>
 
-  <a class="back" href="/" data-t="back">← Retour au site</a>
-</div>
+<footer class="foot">
+  <div class="in">
+    <div class="foot__top">
+      <div>
+        <img src="/assets/logo-cream.png" alt="Les Émirs" />
+        <p data-t="fTag">Apéros, déjeuners, dîners… et vibes chill au cœur de Port El Kantaoui.</p>
+      </div>
+      <div class="col">
+        <span class="h">Contact</span>
+        <a href="tel:+21673348700">+216 73 348 700</a>
+        <a href="mailto:contact@lesemirs.com">contact@lesemirs.com</a>
+        <a href="mailto:reclamation@lesemirs.com">reclamation@lesemirs.com</a>
+      </div>
+      <div class="col">
+        <span class="h" data-t="fHours">Horaires</span>
+        <span data-t="fHoursV">Tous les jours · 12h — 00h</span>
+        <a href="/#reserver" data-t="nBook">Réserver</a>
+        <a href="/" data-t="fHome">Retour au site</a>
+      </div>
+    </div>
+    <div class="foot__base">© Restaurant Les Émirs · Port El Kantaoui, Sousse</div>
+  </div>
+</footer>
 
 <script>
 (function(){
   var T={
-    fr:{kick:"Réclamation", h1:"Un souci lors de votre visite ?", h1b:"Dites-le-nous.",
-        lead:"Votre réclamation est transmise directement à la direction. Nous vous recontactons rapidement.",
+    fr:{nMaison:"La Maison", nCarte:"La Carte", nGal:"Galerie", nWrite:"Écrivez-nous", nContact:"Contact", nBook:"Réserver",
+        label:"Réclamation", h1:"Un souci lors de votre visite ?", h1b:"Dites-le-nous.",
+        heroP:"Chaque réclamation est lue par la direction. Nous prenons le temps de comprendre ce qui s’est passé et de vous répondre personnellement.",
+        fH:"Déposer une réclamation", fSub:"Les champs marqués d’un astérisque sont nécessaires pour vous recontacter.",
+        lTopic:"Sujet", tService:"Service", tFood:"Plats & boissons", tBooking:"Réservation", tBill:"Addition", tOther:"Autre",
         lName:"Nom", lPhone:"Téléphone", lEmail:"Email", lDay:"Date de la visite", opt:"(facultatif)", lBody:"Votre réclamation",
         ph:"Ce qui s’est passé, l’heure, la table…", send:"Envoyer la réclamation",
         okH:"Merci, c’est bien reçu.", okP:"La direction a reçu votre réclamation et vous recontacte rapidement.",
-        mail:"Ou écrivez directement à", back:"← Retour au site",
-        eName:"Merci d’indiquer votre nom.", eContact:"Merci d’indiquer un téléphone ou un email pour vous répondre.",
+        sH:"Comment nous la traitons", s1:"Transmise à la direction", s1p:"Votre réclamation arrive directement chez la direction, en entier.",
+        s2:"Étudiée avec l’équipe", s2p:"Nous vérifions ce qui s’est passé le jour de votre visite.",
+        s3:"Une réponse personnelle", s3p:"Nous vous rappelons ou vous écrivons pour trouver une solution.",
+        cMail:"Par email", cPhone:"Par téléphone", note:"Une question, une demande d’information ?", noteA:"Écrivez-nous",
+        fTag:"Apéros, déjeuners, dîners… et vibes chill au cœur de Port El Kantaoui.", fHours:"Horaires", fHoursV:"Tous les jours · 12h — 00h", fHome:"Retour au site",
+        eName:"Merci d’indiquer votre nom.", ePhone:"Merci d’indiquer votre téléphone pour que nous puissions vous rappeler.",
         eBody:"Merci de décrire votre réclamation.", sending:"Envoi…", eNet:"Envoi impossible — vérifiez votre connexion ou écrivez à reclamation@lesemirs.com."},
-    en:{kick:"Complaint", h1:"Something went wrong during your visit?", h1b:"Tell us.",
-        lead:"Your complaint goes straight to the management. We will get back to you quickly.",
+    en:{nMaison:"The House", nCarte:"The Menu", nGal:"Gallery", nWrite:"Write to us", nContact:"Contact", nBook:"Book",
+        label:"Complaint", h1:"Something went wrong during your visit?", h1b:"Tell us.",
+        heroP:"Every complaint is read by the management. We take the time to understand what happened and to answer you personally.",
+        fH:"Submit a complaint", fSub:"Fields marked with an asterisk are needed to get back to you.",
+        lTopic:"Subject", tService:"Service", tFood:"Food & drinks", tBooking:"Booking", tBill:"Bill", tOther:"Other",
         lName:"Name", lPhone:"Phone", lEmail:"Email", lDay:"Date of visit", opt:"(optional)", lBody:"Your complaint",
         ph:"What happened, the time, the table…", send:"Send the complaint",
         okH:"Thank you, we have received it.", okP:"The management has your complaint and will get back to you quickly.",
-        mail:"Or write directly to", back:"← Back to the website",
-        eName:"Please enter your name.", eContact:"Please enter a phone number or an email so we can reply.",
+        sH:"How we handle it", s1:"Sent to the management", s1p:"Your complaint goes straight to the management, in full.",
+        s2:"Reviewed with the team", s2p:"We check what happened on the day of your visit.",
+        s3:"A personal answer", s3p:"We call or write to you to find a solution.",
+        cMail:"By email", cPhone:"By phone", note:"A question, need some information?", noteA:"Write to us",
+        fTag:"Aperitifs, lunches, dinners… and chill vibes in the heart of Port El Kantaoui.", fHours:"Opening hours", fHoursV:"Every day · 12pm — 12am", fHome:"Back to the website",
+        eName:"Please enter your name.", ePhone:"Please enter your phone number so we can call you back.",
         eBody:"Please describe your complaint.", sending:"Sending…", eNet:"Could not send — check your connection or write to reclamation@lesemirs.com."}
   }, lang="fr";
+  var msg=document.getElementById("msg");
   function setLang(l){
     lang=l; document.documentElement.lang=l;
-    document.querySelectorAll("[data-t]").forEach(function(el){ el.textContent=T[l][el.getAttribute("data-t")]; });
+    document.querySelectorAll("[data-t]").forEach(function(el){ var v=T[l][el.getAttribute("data-t")]; if(v) el.textContent=v; });
     document.getElementById("body").placeholder=T[l].ph;
-    document.getElementById("msg").textContent="";
     document.querySelectorAll("[data-l]").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-l")===l); });
+    msg.textContent="";
     try{ localStorage.setItem("emirs_menu_lang", l); }catch(e){}
   }
   var saved=null; try{ saved=localStorage.getItem("emirs_menu_lang"); }catch(e){}
   setLang(saved==="en" ? "en" : "fr");
   document.querySelector(".lang").addEventListener("click", function(e){ var b=e.target.closest("[data-l]"); if(b) setLang(b.getAttribute("data-l")); });
 
-  var f=document.getElementById("f"), msg=document.getElementById("msg"), btn=document.getElementById("send");
+  var topic="";
+  document.getElementById("topics").addEventListener("click", function(e){
+    var b=e.target.closest("[data-k]"); if(!b) return;
+    topic = b.classList.contains("on") ? "" : b.getAttribute("data-k");
+    this.querySelectorAll("[data-k]").forEach(function(x){ x.classList.toggle("on", x.getAttribute("data-k")===topic); });
+  });
+
+  var TOPIC_FR={service:"Service", plats:"Plats & boissons", reservation:"Réservation", addition:"Addition", autre:"Autre"};
+  var f=document.getElementById("f"), btn=document.getElementById("send");
   function v(id){ return document.getElementById(id).value.trim(); }
   f.addEventListener("submit", function(ev){
     ev.preventDefault();
     var name=v("name"), phone=v("phone"), email=v("email"), day=v("day"), text=v("body");
     msg.className="msg";
     if(!name){ msg.textContent=T[lang].eName; return; }
-    if(!phone && !/.+@.+\..+/.test(email)){ msg.textContent=T[lang].eContact; return; }
+    if(!phone){ msg.textContent=T[lang].ePhone; return; }
     if(text.length<2){ msg.textContent=T[lang].eBody; return; }
-    /* the [Réclamation] tag routes it to reclamation@lesemirs.com and the dashboards */
-    var body="[Réclamation] "+(day ? "Visite du "+day.split("-").reverse().join("/")+"\n" : "")+text;
-    var payload={name:name, body:body}; if(phone) payload.phone=phone; if(email) payload.email=email;
+    /* the [Réclamation] tag routes it to reclamation@lesemirs.com and the dashboards (French, for the staff) */
+    var head=[topic ? "Sujet : "+TOPIC_FR[topic] : "", day ? "Visite du "+day.split("-").reverse().join("/") : ""].filter(Boolean).join(" · ");
+    var body="[Réclamation] "+(head ? head+"\n" : "")+text;
+    var payload={name:name, phone:phone, body:body}; if(/.+@.+\..+/.test(email)) payload.email=email;
     btn.disabled=true; msg.className="msg ok"; msg.textContent=T[lang].sending;
     fetch("/api/messages",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(payload)})
       .then(function(r){ return r.json().catch(function(){ return {}; }); })
       .then(function(res){
         btn.disabled=false;
-        if(res && res.ok){ document.getElementById("card").classList.add("sent"); msg.textContent=""; window.scrollTo(0,0); }
+        if(res && res.ok){ var c=document.getElementById("card"); c.classList.add("sent"); msg.textContent=""; c.scrollIntoView({block:"start", behavior:"smooth"}); }
         else { msg.className="msg"; msg.textContent=(res && res.error) || T[lang].eNet; }
       })
       .catch(function(){ btn.disabled=false; msg.className="msg"; msg.textContent=T[lang].eNet; });
