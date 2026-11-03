@@ -285,7 +285,14 @@ p{margin:0}
   border-radius:18px 18px 0 0;display:flex;flex-direction:column;overflow:hidden;
   box-shadow:0 -30px 90px rgba(0,0,0,.4);transform:translateY(34px);transition:transform .6s var(--ease)}
 .sheet.open .sheet__box{transform:none}
-.sheet__head{padding:clamp(22px,3vw,34px) clamp(22px,4vw,52px) 0;flex-shrink:0}
+.sheet__head{padding:clamp(22px,3vw,34px) clamp(22px,4vw,52px) 0;flex-shrink:0;transition:padding .35s var(--ease)}
+/* scrolling down the carte folds the logo/title away: only the cartes and sections stay */
+.sheet__bar,.sheet__titlerow{max-height:160px;transition:max-height .35s var(--ease),opacity .25s,margin .35s var(--ease)}
+.sheet__head.mini{padding-top:10px}
+.sheet__head.mini .sheet__bar,.sheet__head.mini .sheet__titlerow{max-height:0;opacity:0;margin:0;overflow:hidden;pointer-events:none}
+.sheet__head.mini .sheet__cats{margin-top:0}
+.sheet__head.mini .sheet__cats button{padding:10px 6px}
+.sheet__head.mini .sheet__tabs{padding:12px 0 10px}
 .sheet__bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
 .sheet__bar h2{font-size:clamp(1.8rem,3.6vw,2.7rem);font-weight:300}
 .sheet__brand{min-width:0}
@@ -1618,6 +1625,14 @@ p{margin:0}
   /* scroll-spy the tabs — never call scrollIntoView here: it would cancel
      the sheet's own smooth scroll. The tab strip is panned by scrollLeft. */
   var spy=null, lastCur=null;
+  /* fold the head while reading down, unfold on the way back up */
+  var sheetHead=sheet.querySelector(".sheet__head"), lastY=0;
+  sheetBody.addEventListener("scroll", function(){
+    var y=sheetBody.scrollTop, d=y-lastY;
+    if(y<30 || d<-12) sheetHead.classList.remove("mini");
+    else if(d>8 && y>60 && sheetBody.scrollHeight-sheetBody.clientHeight>240) sheetHead.classList.add("mini");
+    if(Math.abs(d)>8 || y<30) lastY=y;
+  }, {passive:true});
   sheetBody.addEventListener("scroll", function(){
     if(spy) return;
     spy=requestAnimationFrame(function(){
@@ -1642,6 +1657,7 @@ p{margin:0}
   function openSheet(){
     lastFocus=document.activeElement;
     sheet.classList.add("open"); sheet.setAttribute("aria-hidden","false");
+    sheetHead.classList.remove("mini"); lastY=0;
     document.body.classList.add("locked"); closeM();
     sheetBody.scrollTop=0;
     setTimeout(function(){ var x=sheet.querySelector(".sheet__x"); if(x) x.focus(); },80);
