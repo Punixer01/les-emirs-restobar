@@ -7,7 +7,7 @@ import { auth, STAFF, isWatcher } from "./_lib/auth.mjs";
    without choosing anything, so the restaurant can call them back.
 
    recordMissed(value)                      called by reservations.mjs on a 409
-   GET  /api/missed            (staff)      the list, newest first, with what became of it
+   GET  /api/missed            (staff)      the unfinished ones, newest first
    GET  /api/missed?count=1    (staff)      how many are still to call
    POST /api/missed {action:'close', id}    (staff) handled / given up            */
 
@@ -41,7 +41,10 @@ export default async (req) => {
         where status = 'open' and booked_ref is null and on_waitlist is null and res_date >= date('now','+1 hour')`);
       return json({ n: (r[0] && r[0].n) || 0 });
     }
-    const rows = await sql.query(`select m.*, ${OUTCOME} from missed m order by m.created_at desc, m.id desc limit 300`);
+    /* only the unfinished ones: a guest who then booked (another place or hour)
+       or joined the waiting list is not a missed reservation */
+    const rows = await sql.query(`select * from (select m.*, ${OUTCOME} from missed m)
+      where booked_ref is null and on_waitlist is null order by created_at desc, id desc limit 300`);
     return json({ missed: rows });
   }
 

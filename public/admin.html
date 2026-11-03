@@ -957,17 +957,17 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
       <div class="tab active" data-tab="demandes">Réservations <span class="badge hide" id="pendBadge">0</span></div>
       <div class="tab" data-tab="salle">Plan de salle</div>
       <div class="tab" data-tab="messages">Messages <span class="badge hide" id="msgBadge">0</span></div>
+      <div class="tab" data-tab="attente">Liste d'attente <span class="badge hide" id="wlBadge">0</span></div>
+      <div class="tab" data-tab="manquees">Rsv manquées <span class="badge hide" id="msBadge">0</span></div>
+      <div class="tab" data-tab="complet">Complet</div>
+      <div class="tab" data-tab="ardoise">Crédit <span class="badge hide" id="debtBadge">0</span></div>
       <div class="tab" data-tab="emails">Emails <span class="badge hide" id="mailBadge">0</span></div>
       <div class="tab" data-tab="analytics">Analytics</div>
       <div class="tab" data-tab="clients">Clients</div>
-      <div class="tab" data-tab="attente">Liste d'attente <span class="badge hide" id="wlBadge">0</span></div>
-      <div class="tab" data-tab="manquees">Réservations manquées <span class="badge hide" id="msBadge">0</span></div>
       <div class="tab" data-tab="histo">Historique</div>
       <div class="tab" data-tab="marketing">Marketing</div>
       <div class="tab" data-tab="site">Site</div>
-      <div class="tab" data-tab="complet">Complet</div>
       <div class="tab" data-tab="blacklist">Blacklist</div>
-      <div class="tab" data-tab="ardoise">Crédit <span class="badge hide" id="debtBadge">0</span></div>
       <div class="tab" data-tab="envois">Envois</div>
       <div class="tab" data-tab="acces">Accès</div>
       <div class="tab" data-tab="activite">Activité</div>
@@ -1238,9 +1238,9 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
         <div class="chiprow" id="menuCarte" style="margin-top:8px">
           <button type="button" class="chip on" data-carte="menu">Menu <i>0</i></button>
           <button type="button" class="chip" data-carte="boissons">Boissons <i>0</i></button>
-          <button type="button" class="chip" data-carte="tapas">Tapas <i>0</i></button>
+          <button type="button" class="chip" data-carte="tapas">Snacks &amp; Apéro <i>0</i></button>
         </div>
-        <div class="muted" style="font-size:12.5px;margin-top:4px">Sur le site et le QR, le client choisit Menu, Boissons ou Tapas. Choisissez la carte ci-dessus, puis ajoutez ou modifiez ses lignes.</div>
+        <div class="muted" style="font-size:12.5px;margin-top:4px">Sur le site et le QR, le client choisit Menu, Boissons ou Snacks &amp; Apéro. Choisissez la carte ci-dessus, puis ajoutez ou modifiez ses lignes.</div>
         <div id="menuEditor" style="margin:8px 0 12px"></div>
         <button class="btn btn--ghost btn--sm" id="menuAdd">+ Ajouter une ligne</button>
 
@@ -1281,7 +1281,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
 
     <!-- Réservations manquées: the site said "complet" and the guest left -->
     <section data-panel="manquees" class="hide">
-      <div class="section-h"><h2>Réservations manquées</h2>
+      <div class="section-h"><h2>Rsv manquées</h2>
         <span class="muted">Les clients qui ont demandé une table sur le site quand c'était complet — même s'ils ont fermé la fenêtre sans rien choisir. Rappelez-les.</span></div>
       <div class="chiprow" id="msView">
         <button type="button" class="chip on" data-msview="open">À rappeler</button>

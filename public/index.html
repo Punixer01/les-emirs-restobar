@@ -1284,7 +1284,7 @@ p{margin:0}
       <div class="sheet__cats" id="sheetCats" role="tablist" data-no-i18n>
         <button type="button" role="tab" data-cat="menu" data-fr="Menu" data-en="Menu" class="on" aria-selected="true">Menu</button>
         <button type="button" role="tab" data-cat="boissons" data-fr="Boissons" data-en="Drinks" aria-selected="false">Boissons</button>
-        <button type="button" role="tab" data-cat="tapas" data-fr="Tapas" data-en="Tapas" aria-selected="false">Tapas</button>
+        <button type="button" role="tab" data-cat="tapas" data-fr="Snacks &amp; Apéro" data-en="Snacks &amp; Apéro" aria-selected="false">Snacks &amp; Apéro</button>
       </div>
       <div class="sheet__tabs" id="sheetTabs"></div>
     </div>
@@ -1498,14 +1498,14 @@ p{margin:0}
       sheetTabs=document.getElementById("sheetTabs"), sheetFoot=sheetBody.querySelector(".sheet__foot");
 
   function slug(s){ return "sec-"+s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""); }
-  /* three cartes: Menu · Boissons · Tapas — the guest picks one at the top */
+  /* three cartes: Menu · Boissons · Snacks & Apéro — the guest picks one at the top */
   var CUR_CAT="menu", sheetCats=document.getElementById("sheetCats");
   var CAT_EMPTY={
     fr:{boissons:["Les boissons","La carte des boissons arrive bientôt en ligne — demandez-la à votre serveur."],
-        tapas:["Les tapas","La carte des tapas arrive bientôt en ligne — demandez-la à votre serveur."],
+        tapas:["Snacks & Apéro","La carte snacks & apéro arrive bientôt en ligne — demandez-la à votre serveur."],
         menu:["La carte","La carte arrive bientôt en ligne."]},
     en:{boissons:["Drinks","Our drinks list is coming online soon — please ask your waiter."],
-        tapas:["Tapas","Our tapas list is coming online soon — please ask your waiter."],
+        tapas:["Snacks & Apéro","Our snacks list is coming online soon — please ask your waiter."],
         menu:["The menu","Our menu is coming online soon."]}
   };
   function buildMenu(data){
@@ -2183,10 +2183,12 @@ p{margin:0}
       var box=document.getElementById("fullRooms");
       box.className="fullb__rooms"+(rooms.length===3?" fullb__rooms--3":"");
       box.innerHTML=rooms.map(function(r){ return roomCard(r[0], r[1], st[r[0]]==="full"); }).join("");
-      var other=document.getElementById("fullPickOther");
-      if(info.otherFree){
-        document.getElementById("fullTitle").textContent="La "+info.requestedFr+" est complète";
-        document.getElementById("fullMsg").innerHTML="Il reste des tables en <b>"+info.otherFr+"</b> à "+timeTxt+".";
+      /* the sentence names the places exactly as the cards do */
+      var nameOf={}; rooms.forEach(function(r){ nameOf[r[0]]=r[1]; });
+      var free=rooms.filter(function(r){ return st[r[0]]!=="full"; }).map(function(r){ return "<b>"+r[1].toLowerCase()+"</b>"; });
+      if(free.length){
+        document.getElementById("fullTitle").textContent="La "+(nameOf[info.requested]||nameOf.terrace).toLowerCase()+" est complète";
+        document.getElementById("fullMsg").innerHTML="Il reste des tables en "+free.join(" et en ")+" à "+timeTxt+".";
         document.getElementById("fullHint").textContent="Touchez une place disponible pour réserver.";
       } else {
         document.getElementById("fullTitle").textContent="Ce créneau est complet";
@@ -2210,7 +2212,7 @@ p{margin:0}
         box.querySelectorAll(".fullb__room").forEach(function(x){ x.classList.toggle("on", x===b); });
         openBtn.click();
       };
-      other.onclick=function(){
+      document.getElementById("fullPickOther").onclick=function(){
         closeFull();
         var hours=document.getElementById("timeSlots")||document.getElementById("reserver");
         if(hours && hours.scrollIntoView) hours.scrollIntoView({block:"center",behavior:"smooth"});
