@@ -1238,9 +1238,9 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
         <div class="chiprow" id="menuCarte" style="margin-top:8px">
           <button type="button" class="chip on" data-carte="menu">Menu <i>0</i></button>
           <button type="button" class="chip" data-carte="boissons">Boissons <i>0</i></button>
-          <button type="button" class="chip" data-carte="tapas">Snacks &amp; Apéro <i>0</i></button>
+          <button type="button" class="chip" data-carte="tapas">Snacks/Apéros <i>0</i></button>
         </div>
-        <div class="muted" style="font-size:12.5px;margin-top:4px">Sur le site et le QR, le client choisit Menu, Boissons ou Snacks &amp; Apéro. Choisissez la carte ci-dessus, puis ajoutez ou modifiez ses lignes.</div>
+        <div class="muted" style="font-size:12.5px;margin-top:4px">Sur le site et le QR, le client choisit Menu, Boissons ou Snacks/Apéros. Choisissez la carte ci-dessus, puis ajoutez ou modifiez ses lignes.</div>
         <div id="menuEditor" style="margin:8px 0 12px"></div>
         <button class="btn btn--ghost btn--sm" id="menuAdd">+ Ajouter une ligne</button>
 
@@ -3995,7 +3995,11 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
 
   /* réservations manquées — the site said "complet"; name, phone and wish kept */
   var MS_VIEW='open';
-  async function msCount(){ var r=await api('missed?count=1'); if(r.status===200){ var b=document.getElementById('msBadge'); if(b){ var n=(r.data||{}).n||0; b.textContent=n; b.classList.toggle('hide', !n); } } }
+  /* a new guest turned away while the dashboard is open: say it, on every dashboard */
+  var msLast=null;
+  async function msCount(){ var r=await api('missed?count=1'); if(r.status===200){ var b=document.getElementById('msBadge'); if(b){ var n=(r.data||{}).n||0; b.textContent=n; b.classList.toggle('hide', !n);
+    if(msLast!==null && n>msLast){ toast('🔔 Nouvelle réservation manquée — à rappeler (onglet « Rsv manquées »).'); if(navigator.vibrate) try{ navigator.vibrate([200,90,200]); }catch(e){} }
+    msLast=n; } } }
   async function loadMissed(){
     var el=document.getElementById('msList'); if(!el) return;
     var res=await api('missed'); var all=(res.data&&res.data.missed)||[];

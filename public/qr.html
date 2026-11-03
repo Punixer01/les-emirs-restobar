@@ -147,7 +147,7 @@ body.ready .skip{display:none}
         <b data-t="cDrinks">Boissons</b></a>
       <a class="carte" href="/?carte=1&amp;cat=tapas" data-go="carte-tapas">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="15" rx="8.5" ry="3.5"/><circle cx="9" cy="11.5" r="1.6"/><circle cx="13.5" cy="10.5" r="1.6"/><circle cx="15.5" cy="13" r="1.4"/></svg>
-        <b data-t="cTapas">Snacks &amp; Apéro</b></a>
+        <b data-t="cTapas">Snacks/Apéros</b></a>
     </div></div>
     </div>
     <a class="door" id="reviewLink" href="#" target="_blank" rel="noopener" data-go="review">
@@ -157,7 +157,7 @@ body.ready .skip{display:none}
     </a>
     <a class="door" href="/reclamation" data-go="reclamation">
       <span class="door__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 17H10l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 5z"/><path d="M12 8.5v3.5M12 14.6v.01"/></svg></span>
-      <span class="door__txt"><span class="door__t" data-t="claim">Réclamation</span><span class="door__sub" data-t="claimSub">Un souci ? Écrivez-nous</span></span>
+      <span class="door__txt"><span class="door__t" data-t="claim">Réclamation</span><span class="door__sub" data-t="claimSub">Un souci lors de votre visite ?</span></span>
       <span class="door__arr" aria-hidden="true">›</span>
     </a>
     <a class="door" href="/" data-go="site" id="siteDoor">
@@ -192,11 +192,11 @@ body.ready .skip{display:none}
 
   /* ---- words, in the guest's language ---- */
   var T = {
-    fr:{menu:"La Carte", menuSub:"Menu, boissons & snacks", cMenu:"Menu", cDrinks:"Boissons", cTapas:"Snacks & Apéro", review:"Votre avis", reviewSub:"sur Google",
-        claim:"Réclamation", claimSub:"Un souci ? Écrivez-nous", site:"Notre site web", siteSub:"Réservation, galerie & contact",
+    fr:{menu:"La Carte", menuSub:"Menu, boissons & snacks", cMenu:"Menu", cDrinks:"Boissons", cTapas:"Snacks/Apéros", review:"Votre avis", reviewSub:"sur Google",
+        claim:"Réclamation", claimSub:"Un souci lors de votre visite ?", site:"Notre site web", siteSub:"Réservation, galerie & contact",
         social:"Réseaux sociaux", socialSub:"Instagram & Facebook", skip:"Passer l'introduction"},
-    en:{menu:"The Menu", menuSub:"Food, drinks & snacks", cMenu:"Menu", cDrinks:"Drinks", cTapas:"Snacks & Apéro", review:"Your review", reviewSub:"on Google",
-        claim:"Complaint", claimSub:"Something wrong? Write to us", site:"Our website", siteSub:"Booking, gallery & contact",
+    en:{menu:"The Menu", menuSub:"Food, drinks & snacks", cMenu:"Menu", cDrinks:"Drinks", cTapas:"Snacks/Apéros", review:"Your review", reviewSub:"on Google",
+        claim:"Complaint", claimSub:"Something went wrong? Tell us", site:"Our website", siteSub:"Booking, gallery & contact",
         social:"Social media", socialSub:"Instagram & Facebook", skip:"Skip the intro"}
   };
   var lang;
@@ -223,7 +223,7 @@ body.ready .skip{display:none}
   /* ---- social opens in place ---- */
   function opener(btn, panel){ btn.addEventListener("click", function(){ var o=btn.getAttribute("aria-expanded")!=="true"; btn.setAttribute("aria-expanded", String(o)); panel.classList.toggle("open", o); }); }
   opener(document.getElementById("socialBtn"), document.getElementById("social"));
-  /* La Carte: Menu · Boissons · Snacks & Apéro */
+  /* La Carte: Menu · Boissons · Snacks/Apéros */
   opener(document.getElementById("menuBtn"), document.getElementById("cartes"));
 
   /* ---- the terrace film, only on a connection that can afford it ---- */

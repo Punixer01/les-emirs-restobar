@@ -272,8 +272,10 @@
     "Boissons": "Drinks",
     "Salades": "Salads",
     "Pizzas": "Pizzas",
-    "Pas besoin d’attendre l’heure du déjeuner ou du dîner pour se faire plaisir ! Nos petits snacks gourmands sont là pour être partagés entre amis et accompagner vos apéros…":
-      "No need to wait for lunch or dinner to treat yourself! Our tasty little snacks are made for sharing with friends and to go with your drinks…",
+    "À partager": "To share",
+    "Pas besoin d’attendre l’heure du déjeuner ou du dîner pour se faire plaisir !": "No need to wait for lunch or dinner to treat yourself!",
+    "Nos petits snacks gourmands sont là pour être partagés entre amis et accompagner vos apéros…":
+      "Our tasty little snacks are made for sharing with friends and to go with your drinks…",
     "Prix en dinars tunisiens (DT), taxes comprises.":
       "Prices in Tunisian dinars (DT), taxes included.",
     "Suggestions du jour et arrivages présentés à table.":
@@ -304,7 +306,8 @@
     "Prénom": "First name",
     "Votre prénom": "Your first name",
     "Écrivez-nous": "Write to us",
-    "Une remarque ou quelque chose qui vous a déplu ?": "A remark, or something you did not like?",
+    "Besoin d’aide ou d’information ?": "Need help or information?",
+    "Réclamation": "Complaint",
     "Nous sommes à votre écoute.": "We are listening.",
     "Votre nom de famille": "Your last name",
     "Nombre de personnes": "Number of guests",
