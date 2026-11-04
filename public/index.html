@@ -1952,7 +1952,11 @@ p{margin:0}
   }
   var DOWP=["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
   var MONP=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
-  function fdatePass(d){ var x=new Date(d+"T00:00:00"); return DOWP[x.getDay()]+" "+x.getDate()+" "+MONP[x.getMonth()]; }
+  function fdatePass(d){ var x=new Date(d+"T00:00:00");
+    if(window.EMIRS_LANG==="en") return x.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+    return DOWP[x.getDay()]+" "+x.getDate()+" "+MONP[x.getMonth()]; }
+  /* the English of a French phrase built in script (i18n.js dictionary); French as is */
+  function tr(s){ return window.EMIRS_LANG==="en" && window.emirsT ? (window.emirsT(s)||s) : s; }
   (function(){
     var lb=document.getElementById("passLb"); if(!lb) return;
     function close(){ lb.classList.remove("open"); lb.setAttribute("aria-hidden","true");
@@ -2197,12 +2201,12 @@ p{margin:0}
       if(!sheet.classList.contains("open")) document.body.classList.remove("locked"); }
     function roomCard(zone, nameFr, isFull){
       return '<button type="button" class="fullb__room '+(isFull?'full':'free')+'" data-zone="'+zone+'"><span class="rm" style="display:block">'+nameFr+'</span>'+
-        '<span class="fullb__stat">'+(isFull?'Complet':'Disponible')+'</span>'+
-        '<span class="fullb__go">'+(isFull?'Me prévenir ›':'Réserver ici ›')+'</span></button>';
+        '<span class="fullb__stat">'+tr(isFull?'Complet':'Disponible')+'</span>'+
+        '<span class="fullb__go">'+tr(isFull?'Me prévenir ›':'Réserver ici ›')+'</span></button>';
     }
     function showFull(info){
       if(!fullLb) return false;
-      var timeTxt=String(info.time||"").replace(":","h");
+      var en=window.EMIRS_LANG==="en", timeTxt=String(info.time||"").slice(0,5).replace(":", en?":":"h");
       var when=info.date ? (fdatePass(info.date)+" · "+timeTxt) : timeTxt;
       document.getElementById("fullWhen").textContent=when;
       /* per-room status: the requested room is full; the other is free unless it is
@@ -2218,15 +2222,18 @@ p{margin:0}
       box.innerHTML=rooms.map(function(r){ return roomCard(r[0], r[1], st[r[0]]==="full"); }).join("");
       /* the sentence names the places exactly as the cards do */
       var nameOf={}; rooms.forEach(function(r){ nameOf[r[0]]=r[1]; });
-      var free=rooms.filter(function(r){ return st[r[0]]!=="full"; }).map(function(r){ return "<b>"+r[1].toLowerCase()+"</b>"; });
+      var free=rooms.filter(function(r){ return st[r[0]]!=="full"; }).map(function(r){ return "<b>"+tr(r[1]).toLowerCase()+"</b>"; });
+      var reqName=tr(nameOf[info.requested]||nameOf.terrace);
       if(free.length){
-        document.getElementById("fullTitle").textContent="La "+(nameOf[info.requested]||nameOf.terrace).toLowerCase()+" est complète";
-        document.getElementById("fullMsg").innerHTML="Il reste des tables en "+free.join(" et en ")+" à "+timeTxt+".";
-        document.getElementById("fullHint").textContent="Touchez une place disponible pour réserver.";
+        document.getElementById("fullTitle").textContent=en ? "The "+reqName.toLowerCase()+" is full" : "La "+reqName.toLowerCase()+" est complète";
+        document.getElementById("fullMsg").innerHTML=en ? "Tables are still free in the "+free.join(" and the ")+" at "+timeTxt+"."
+          : "Il reste des tables en "+free.join(" et en ")+" à "+timeTxt+".";
+        document.getElementById("fullHint").textContent=tr("Touchez une place disponible pour réserver.");
       } else {
-        document.getElementById("fullTitle").textContent="Ce créneau est complet";
-        document.getElementById("fullMsg").innerHTML="Toutes les places sont complètes à "+timeTxt+". Choisissez un autre horaire, ou appelez-nous au <b>+216 73 348 700</b>.";
-        document.getElementById("fullHint").textContent="Touchez une place pour être prévenu si une table se libère.";
+        document.getElementById("fullTitle").textContent=tr("Ce créneau est complet");
+        document.getElementById("fullMsg").innerHTML=en ? "Every area is full at "+timeTxt+". Choose another time, or call us on <b>+216 73 348 700</b>."
+          : "Toutes les places sont complètes à "+timeTxt+". Choisissez un autre horaire, ou appelez-nous au <b>+216 73 348 700</b>.";
+        document.getElementById("fullHint").textContent=tr("Touchez une place pour être prévenu si une table se libère.");
       }
       /* a free place: switch the Place chip to it and send the same request again;
          a full one: the waiting list, for that place */
@@ -2307,11 +2314,15 @@ p{margin:0}
       });
       var names=list.map(function(m){ return m[2]; });
       msg.style.color="#c0392b"; msg.style.fontWeight="700";
-      msg.textContent="Il manque : "+names.join(", ")+".";
+      var en=window.EMIRS_LANG==="en";
+      msg.textContent=(en?"Missing: ":"Il manque : ")+names.join(", ")+".";
       /* the same list, named, at the top of the form — the page goes back there */
       var bn=document.getElementById("resaMiss");
-      bn.innerHTML="<span><b>"+(list.length>1?"Il manque "+list.length+" informations obligatoires":"Il manque une information obligatoire")+
-        "</b> : "+names.map(function(n){ return "<b>"+esc(n)+"</b>"; }).join(", ")+".<br>Complétez les champs en rouge puis appuyez à nouveau sur « Demander la réservation ».</span>";
+      bn.innerHTML="<span><b>"+(en ? (list.length>1?list.length+" required details are missing":"A required detail is missing")
+          : (list.length>1?"Il manque "+list.length+" informations obligatoires":"Il manque une information obligatoire"))+
+        "</b>"+(en?": ":" : ")+names.map(function(n){ return "<b>"+esc(n)+"</b>"; }).join(", ")+"."+
+        (en ? "<br>Fill in the fields in red, then tap “Request a booking” again.</span>"
+            : "<br>Complétez les champs en rouge puis appuyez à nouveau sur « Demander la réservation ».</span>");
       bn.hidden=false;
       var el=list[0][0], f=el.closest(".field")||el.parentNode;
       var top=bn.getBoundingClientRect().top+window.pageYOffset-100;
@@ -2345,14 +2356,14 @@ p{margin:0}
       var mail=(form.email&&form.email.value.trim())||"";
       /* every box that is missing or wrong, in the order the guest sees them:
          all are marked "Champ obligatoire", the page goes back to the first */
-      var OB="Champ obligatoire";
+      var OB=tr("Champ obligatoire");
       var miss=[
-        !prenom && [form.nom, OB, "Prénom"],
-        !famille && [form.nomFam, OB, "Nom"],
-        !tel ? [form.tel, OB, "Téléphone"] : (tel.replace(/\D/g,"").length<8 && [form.tel, "Numéro incomplet : 8 chiffres minimum", "Téléphone (incomplet)"]),
-        !mail ? [form.email, OB, "Email"] : (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail) && [form.email, "Adresse email invalide (ex. nom@gmail.com)", "Email (invalide)"]),
-        !form.date.value && [document.getElementById("daySlots"), OB + " : choisissez le jour", "Jour"],
-        !form.heure.value && [document.getElementById("timeSlots"), OB + " : choisissez l'heure", "Heure"]
+        !prenom && [form.nom, OB, tr("Prénom")],
+        !famille && [form.nomFam, OB, tr("Nom")],
+        !tel ? [form.tel, OB, tr("Téléphone")] : (tel.replace(/\D/g,"").length<8 && [form.tel, tr("Numéro incomplet : 8 chiffres minimum"), tr("Téléphone (incomplet)")]),
+        !mail ? [form.email, OB, "Email"] : (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail) && [form.email, tr("Adresse email invalide (ex. nom@gmail.com)"), tr("Email (invalide)")]),
+        !form.date.value && [document.getElementById("daySlots"), tr("Champ obligatoire : choisissez le jour"), tr("Jour")],
+        !form.heure.value && [document.getElementById("timeSlots"), tr("Champ obligatoire : choisissez l'heure"), tr("Heure")]
       ].filter(Boolean);
       if(miss.length){ flagMissing(miss); return; }
       var nom=prenom+" "+famille;
@@ -2421,7 +2432,7 @@ p{margin:0}
     ev.preventDefault();
     var body=document.getElementById('mBody').value.trim(), name=document.getElementById('mName').value.trim(),
         contact=document.getElementById('mContact').value.trim(), out=document.getElementById('mMsg');
-    if(body.length<2){ out.style.color='#a4552f'; out.textContent='Merci d\'écrire votre message.'; return; }
+    if(body.length<2){ out.style.color='#a4552f'; out.textContent=tr('Merci d\'écrire votre message.'); return; }
     var payload={ name:name, body:body }; if(/@/.test(contact)) payload.email=contact; else if(contact) payload.phone=contact;
     out.style.color=''; out.textContent='Envoi…';
     fetch('/api/messages',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)})
@@ -2478,6 +2489,6 @@ p{margin:0}
   document.getElementById("year").textContent=new Date().getFullYear();
 })();
 </script>
-<script src="/i18n.js?v=20261104" defer></script>
+<script src="/i18n.js?v=20261105b" defer></script>
 </body>
 </html>

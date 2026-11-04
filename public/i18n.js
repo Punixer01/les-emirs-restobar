@@ -9,7 +9,7 @@
 
   var DICT = {
     /* ---- navigation ---- */
-    "La Maison": "The House",
+    "La Maison": "About us",
     "La Carte": "Menu",
     "Galerie": "Gallery",
     "Écrivez-nous": "Contact us",
@@ -20,7 +20,7 @@
     /* ---- hero ---- */
     "Depuis 1980": "Since 1980",
     "Apéros, déjeuners, dîners… et vibes chill au cœur de Port El Kantaoui.":
-      "Drinks, lunches, dinners… and a chilled vibe in the heart of Port El Kantaoui.",
+      "Aperitifs, lunches, dinners… and chill vibes in the heart of Port El Kantaoui.",
     "Événements live": "Live events",
     "Soirées karaoké": "Karaoke nights",
     "Ambiance conviviale": "Warm atmosphere",
@@ -34,23 +34,23 @@
     "tunisienne.": "gastronomy.",
     "Haut lieu de la gastronomie tunisienne depuis 1980, ce restaurant":
       "A landmark of Tunisian gastronomy since 1980, this restaurant",
-    "3 fourchettes": "3 forks",
+    "3 fourchettes": "",
     "sis à Port El Kantaoui, une des plus belles stations balnéaires de la Méditerranée, a été décoré plusieurs fois dans des concours nationaux et internationaux.":
-      "set in Port El Kantaoui, one of the most beautiful seaside resorts of the Mediterranean, has been awarded several times in national and international competitions.",
+      "set in Port El Kantaoui, one of the most beautiful marina resorts of the Mediterranean, has been awarded several times in national and international competitions.",
     "Presque les pieds dans l’eau, vous serez enchantés par l’environnement féerique qui nous entoure. Notre carte est un métissage de spécialités tunisiennes et méditerranéennes, dont des spécialités devenues réputées mondialement — à l’instar de la fameuse":
-      "Almost at the water’s edge, you will be charmed by the magical setting around us. Our menu blends Tunisian and Mediterranean specialities, several of them known far beyond our shores — such as the famous",
+      "Set right on the marina, with the Mediterranean Sea just steps away, you will be charmed by the magical setting around us. For generations of guests, Les Emirs has been more than a restaurant. It is a place where Tunisian culinary tradition, Mediterranean flavors and genuine hospitality come together, alongside signature dishes that have become part of the Les Emirs story. Among them, our famous",
     "Gargoulette des Émirs": "Gargoulette des Émirs",
     "— et bien d’autres qui font le plaisir des palais des fins gourmets.":
-      "— and many others that delight the most discerning palates.",
+      "— slow-cooked, sealed in clay and opened tableside: a true Tunisian tradition made to be shared.",
     "Port El Kantaoui": "Port El Kantaoui",
     "L’art de recevoir, au bord du port, face à la Méditerranée.":
-      "The art of hosting, by the harbour, facing the Mediterranean.",
+      "The art of hosting, by the harbour, facing the Mediterranean Sea.",
 
     /* ---- la table ---- */
     "La Table": "The Table",
     "Tunisie & Méditerranée.": "Tunisia & the Mediterranean.",
     "Une cuisine inspirée par les saveurs de la Tunisie et de la Méditerranée, où traditions, fraîcheur et créativité se rencontrent. Des spécialités emblématiques, façonnées au fil des années et dont la réputation s’est étendue bien au-delà de nos tables.":
-      "A kitchen inspired by the flavours of Tunisia and the Mediterranean, where tradition, freshness and creativity meet. Signature dishes, shaped over the years, whose reputation reaches far beyond our tables.",
+      "A menu inspired by the flavors of Tunisia and the Mediterranean, where tradition, fresh ingredients and creativity come together. From iconic Tunisian specialties to fresh seafood and carefully prepared dishes, every plate reflects the character of our cuisine, rooted in tradition and made with creativity. The reputation of our signature dishes, shaped over the years, reaches far beyond our tables.",
     "Voir la carte complète": "See the full menu",
 
     /* ---- signature dish ---- */
@@ -58,13 +58,13 @@
     "La Gargoulette": "La Gargoulette",
     "des Émirs.": "des Émirs.",
     "Une spécialité devenue réputée mondialement. Scellée dans l’argile, mijotée lentement, ouverte devant vous — le plat que l’on vient partager, encore et encore.":
-      "A speciality known the world over. Sealed in clay, slowly simmered, broken open in front of you — the dish people come back to share, again and again.",
+      "Slow-braised lamb in a sealed clay jar, broken in front of you, to share.",
     "Marinée au safran thym et romarin": "Marinated with saffron, thyme and rosemary",
     "Scellée dans l’argile": "Sealed in clay",
-    "Brisée et servie à table": "Broken open and served at the table",
+    "Brisée et servie à table": "Broken and served at your table",
     "La Gargoulette des Émirs": "La Gargoulette des Émirs",
     "Agneau à l’étouffée, mijoté lentement dans une jarre d’argile scellée — brisée devant vous, à partager.":
-      "Slow-braised lamb in a sealed clay jar — broken open in front of you, to share.",
+      "Slow-braised lamb in a sealed clay jar, broken in front of you, to share.",
     "Agneau à l’étouffée dans une jarre": "Lamb braised, cooked in an earthenware pot",
 
     /* ---- vivier ---- */
@@ -74,11 +74,11 @@
     "De notre vivier de langoustes à votre assiette : l’authenticité de la mer,":
       "From our lobster tank to your plate: the sea at its most honest,",
     "la fraîcheur d’exception. Choisissez votre langouste vivante, savourez l’excellence.":
-      "exceptional freshness. Pick your live lobster and enjoy.",
+      "exceptional freshness. Pick your live lobster and enjoy — our kitchen takes care of the rest.",
 
     /* ---- galerie ---- */
-    "Instants de table": "Moments at the table",
-    "La maison, la terrasse et les assiettes.": "The house, the terrace and the plates.",
+    "Instants de table": "Moments at Les Emirs",
+    "La maison, la terrasse et les assiettes.": "The atmosphere, the terrace and the plates.",
     "Cliquez pour agrandir — les vidéos se lancent avec le son":
       "Tap to enlarge — videos play with sound",
     "Activer le son": "Turn sound on",
@@ -95,6 +95,12 @@
     "Gambas royales, dressées en tour": "King prawns, served in a tower",
     "Gambas, à la tombée du soir": "King prawns, at dusk",
     "Pâtes aux fruits de mer": "Seafood pasta",
+    "Moules et gambas": "Mussels and king prawns",
+    "Gambas & moules, face au port": "King prawns & mussels, facing the harbour",
+    "Gambas & moules au safran": "King prawns & mussels with saffron",
+    "Penne aux gambas, face au port": "Penne with king prawns, facing the harbour",
+    "Penne aux crevettes": "Penne with shrimp",
+    "Dressage en terrasse": "Plated on the terrace",
     "Tagliatelle, face à l’eau": "Tagliatelle, facing the water",
     "À table, face au port": "At the table, facing the harbour",
     "Vue sur la mer et la marina": "Sea and marina view",
@@ -184,6 +190,30 @@
     "Il reste des tables en": "Tables are still available",
     "La salle et la terrasse sont complètes à": "The indoor room and the terrace are full at",
     "est complète": "is full",
+    /* winter mode, the "complet" window, the booking form's checks */
+    "Terrasse verrière": "Glass-covered terrace",
+    "Terrasse en plein air": "Open-air terrace",
+    "Complet": "Full",
+    "Disponible": "Available",
+    "Me prévenir ›": "Notify me ›",
+    "Réserver ici ›": "Book here ›",
+    "Touchez une place pour réserver.": "Tap an area to book.",
+    "Touchez une place disponible pour réserver.": "Tap an available area to book.",
+    "Touchez une place pour être prévenu si une table se libère.": "Tap an area to be told when a table frees up.",
+    "Champ obligatoire": "Required",
+    "Champ obligatoire : choisissez le jour": "Required: choose the day",
+    "Champ obligatoire : choisissez l'heure": "Required: choose the time",
+    "Numéro incomplet : 8 chiffres minimum": "Incomplete number: 8 digits minimum",
+    "Téléphone (incomplet)": "Phone (incomplete)",
+    "Adresse email invalide (ex. nom@gmail.com)": "Invalid email address (e.g. name@gmail.com)",
+    "Email (invalide)": "Email (invalid)",
+    "Jour": "Day",
+    "Heure": "Time",
+    "Merci d'écrire votre message.": "Please write your message.",
+    "Choisir le mois": "Choose the month",
+    "Ouvrir l’emplacement du restaurant dans Google Maps": "Open the restaurant’s location in Google Maps",
+    "Janvier": "January", "Février": "February", "Mars": "March", "Avril": "April", "Mai": "May", "Juin": "June",
+    "Juillet": "July", "Août": "August", "Septembre": "September", "Octobre": "October", "Novembre": "November", "Décembre": "December",
 
     /* ---- carte : rubriques ---- */
     "Entrées Froides": "Cold Starters",
@@ -259,7 +289,7 @@
     "Pasta Boutargue & Calamars": "Pasta with Bottarga & Squid",
     "Boutargue Façon Carpaccio et Son Bouquet de Verdure": "Bottarga Carpaccio with Fresh Greens",
     "De notre vivier de langoustes à votre assiette : l’authenticité de la mer, la fraîcheur d’exception. Choisissez votre langouste vivante, savourez l’excellence.":
-      "From our lobster tank to your plate: the sea at its most honest, exceptional freshness. Pick your live lobster and enjoy.",
+      "From our lobster tank to your plate: the sea at its most honest, exceptional freshness. Pick your live lobster and enjoy — our kitchen takes care of the rest.",
     "Entrées Chaudes": "Warm Starters",
     "Spécialités Tunisiennes": "Tunisian Specialities",
     "Les Pâtes": "Pasta",
@@ -329,7 +359,7 @@
     /* ---- titres de page ---- */
     "Les Emirs - Restaurant, Port El Kantaoui": "Les Emirs - Restaurant, Port El Kantaoui",
     "Apéros, déjeuners, dîners... et vibes chill au coeur de Port El Kantaoui. L'art de recevoir, au bord du port, face à la méditerranée...":
-      "Drinks, lunches, dinners... and a chilled vibe in the heart of Port El Kantaoui. The art of hosting, by the harbour, facing the Mediterranean...",
+      "Aperitifs, lunches, dinners... and chill vibes in the heart of Port El Kantaoui. The art of hosting, by the harbour, facing the Mediterranean Sea...",
     "La Carte — Les Émirs · Port El Kantaoui": "Menu — Les Émirs · Port El Kantaoui",
     "La carte du Restaurant Les Émirs, Port El Kantaoui : entrées, spécialités tunisiennes, pâtes, viandes, poissons et desserts.":
       "The menu of Restaurant Les Émirs, Port El Kantaoui: starters, Tunisian specialities, pasta, meat, fish and desserts.",
@@ -353,9 +383,12 @@
       function (m) { return "Thank you " + m[1] + " — request received. Reference: "; }],
     [/^Merci Mr\/Mme\s*$/, function () { return "Thank you "; }],
     [/^Merci Mr\/Mme (.+)$/, function (m) { return "Thank you " + m[1]; }],
-    [/^(\d+) couverts? · (Terrasse|Salle intérieure)$/, function (m) {
-      return m[1] + (m[1] === "1" ? " guest · " : " guests · ") + (m[2] === "Terrasse" ? "Terrace" : "Indoor room");
+    [/^(\d+) couverts? · (Terrasse verrière|Terrasse en plein air|Terrasse|Salle intérieure)$/, function (m) {
+      return m[1] + (m[1] === "1" ? " guest · " : " guests · ") + DICT[m[2]];
     }],
+    [/^(Janvier|Février|Mars|Avril|Mai|Juin|Juillet|Août|Septembre|Octobre|Novembre|Décembre) (\d{4})$/,
+      function (m) { return DICT[m[1]] + " " + m[2]; }],
+    [/^Agrandir : (.+)$/, function (m) { var c = DICT[m[1]]; return c ? "Enlarge: " + c : undefined; }],
     [/^(\d+) personnes?$/, function (m) { return m[1] + (m[1] === "1" ? " guest" : " guests"); }],
     [/^Table pour (\d+)$/, function (m) { return "Table for " + m[1]; }]
   ];
@@ -406,9 +439,9 @@
     });
   }
 
-  /* English is switched OFF until the owner sends the English texts he wants
-     to show. Set to true to bring back the FR | EN switch and ?lang=en. */
-  var ENABLED = false;
+  /* English is ON: the owner sent his English texts (Nov 2026). false hides the
+     FR | EN switch and ?lang=en again. */
+  var ENABLED = true;
 
   /* the MENU alone can always be read in English (the rest of the site follows
      ENABLED): the menu window calls this on itself */
