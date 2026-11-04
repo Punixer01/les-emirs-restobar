@@ -683,15 +683,17 @@ export async function sendMarketingEmail(email, name, subject, body) {
 export async function notifyOwnerMessage(sql, m) {
   /* contact-form fields are attacker-controlled — escape before HTML/Telegram */
   const line = `${esc(m.name || "Client")} (${esc(m.phone || m.email || "")}) : ${esc(String(m.body).slice(0, 140))}`;
+  /* a réclamation (/reclamation page, QR "Réclamation" door) goes, in full, to
+     its own mailbox only — never to the contact inbox */
+  const isClaim = /^\[Réclamation\]/.test(String(m.body || ""));
   const re = restaurantEmail();
-  if (re) await sendEmail(re, `✉️ Nouveau message — ${m.name || "site"}`,
+  if (re && !isClaim) await sendEmail(re, `✉️ Nouveau message — ${m.name || "site"}`,
     shell(`<b>Nouveau message depuis le site</b><br><br>${line}<br><br><a href="${base()}/admin">Ouvrir le tableau de bord</a>`));
-  /* a réclamation (QR "Réclamation" door) also goes, in full, to its own mailbox */
-  if (/^\[Réclamation\]/.test(String(m.body || "")))
+  if (isClaim)
     await sendEmail(process.env.RECLAMATION_EMAIL || "reclamation@lesemirs.com", `⚠️ Réclamation — ${m.name || "client"}`,
       shell(`<b>Nouvelle réclamation depuis le site</b><br><br><b>Nom :</b> ${esc(m.name || "—")}<br>` +
         `<b>Téléphone :</b> ${esc(m.phone || "—")}<br><b>Email :</b> ${esc(m.email || "—")}<br><br>` +
         `${esc(String(m.body).replace(/^\[Réclamation\]\s*/, "")).replace(/\n/g, "<br>")}<br><br>` +
         `<a href="${base()}/admin">Ouvrir le tableau de bord</a>`));
-  await pushOwners(sql, { title: "Nouveau message", body: line.slice(0, 90), url: "/admin" });
+  await pushOwners(sql, { title: isClaim ? "⚠️ Nouvelle réclamation" : "Nouveau message", body: line.slice(0, 90), url: "/admin" });
 }
