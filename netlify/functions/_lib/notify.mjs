@@ -195,6 +195,16 @@ function editLink(r) { return r && r.id ? `${base()}/modifier?r=${r.id}&t=${edit
 function cancelLink(r) { return r && r.id ? `${base()}/modifier?r=${r.id}&t=${editToken(r.id)}&annuler=1${langSuffix(r)}` : ""; }
 function passLink(r) { return r && r.id ? `${base()}/pass?r=${r.id}&t=${passToken(r.id)}${langSuffix(r)}` : ""; }
 
+/* An email button. The colour sits on a table cell (bgcolor) as well as the
+   link: some mail apps strip backgrounds from links and leave grey text. */
+function btn(href, label, primary, center) {
+  const bg = primary ? "#1f473f" : "#f3ead6", fg = primary ? "#ffffff" : "#1f473f", bd = primary ? "#1f473f" : "#cdbfa3";
+  return `<table role="presentation" cellspacing="0" cellpadding="0" border="0"${center ? ' align="center"' : ""} style="display:inline-table;margin:8px ${center ? "auto" : "8px"} 0 0;border-collapse:separate">` +
+    `<tr><td bgcolor="${bg}" style="background-color:${bg};border:1px solid ${bd};border-radius:8px">` +
+    `<a href="${href}" style="display:inline-block;padding:13px 20px;font-size:14px;font-weight:700;color:${fg};text-decoration:none;border-radius:8px">${label}</a>` +
+    `</td></tr></table>`;
+}
+
 /* The QR block for the guest's email. Points at /api/qr rather than embedding
    SVG, because most mail clients strip inline SVG but render <img> fine. */
 function passBlock(r) {
@@ -207,7 +217,7 @@ function passBlock(r) {
       <div style="font-size:13px;color:#3b352b;margin-top:14px">${isEn(r) ? "Show this code at the door." : "Présentez ce code à l'accueil."}</div>
       <div style="font-family:Georgia,serif;font-size:17px;color:#17150f;margin-top:16px;letter-spacing:.04em">${r.reference}</div>
       <div style="font-size:12px;color:#8b8271;margin-top:4px">${isEn(r) ? "to show on arrival" : "à présenter à l'arrivée"}</div>
-      <a href="${passLink(r)}" style="display:inline-block;margin-top:18px;padding:11px 22px;background:#1f473f;color:#fff;text-decoration:none;border-radius:8px;font-size:13px;font-weight:600;letter-spacing:.02em">${isEn(r) ? "Open my booking" : "Ouvrir ma réservation"}</a>
+      <div style="height:10px"></div>${btn(passLink(r), isEn(r) ? "Open my booking" : "Ouvrir ma réservation", true, true)}
     </div>`;
 }
 
@@ -362,9 +372,6 @@ async function decisionEn(r) {
   const when = `${enDateLong(r.res_date)}, ${fmtTime(r.res_time)}`;
   if (r.status === "accepted") {
     const link = editLink(r), cancel = cancelLink(r);
-    const btn = (href, label, primary) =>
-      `<a href="${href}" style="display:inline-block;margin:6px 6px 0 0;padding:12px 18px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;` +
-      (primary ? `background:#1f473f;color:#fff` : `background:#fff;color:#1f473f;border:1px solid #cdbfa3`) + `">${label}</a>`;
     const html = shell(
       `Dear ${esc(r.name)},<br><br>` +
       `<div style="font-family:Georgia,serif;font-size:21px;color:#1f473f;margin:2px 0 18px">Your booking is confirmed</div>` +
@@ -411,9 +418,6 @@ export async function notifyClientDecision(r) {
   if (r.status === "accepted") {
     const link = editLink(r);
     const cancel = cancelLink(r);
-    const btn = (href, label, primary) =>
-      `<a href="${href}" style="display:inline-block;margin:6px 6px 0 0;padding:12px 18px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;` +
-      (primary ? `background:#1f473f;color:#fff` : `background:#fff;color:#1f473f;border:1px solid #cdbfa3`) + `">${label}</a>`;
     const html = shell(
       `Bonjour Mr/Mme ${esc(r.name)},<br><br>` +
       `<div style="font-family:Georgia,serif;font-size:21px;color:#1f473f;margin:2px 0 18px">Votre réservation est confirmée</div>` +
@@ -468,18 +472,16 @@ export async function notifyClientDecision(r) {
 export async function notifyClientReminder(r) {
   if (!r.email) return { skipped: true };
   const link = editLink(r), cancel = cancelLink(r);
-  const btn = (href, label, primary) =>
-    `<a href="${href}" style="display:inline-block;margin:6px 6px 0 0;padding:12px 18px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;` +
-    (primary ? `background:#1f473f;color:#fff` : `background:#fff;color:#1f473f;border:1px solid #cdbfa3`) + `">${label}</a>`;
   if (isEn(r)) {
     const html = shell(
       `Dear ${esc(r.name)},<br><br>` +
       `<div style="font-family:Georgia,serif;font-size:21px;color:#1f473f;margin:2px 0 18px">See you shortly</div>` +
       `A reminder of your table today: <b>${enDateLong(r.res_date)} · ${fmtTime(r.res_time)}</b> · ` +
       `${r.party_size} guest${r.party_size > 1 ? "s" : ""}<br>${seatEnCap(r.seating)}<br>Reference: <b>${r.reference}</b>` +
+      (link || cancel ? `<div style="margin:22px 0 4px;padding:16px 18px;background:#faf7f0;border:1px solid #e2dccf;border-radius:8px">` +
+      `<div style="font-size:16px;font-weight:700;color:#1f473f">If your plans have changed, let us know in one tap:</div><div>` +
+      (link ? btn(link, "Change my booking", true) : "") + (cancel ? btn(cancel, "Cancel my booking", false) : "") + `</div></div>` : "") +
       passBlock(r) +
-      (link || cancel ? `<div>If your plans have changed, please let us know:</div><div>` +
-        (link ? btn(link, "Change my booking", true) : "") + (cancel ? btn(cancel, "Cancel my booking", false) : "") + `</div>` : "") +
       `<div style="margin-top:22px;font-size:12.5px;color:#7a5f16">Tables are held for 30 minutes after the booked time.</div>`
     );
     const subject = "Reminder: your table at Les Émirs today";
@@ -491,9 +493,10 @@ export async function notifyClientReminder(r) {
     `<div style="font-family:Georgia,serif;font-size:21px;color:#1f473f;margin:2px 0 18px">À tout à l'heure</div>` +
     `Petit rappel de votre réservation : <b>${frDateLong(r.res_date)} · ${frHour(r.res_time)}</b> · ` +
     `${r.party_size} personne${r.party_size > 1 ? "s" : ""}<br>${seatPhraseCap(r.seating)}<br>Référence : <b>${r.reference}</b>` +
+    (link || cancel ? `<div style="margin:22px 0 4px;padding:16px 18px;background:#faf7f0;border:1px solid #e2dccf;border-radius:8px">` +
+      `<div style="font-size:16px;font-weight:700;color:#1f473f">Un changement de programme ? Prévenez-nous en un clic :</div><div>` +
+      (link ? btn(link, "Modifier la réservation", true) : "") + (cancel ? btn(cancel, "Annuler la réservation", false) : "") + `</div></div>` : "") +
     passBlock(r) +
-    (link || cancel ? `<div>Un changement de programme ? Prévenez-nous en un clic :</div><div>` +
-      (link ? btn(link, "Modifier la réservation", true) : "") + (cancel ? btn(cancel, "Annuler la réservation", false) : "") + `</div>` : "") +
     `<div style="margin-top:22px;padding:14px 16px;background:#fdf6e6;border:1px solid #ecdfbf;border-radius:8px;font-size:12.5px;color:#7a5f16;line-height:1.6">` +
     `La durée de retard tolérée est de <b>30 minutes maximum</b>. Au-delà, nous nous réservons le droit de libérer la table.</div>`
   );
