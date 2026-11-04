@@ -571,6 +571,25 @@ export async function notifyOwnerNew(sql, r, debt) {
   });
 }
 
+/* A guest turned away as "complet": the direction (email + Telegram) and every
+   staff dashboard (push) hear it at once, to call them back while it matters. */
+export async function notifyOwnerMissed(sql, v) {
+  const line = `${esc(v.name)} (${esc(v.phone)}) · ${fmtDate(v.date)} ${fmtTime(v.time)} · ${v.party} couverts · ${seatFr(v.seating)} complet`;
+  const re = restaurantEmail();
+  if (re) {
+    await sendEmail(re, `⚠ Réservation manquée — ${v.name}`,
+      shell(`<b>Réservation manquée</b> — le client a demandé une table mais c’était complet. À rappeler.<br><br>${line}<br><br>
+        <a href="${base()}/admin" style="display:inline-block;background:#1f473f;color:#fff;text-decoration:none;padding:11px 20px;border-radius:4px;font-size:13px">Ouvrir « Rsv manquées »</a>`));
+  }
+  await telegram(`⚠ <b>Réservation manquée</b> — à rappeler
+${line}`);
+  await pushOwners(sql, {
+    title: "⚠ Réservation manquée — à rappeler",
+    body: `${v.name} · ${fmtDate(v.date)} ${fmtTime(v.time)} · ${v.party}p · ${seatFr(v.seating)} complet`,
+    url: "/admin",
+  });
+}
+
 /* A guest moving their own booking must never be a silent change: the table
    was chosen for a given hour and room, and reception has to see the new one. */
 export async function notifyOwnerChange(sql, r, before) {

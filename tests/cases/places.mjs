@@ -2,6 +2,7 @@
 import assert from "assert";
 const { validateBooking, zoneOf, seatFr } = await import("../.tmp/_lib/util.mjs");
 const { answerWith, LOG } = await import("../.tmp/_lib/db.mjs");
+const { SENT } = await import("../.tmp/_lib/notify.mjs");
 
 assert.equal(zoneOf("verriere"), "verriere");
 assert.equal(zoneOf("terrace"), "terrace");
@@ -24,5 +25,6 @@ assert.equal(r.status, 409); assert.equal(d.code, "full");
 assert.equal(d.other, "verriere"); assert.equal(d.otherFree, true);
 assert.deepEqual(d.rooms, { terrace: "full", verriere: "free", inside: "full" });
 assert.ok(LOG.some((l) => /insert into missed/.test(l.q) && l.args.includes("22123456")), "a full slot keeps the guest in the missed list");
+assert.ok(SENT.some((x) => x.k === "ownerMissed"), "a guest turned away alerts the owner + dashboards");
 answerWith(null);
 console.log("OK places: verrière accepted, labels, full terrace -> verrière offered first");

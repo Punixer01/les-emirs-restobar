@@ -44,7 +44,7 @@ export const pushTest = rec("pushtest"), telegram = rec("telegram");
 export const notifyClientReceived = rec("received"), notifyClientDecision = rec("decision");
 export const notifyClientCancelled = rec("cancelled"), notifyClientCustom = rec("custom");
 export const notifyClientReminder = rec("reminder");
-export const notifyOwnerNew = rec("ownerNew"), notifyOwnerChange = rec("ownerChange"), notifyOwnerCancel = rec("ownerCancel");
+export const notifyOwnerNew = rec("ownerNew"), notifyOwnerChange = rec("ownerChange"), notifyOwnerCancel = rec("ownerCancel"), notifyOwnerMissed = rec("ownerMissed");
 export const notifyOwnerMessage = rec("ownerMsg"), sendClientMessage = rec("clientMsg"), sendMarketingEmail = rec("marketing");
 export const shell = (s) => String(s);
 export const replyHtml = (n, q, t) => String(t);

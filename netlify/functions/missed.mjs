@@ -1,8 +1,7 @@
 import { sql } from "./_lib/db.mjs";
 import { json, readBody } from "./_lib/util.mjs";
 import { auth, STAFF, isWatcher } from "./_lib/auth.mjs";
-import { pushOwners } from "./_lib/notify.mjs";
-import { fmtDate, fmtTime, seatFr } from "./_lib/util.mjs";
+import { notifyOwnerMissed } from "./_lib/notify.mjs";
 
 /* Réservations manquées — every online request the site turned away as
    "complet". The guest's details are kept even if they closed the popup
@@ -25,12 +24,8 @@ export async function recordMissed(v) {
   }
   await sql`insert into missed (name, phone, email, res_date, res_time, party_size, seating)
     values (${v.name}, ${v.phone}, ${v.email || null}, ${v.date}, ${v.time}, ${v.party}, ${v.seating})`;
-  /* a new guest turned away: every staff dashboard is alerted, to call them back */
-  await pushOwners(sql, {
-    title: "Réservation manquée",
-    body: `${v.name} · ${fmtDate(v.date)} ${fmtTime(v.time)} · ${v.party}p · ${seatFr(v.seating)} complet`,
-    url: "/admin",
-  });
+  /* a new guest turned away: the owner and every staff dashboard are alerted */
+  await notifyOwnerMissed(sql, v);
 }
 
 /* booked anyway (another place or hour, same day) or put on the waiting list */

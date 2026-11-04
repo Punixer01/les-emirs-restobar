@@ -60,6 +60,8 @@
     "Une spécialité devenue réputée mondialement. Scellée dans l’argile, mijotée lentement, ouverte devant vous — le plat que l’on vient partager, encore et encore.":
       "Slow-braised lamb in a sealed clay jar, broken in front of you, to share.",
     "Marinée au safran thym et romarin": "Marinated with saffron, thyme and rosemary",
+    "Marinée au safran,": "Marinated with saffron,",
+    "thym et romarin": "thyme and rosemary",
     "Scellée dans l’argile": "Sealed in clay",
     "Brisée et servie à table": "Broken and served at your table",
     "La Gargoulette des Émirs": "La Gargoulette des Émirs",

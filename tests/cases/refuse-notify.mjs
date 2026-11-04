@@ -9,6 +9,7 @@ const call = async (body) => {
     headers: { "content-type": "application/json", authorization: "Bearer " + issueToken("owner") }, body: JSON.stringify(body) }));
   return { status: r.status, data: await r.json() };
 };
+SENT.splice(0); /* earlier files leave their sends behind (a missed booking alerts the owner) */
 const kinds = () => SENT.splice(0).map((s) => s.k).filter((k) => k !== "push");
 const updates = () => LOG.filter((l) => /update reservations set status/.test(l.q)).length;
 

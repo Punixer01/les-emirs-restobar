@@ -385,9 +385,11 @@ p{margin:0}
 .sig__steps{display:flex;flex-direction:column;align-items:center;gap:7px;margin-top:18px;
   text-transform:none;letter-spacing:.01em;font-family:var(--font-serif);font-style:italic;
   font-size:1.02rem;line-height:1.5;color:var(--stone)}
-/* each step is one whole line — never let "romarin" wrap onto its own row.
-   clamp keeps the longest line on a single row down to narrow phones. */
+/* each step is one whole line; on a phone the first one breaks after the
+   saffron, so "thym et romarin" sits on its own line instead of overflowing */
 .sig__steps span{white-space:nowrap;font-size:clamp(.78rem,3.4vw,1.02rem)}
+.sig__steps .sig__br{display:inline}
+@media (max-width:700px){ .sig__steps .sig__br{display:block} }
 /* the film has sound; browsers refuse to autoplay it audibly, so offer the toggle */
 .sig__sound{position:absolute;right:14px;bottom:14px;width:44px;height:44px;border-radius:50%;
   border:1px solid rgba(242,236,224,.35);background:rgba(12,17,14,.5);
@@ -1100,7 +1102,7 @@ p{margin:0}
         </button>
       </div>
       <figcaption class="sig__steps">
-        <span>Marinée au safran thym et romarin</span>
+        <span>Marinée au safran, <span class="sig__br">thym et romarin</span></span>
         <span>Scellée dans l’argile</span>
         <span>Brisée et servie à table</span>
       </figcaption>
@@ -2489,6 +2491,6 @@ p{margin:0}
   document.getElementById("year").textContent=new Date().getFullYear();
 })();
 </script>
-<script src="/i18n.js?v=20261105b" defer></script>
+<script src="/i18n.js?v=20261105c" defer></script>
 </body>
 </html>
