@@ -382,7 +382,8 @@ p{margin:0}
 .sig__fig figcaption{margin-top:16px;text-align:center;font-family:var(--font-sans);font-size:11px;
   letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
 /* three lines, exactly as written — no rules, no joining punctuation */
-.sig__steps{display:flex;flex-direction:column;align-items:center;gap:7px;margin-top:18px;
+/* one even block: the same spacing between the steps as inside the wrapped one */
+.sig__steps{display:flex;flex-direction:column;align-items:center;gap:0;margin-top:18px;
   text-transform:none;letter-spacing:.01em;font-family:var(--font-serif);font-style:italic;
   font-size:1.02rem;line-height:1.5;color:var(--stone)}
 /* each step is one whole line; on a phone the first one breaks after the
@@ -531,6 +532,8 @@ p{margin:0}
 
 /* ---- le vivier ---- */
 .vivier{padding-block:clamp(70px,10vw,140px);background:var(--bone-2);border-block:1px solid var(--hair-soft)}
+/* phone: no empty band between the Gargoulette steps and Le vivier */
+@media(max-width:720px){ .sig{padding-bottom:56px} .vivier{padding-top:56px} }
 .vivier__txt{grid-column:3/11;text-align:center}
 .vivier__txt h2{font-family:var(--font-serif);font-weight:300;font-size:clamp(1.9rem,3.6vw,2.8rem);
   line-height:1.06;letter-spacing:-.015em;margin:16px 0 0}
