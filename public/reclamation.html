@@ -149,7 +149,7 @@ textarea{resize:vertical;min-height:160px}
           <span class="lbl"><span data-t="lTopic">Sujet</span> <small data-t="opt">(facultatif)</small></span>
           <div class="topics" id="topics">
             <button type="button" data-k="service" data-t="tService">Service</button>
-            <button type="button" data-k="plats" data-t="tFood">Plats &amp; boissons</button>
+            <button type="button" data-k="plats" data-t="tFood">Nourriture</button>
             <button type="button" data-k="reservation" data-t="tBooking">Réservation</button>
             <button type="button" data-k="addition" data-t="tBill">Addition</button>
             <button type="button" data-k="autre" data-t="tOther">Autre</button>
@@ -228,7 +228,7 @@ textarea{resize:vertical;min-height:160px}
         label:"Réclamation", h1:"Un souci lors de votre visite ?", h1b:"Dites-le-nous.",
         heroP:"Chaque réclamation est lue par la direction. Nous prenons le temps de comprendre ce qui s’est passé et de vous répondre personnellement.",
         fH:"Déposer une réclamation", fSub:"Les champs marqués d’un astérisque sont nécessaires pour vous recontacter.",
-        lTopic:"Sujet", tService:"Service", tFood:"Plats & boissons", tBooking:"Réservation", tBill:"Addition", tOther:"Autre",
+        lTopic:"Sujet", tService:"Service", tFood:"Nourriture", tBooking:"Réservation", tBill:"Addition", tOther:"Autre",
         lName:"Nom", lPhone:"Téléphone", lEmail:"Email", lDay:"Date de la visite", opt:"(facultatif)", lBody:"Votre réclamation",
         ph:"Ce qui s’est passé, l’heure, la table…", send:"Envoyer la réclamation",
         okH:"Merci, c’est bien reçu.", okP:"La direction a reçu votre réclamation et vous recontacte rapidement.",
@@ -243,7 +243,7 @@ textarea{resize:vertical;min-height:160px}
         label:"Complaint", h1:"Something went wrong during your visit?", h1b:"Tell us.",
         heroP:"Every complaint is read by the management. We take the time to understand what happened and to answer you personally.",
         fH:"Submit a complaint", fSub:"Fields marked with an asterisk are needed to get back to you.",
-        lTopic:"Subject", tService:"Service", tFood:"Food & drinks", tBooking:"Booking", tBill:"Bill", tOther:"Other",
+        lTopic:"Subject", tService:"Service", tFood:"Food", tBooking:"Booking", tBill:"Bill", tOther:"Other",
         lName:"Name", lPhone:"Phone", lEmail:"Email", lDay:"Date of visit", opt:"(optional)", lBody:"Your complaint",
         ph:"What happened, the time, the table…", send:"Send the complaint",
         okH:"Thank you, we have received it.", okP:"The management has your complaint and will get back to you quickly.",
@@ -275,7 +275,7 @@ textarea{resize:vertical;min-height:160px}
     this.querySelectorAll("[data-k]").forEach(function(x){ x.classList.toggle("on", x.getAttribute("data-k")===topic); });
   });
 
-  var TOPIC_FR={service:"Service", plats:"Plats & boissons", reservation:"Réservation", addition:"Addition", autre:"Autre"};
+  var TOPIC_FR={service:"Service", plats:"Nourriture", reservation:"Réservation", addition:"Addition", autre:"Autre"};
   var f=document.getElementById("f"), btn=document.getElementById("send");
   function v(id){ return document.getElementById(id).value.trim(); }
   f.addEventListener("submit", function(ev){
