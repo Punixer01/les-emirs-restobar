@@ -2,7 +2,8 @@ import { Resend } from "resend";
 import { sql } from "./db.mjs";
 import { sendPush } from "./webpush.mjs";
 import { fmtDate, fmtTime, seatFr } from "./util.mjs";
-import { editToken, passToken } from "./auth.mjs";
+import { editToken, passToken, verifyPassToken } from "./auth.mjs";
+import { qrPng } from "./qr.mjs";
 
 /* env read lazily (works on Cloudflare, where env is populated per-request) */
 function getResend() { return process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null; }
@@ -25,12 +26,40 @@ function parseSub(row) {
    subdomain — a guest hitting "reply" is answering the restaurant. */
 function replyTo() { return process.env.REPLY_TO || process.env.RESTAURANT_EMAIL || null; }
 
+/* The pass QR is embedded in the email itself (inline image, cid:) instead of
+   being fetched from /api/qr: some mail apps never load remote images, and the
+   guest then sees no code. The copy kept in the Emails tab keeps the link. */
+function inlineQr(html) {
+  const m = String(html || "").match(/src="(https?:\/\/[^"]*\/api\/qr\?r=(\d+)&(?:amp;)?t=([A-Za-z0-9_-]+))"/);
+  if (!m || !verifyPassToken(parseInt(m[2], 10), m[3])) return { html };
+  const png = qrPng(`${base()}/pass?r=${m[2]}&t=${m[3]}`, { scale: 8, margin: 4 });
+  return {
+    html: html.split(m[1]).join("cid:passqr"),
+    /* REST field names (the SDK in use still sends an older inline-id name) */
+    attachments: [{ filename: "qr-reservation.png", content: Buffer.from(png).toString("base64"),
+                    content_type: "image/png", content_id: "passqr" }],
+  };
+}
+
 export async function sendEmail(to, subject, html) {
   const resend = getResend();
   if (!resend || !to) return { skipped: true };
   const payload = { from: mailFrom(), to, subject, html };
   const rt = replyTo();
   if (rt) payload.reply_to = rt;
+  /* with the QR inside: straight to the Resend API; if that fails, the usual
+     send below still goes out, the QR then loaded from the site */
+  const q = inlineQr(html);
+  if (q.attachments) {
+    try {
+      const res = await fetch("https://api.resend.com/emails", { method: "POST",
+        headers: { authorization: `Bearer ${process.env.RESEND_API_KEY}`, "content-type": "application/json" },
+        body: JSON.stringify({ ...payload, html: q.html, attachments: q.attachments }) });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) return { data, error: null };
+      console.error("[email inline qr]", res.status, JSON.stringify(data).slice(0, 200));
+    } catch (e) { console.error("[email inline qr]", String(e).slice(0, 200)); }
+  }
   try { return await resend.emails.send(payload); }
   catch (e) { console.error("[email]", e); return { error: String(e) }; }
 }
@@ -197,12 +226,24 @@ function passLink(r) { return r && r.id ? `${base()}/pass?r=${r.id}&t=${passToke
 
 /* An email button. The colour sits on a table cell (bgcolor) as well as the
    link: some mail apps strip backgrounds from links and leave grey text. */
-function btn(href, label, primary, center) {
+function btn(href, label, primary, center, full) {
   const bg = primary ? "#1f473f" : "#f3ead6", fg = primary ? "#ffffff" : "#1f473f", bd = primary ? "#1f473f" : "#cdbfa3";
+  if (full) return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:separate">` +
+    `<tr><td bgcolor="${bg}" align="center" style="background-color:${bg};border:1px solid ${bd};border-radius:8px">` +
+    `<a href="${href}" style="display:block;padding:12px 6px;font-size:13px;line-height:1.3;font-weight:700;color:${fg};text-decoration:none;text-align:center;border-radius:8px">${label}</a>` +
+    `</td></tr></table>`;
   return `<table role="presentation" cellspacing="0" cellpadding="0" border="0"${center ? ' align="center"' : ""} style="display:inline-table;margin:8px ${center ? "auto" : "8px"} 0 0;border-collapse:separate">` +
     `<tr><td bgcolor="${bg}" style="background-color:${bg};border:1px solid ${bd};border-radius:8px">` +
     `<a href="${href}" style="display:inline-block;padding:13px 20px;font-size:14px;font-weight:700;color:${fg};text-decoration:none;border-radius:8px">${label}</a>` +
     `</td></tr></table>`;
+}
+
+/* Change / cancel, side by side on one line — on a phone too */
+function btnPair(link, linkLabel, cancel, cancelLabel) {
+  const cells = [link && btn(link, linkLabel, true, false, true), cancel && btn(cancel, cancelLabel, false, false, true)].filter(Boolean);
+  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:10px"><tr>` +
+    cells.map((c, i) => `<td width="${100 / cells.length}%" valign="top" style="${i ? "padding-left:5px" : cells.length > 1 ? "padding-right:5px" : ""}">${c}</td>`).join("") +
+    `</tr></table>`;
 }
 
 /* The QR block for the guest's email. Points at /api/qr rather than embedding
@@ -383,8 +424,7 @@ async function decisionEn(r) {
       `<div style="margin-top:4px">We look forward to welcoming you.</div>` +
       (link || cancel
         ? `<div style="height:1px;background:#e2dccf;margin:22px 0"></div><div>` +
-          (link ? btn(link, "Change my booking", true) : "") +
-          (cancel ? btn(cancel, "Cancel my booking", false) : "") + `</div>`
+          btnPair(link, "Change my booking", cancel, "Cancel my booking") + `</div>`
         : "") +
       `<div style="margin-top:22px;padding:14px 16px;background:#fdf6e6;border:1px solid #ecdfbf;border-radius:8px;font-size:12.5px;color:#7a5f16;line-height:1.6">` +
       `We hold your table for <b>30 minutes at most</b>. After that we may release it to other guests.</div>`
@@ -430,8 +470,7 @@ export async function notifyClientDecision(r) {
       (link || cancel
         ? `<div style="height:1px;background:#e2dccf;margin:22px 0"></div>` +
           `<div>` +
-          (link ? btn(link, "Modifier la réservation", true) : "") +
-          (cancel ? btn(cancel, "Annuler la réservation", false) : "") +
+          btnPair(link, "Modifier la réservation", cancel, "Annuler la réservation") +
           `</div>`
         : "") +
       `<div style="margin-top:22px;padding:14px 16px;background:#fdf6e6;border:1px solid #ecdfbf;border-radius:8px;font-size:12.5px;color:#7a5f16;line-height:1.6">` +
@@ -480,7 +519,7 @@ export async function notifyClientReminder(r) {
       `${r.party_size} guest${r.party_size > 1 ? "s" : ""}<br>${seatEnCap(r.seating)}<br>Reference: <b>${r.reference}</b>` +
       (link || cancel ? `<div style="margin:22px 0 4px;padding:16px 18px;background:#faf7f0;border:1px solid #e2dccf;border-radius:8px">` +
       `<div style="font-size:16px;font-weight:700;color:#1f473f">If your plans have changed, let us know in one tap:</div><div>` +
-      (link ? btn(link, "Change my booking", true) : "") + (cancel ? btn(cancel, "Cancel my booking", false) : "") + `</div></div>` : "") +
+      btnPair(link, "Change my booking", cancel, "Cancel my booking") + `</div></div>` : "") +
       passBlock(r) +
       `<div style="margin-top:22px;font-size:12.5px;color:#7a5f16">Tables are held for 30 minutes after the booked time.</div>`
     );
@@ -495,7 +534,7 @@ export async function notifyClientReminder(r) {
     `${r.party_size} personne${r.party_size > 1 ? "s" : ""}<br>${seatPhraseCap(r.seating)}<br>Référence : <b>${r.reference}</b>` +
     (link || cancel ? `<div style="margin:22px 0 4px;padding:16px 18px;background:#faf7f0;border:1px solid #e2dccf;border-radius:8px">` +
       `<div style="font-size:16px;font-weight:700;color:#1f473f">Un changement de programme ? Prévenez-nous en un clic :</div><div>` +
-      (link ? btn(link, "Modifier la réservation", true) : "") + (cancel ? btn(cancel, "Annuler la réservation", false) : "") + `</div></div>` : "") +
+      btnPair(link, "Modifier la réservation", cancel, "Annuler la réservation") + `</div></div>` : "") +
     passBlock(r) +
     `<div style="margin-top:22px;padding:14px 16px;background:#fdf6e6;border:1px solid #ecdfbf;border-radius:8px;font-size:12.5px;color:#7a5f16;line-height:1.6">` +
     `La durée de retard tolérée est de <b>30 minutes maximum</b>. Au-delà, nous nous réservons le droit de libérer la table.</div>`

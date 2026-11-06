@@ -12,14 +12,21 @@ import { notifyOwnerMissed } from "./_lib/notify.mjs";
    GET  /api/missed?count=1    (staff)      how many are still to call
    POST /api/missed {action:'close', id}    (staff) handled / given up            */
 
-/* one line per guest and day: a second "complet" try updates it */
+/* one line per guest and day: a second "complet" try updates it. Each try
+   alerts again (the guest is still waiting for a table) — except the very same
+   request repeated within 10 minutes, which is one guest tapping twice. */
 export async function recordMissed(v) {
   if (!v.phone) return;
-  const open = await sql`select id from missed where phone = ${v.phone} and res_date = ${v.date} and status = 'open' limit 1`;
+  const open = await sql`select id, res_time, seating, party_size, created_at from missed
+    where phone = ${v.phone} and res_date = ${v.date} and status = 'open' limit 1`;
   if (open.length) {
+    const o = open[0];
+    const same = String(o.res_time).slice(0, 5) === String(v.time).slice(0, 5) && o.seating === v.seating && +o.party_size === +v.party;
+    const recent = Date.now() - Date.parse(String(o.created_at).replace(" ", "T") + "Z") < 10 * 60 * 1000;
     await sql`update missed set name = ${v.name}, email = ${v.email || null}, res_time = ${v.time},
       party_size = ${v.party}, seating = ${v.seating}, tries = tries + 1, created_at = datetime('now')
-      where id = ${open[0].id}`;
+      where id = ${o.id}`;
+    if (!(same && recent)) await notifyOwnerMissed(sql, v);
     return;
   }
   await sql`insert into missed (name, phone, email, res_date, res_time, party_size, seating)
@@ -40,9 +47,9 @@ export default async (req) => {
 
   if (req.method === "GET") {
     if (new URL(req.url).searchParams.get("count") === "1") {
-      const r = await sql.query(`select count(*) as n from (select m.status, m.res_date, ${OUTCOME} from missed m)
+      const r = await sql.query(`select count(*) as n, max(created_at) as last from (select m.status, m.res_date, m.created_at, ${OUTCOME} from missed m)
         where status = 'open' and booked_ref is null and on_waitlist is null and res_date >= date('now','+1 hour')`);
-      return json({ n: (r[0] && r[0].n) || 0 });
+      return json({ n: (r[0] && r[0].n) || 0, last: (r[0] && r[0].last) || "" });
     }
     /* only the unfinished ones: a guest who then booked (another place or hour)
        or joined the waiting list is not a missed reservation */

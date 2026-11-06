@@ -183,7 +183,7 @@ textarea{resize:vertical;min-height:160px}
         <li><b>3</b><div><span data-t="s3">Une réponse personnelle</span><small data-t="s3p">Nous vous rappelons ou vous écrivons pour faire suite à votre réclamation.</small></div></li>
       </ol>
       <div class="contact">
-        <a href="mailto:reclamation@lesemirs.com">
+        <a href="mailto:reclamation@lesemirs.com" data-claim-mail>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg>
           <div><span data-t="cMail">Par email</span><strong>reclamation@lesemirs.com</strong></div>
         </a>
@@ -208,7 +208,7 @@ textarea{resize:vertical;min-height:160px}
         <span class="h">Contact</span>
         <a href="tel:+21673348700">+216 73 348 700</a>
         <a href="mailto:contact@lesemirs.com">contact@lesemirs.com</a>
-        <a href="mailto:reclamation@lesemirs.com">reclamation@lesemirs.com</a>
+        <a href="mailto:reclamation@lesemirs.com" data-claim-mail>reclamation@lesemirs.com</a>
       </div>
       <div class="col">
         <span class="h" data-t="fHours">Horaires</span>
@@ -253,13 +253,16 @@ textarea{resize:vertical;min-height:160px}
         cMail:"By email", cPhone:"By phone", note:"A question, need some information?", noteA:"Write to us",
         fTag:"Aperitifs, lunches, dinners… and chill vibes in the heart of Port El Kantaoui.", fHours:"Opening hours", fHoursV:"Every day · 12pm — 12am", fHome:"Back to the website",
         eName:"Please enter your name.", ePhone:"Please enter your phone number so we can call you back.",
-        eBody:"Please describe your complaint.", sending:"Sending…", eNet:"Could not send — check your connection or write to reclamation@lesemirs.com."}
+        eBody:"Please describe your complaint.", sending:"Sending…", eNet:"Could not send — check your connection or write to complaint@lesemirs.com."}
   }, lang="fr";
   var msg=document.getElementById("msg");
   function setLang(l){
     lang=l; document.documentElement.lang=l;
     document.querySelectorAll("[data-t]").forEach(function(el){ var v=T[l][el.getAttribute("data-t")]; if(v) el.textContent=v; });
     document.getElementById("body").placeholder=T[l].ph;
+    /* the complaints mailbox has its own English address */
+    var cm = l==="en" ? "complaint@lesemirs.com" : "reclamation@lesemirs.com";
+    document.querySelectorAll("[data-claim-mail]").forEach(function(a){ a.href="mailto:"+cm; (a.querySelector("strong")||a).textContent=cm; });
     document.querySelectorAll("[data-l]").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-l")===l); });
     msg.textContent="";
     try{ localStorage.setItem("emirs_menu_lang", l); }catch(e){}

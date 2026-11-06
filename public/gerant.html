@@ -106,6 +106,10 @@ body.is-watcher{--marine:#4b5a6b;--marine-2:#5f7285}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);overflow:hidden}
 .row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line-2)}
 .row:last-child{border-bottom:none}
+/* Rsv manquées: one heading per day the guests wanted */
+.ms-day{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:10px 16px;background:var(--line-2);
+  border-bottom:1px solid var(--line);font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink,#17150f)}
+.ms-day span{color:var(--mute);text-transform:none;letter-spacing:0}
 /* day separator in the En attente queue */
 .date-h{position:sticky;top:0;z-index:2;background:var(--bone-2);color:var(--marine);
   font-weight:700;font-size:13px;letter-spacing:.02em;padding:9px 16px;border-bottom:1px solid var(--line);
@@ -3998,23 +4002,33 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
   /* a new guest turned away while the dashboard is open: say it, on every dashboard */
   var msLast=null;
   async function msCount(){ var r=await api('missed?count=1'); if(r.status===200){ var b=document.getElementById('msBadge'); if(b){ var n=(r.data||{}).n||0; b.textContent=n; b.classList.toggle('hide', !n);
-    if(msLast!==null && n>msLast){ toast('🔔 Nouvelle réservation manquée — à rappeler (onglet « Rsv manquées »).'); if(navigator.vibrate) try{ navigator.vibrate([200,90,200]); }catch(e){} }
-    msLast=n; } } }
+    var last=(r.data||{}).last||'';
+    if(msLast!==null && last && last>msLast){ toast('🔔 Nouvelle réservation manquée — à rappeler (onglet « Rsv manquées »).'); if(navigator.vibrate) try{ navigator.vibrate([200,90,200]); }catch(e){} }
+    msLast=last; } } }
   async function loadMissed(){
     var el=document.getElementById('msList'); if(!el) return;
     var res=await api('missed'); var all=(res.data&&res.data.missed)||[];
     var today=todayStr();
     all.forEach(function(m){ m._st = m.booked_ref ? 'booked' : m.on_waitlist ? 'wait' : m.status==='closed' ? 'closed' : m.res_date<today ? 'past' : 'open'; });
     var list = MS_VIEW==='open' ? all.filter(function(m){ return m._st==='open'; }) : all;
+    var asc = MS_VIEW==='open';
+    list.sort(function(a,b){ var k=(a.res_date+(a.res_time||'')).localeCompare(b.res_date+(b.res_time||'')); return asc?k:-k; });
     safe(msCount,'ms-count');
     if(!list.length){ el.innerHTML='<div class="empty">'+(MS_VIEW==='open'?'Personne à rappeler.':'Aucune réservation manquée.')+'</div>'; return; }
     var ST={open:['À rappeler','pending'], booked:['A réservé','accepted'], wait:['Liste d\u2019attente','accepted'], closed:['Traité','cancelled'], past:['Date passée','cancelled']};
+    var tmr=new Date(today+'T00:00:00'); tmr.setDate(tmr.getDate()+1); tmr=tmr.toISOString().slice(0,10);
+    var perDay={}; list.forEach(function(m){ perDay[m.res_date]=(perDay[m.res_date]||0)+1; });
+    var prevDay='';
     el.innerHTML=list.map(function(m){
-      var when=fdate(m.res_date)+(m.res_time?' · '+ftime(m.res_time):'')+' · '+m.party_size+' couv. · '+seat(m.seating);
+      var head='';
+      if(m.res_date!==prevDay){ prevDay=m.res_date;
+        var dn=m.res_date===today?'Aujourd\u2019hui · ':m.res_date===tmr?'Demain · ':'';
+        head='<div class="ms-day"><b>'+dn+esc(fdate(m.res_date))+'</b><span>'+perDay[m.res_date]+' client'+(perDay[m.res_date]>1?'s':'')+'</span></div>'; }
+      var when=(m.res_time?ftime(m.res_time)+' · ':'')+m.party_size+' couv. · '+seat(m.seating);
       var at=m.created_at ? tnTs(m.created_at) : '';
       var st=ST[m._st], open=m._st==='open';
       var wa=String(m.phone||'').replace(/\D/g,''); if(wa.length===8) wa='216'+wa;
-      return '<div class="row"><div class="row__main">'+
+      return head+'<div class="row"><div class="row__main">'+
         '<div class="row__name">'+esc(m.name)+'</div>'+
         '<div class="row__sub">'+[esc(m.phone), m.email?esc(m.email):''].filter(Boolean).join(' · ')+'</div>'+
         '<div class="row__when">Voulait : '+esc(when)+'</div>'+
