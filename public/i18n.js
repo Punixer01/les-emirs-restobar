@@ -305,9 +305,9 @@
     "Salades": "Salads",
     "Pizzas": "Pizzas",
     "À partager": "To share",
-    "Pas besoin d’attendre l’heure du déjeuner ou du dîner pour se faire plaisir !": "No need to wait for lunch or dinner to treat yourself!",
-    "Nos petits snacks gourmands sont là pour être partagés entre amis et accompagner vos apéros…":
-      "Our tasty little snacks are made for sharing with friends and to go with your drinks…",
+    "Envie juste d’un moment Apéro ?": "In the mood for a drink and a bite?",
+    "Voici nos petits snacks gourmands à partager et à savourer entre amis…":
+      "Here are our tasty little snacks, to share and enjoy with friends…",
     "Prix en dinars tunisiens (DT), taxes comprises.":
       "Prices in Tunisian dinars (DT), taxes included.",
     "Suggestions du jour et arrivages présentés à table.":
