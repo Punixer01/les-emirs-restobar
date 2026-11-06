@@ -359,16 +359,17 @@
       "Location of Restaurant Les Émirs in Port El Kantaoui",
 
     /* ---- titres de page ---- */
-    "Les Emirs - Restaurant, Port El Kantaoui": "Les Emirs - Restaurant, Port El Kantaoui",
-    "Apéros, déjeuners, dîners... et vibes chill au coeur de Port El Kantaoui. L'art de recevoir, au bord du port, face à la méditerranée...":
-      "Aperitifs, lunches, dinners... and chill vibes in the heart of Port El Kantaoui. The art of hosting, by the harbour, facing the Mediterranean Sea...",
+    "Restaurant Les Émirs – Spécialités tunisiennes et méditerranéennes à Port El Kantaoui":
+      "Restaurant Les Émirs – Tunisian and Mediterranean specialities in Port El Kantaoui",
+    "Vibes chill au cœur de Port El Kantaoui : apéros, déjeuners, dîners et soirées live en terrasse. Poissons, fruits de mer, spécialités tunisiennes et méditerranéennes.":
+      "Chill vibes in the heart of Port El Kantaoui: aperitifs, lunches, dinners and live nights on the terrace. Fish, seafood, Tunisian and Mediterranean specialities.",
     "La Carte — Les Émirs · Port El Kantaoui": "Menu — Les Émirs · Port El Kantaoui",
     "La carte du Restaurant Les Émirs, Port El Kantaoui : entrées, spécialités tunisiennes, pâtes, viandes, poissons et desserts.":
       "The menu of Restaurant Les Émirs, Port El Kantaoui: starters, Tunisian specialities, pasta, meat, fish and desserts.",
     "Modifier ma réservation — Les Émirs": "Change my booking — Les Émirs",
     "Votre réservation — Les Émirs": "Your booking — Les Émirs",
-    "Les Émirs — Restaurant & bar avec vue sur la marina à Port El Kantaoui, Sousse : cuisine tunisienne, fruits de mer et grillades, terrasse face à la mer, apéros et soirées live.":
-      "Les Émirs — Restaurant & bar overlooking the marina in Port El Kantaoui, Sousse: Tunisian cuisine, seafood and grills, seafront terrace, drinks and live nights."
+    "Restaurant Les Émirs — spécialités tunisiennes et méditerranéennes à Port El Kantaoui, Sousse : poissons et fruits de mer, terrasse au bord du port, apéros, musique live et vibes chill, entre amis ou en famille.":
+      "Restaurant Les Émirs — Tunisian and Mediterranean specialities in Port El Kantaoui, Sousse: fish and seafood, a terrace on the harbour, aperitifs, live music and chill vibes, with friends or family."
   };
 
   /* French month abbreviations as the date chips print them */
