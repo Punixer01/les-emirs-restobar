@@ -69,7 +69,14 @@ export default async (req) => {
      see what the client changed in the Acceptées list. The "à revoir" state is
      driven by status='pending', so accepting alone drops it from review. */
   const before = await sql`select status, arrived_at from reservations where id = ${id}`;
-  const rows = await sql`update reservations set status = ${status}, updated_at = datetime('now') where id = ${id} returning *`;
+  /* who refused / cancelled, stamped on the card: "Refusé par la réception" */
+  const who = { owner: "la direction", gerant: "le gérant", reception: "la réception" }[me.role] || "l’équipe";
+  const stamp = status === "declined" ? "Refusé par " + who : null;
+  /* a refusal stamp goes away if the booking is later accepted again */
+  const rows = await sql`update reservations set status = ${status}, updated_at = datetime('now'),
+      mod_summary = case when ${stamp} is not null then ${stamp}
+                         when mod_summary like 'Refusé par %' then null else mod_summary end
+    where id = ${id} returning *`;
   if (!rows.length) return json({ error: "not found" }, 404);
   const r = rows[0];
   const alreadyCame = before.length && (before[0].arrived_at || before[0].status === "arrived" || before[0].status === "seated");
@@ -92,7 +99,6 @@ export default async (req) => {
   if (status === "cancelled") {
     /* a cancelled booking frees its table straight away, and we stamp who did
        it so the rest of the team sees it on the card */
-    const who = me.role === "owner" ? "la direction" : "la réception";
     await sql`update reservations set table_id = null, waiting = 0, mod_summary = ${"Annulé par " + who} where id = ${id}`;
     r.table_id = null; r.waiting = 0; r.mod_summary = "Annulé par " + who;
     /* tell the guest the restaurant cancelled it (not them) */
