@@ -8,7 +8,11 @@ import { qrPng } from "./qr.mjs";
 /* env read lazily (works on Cloudflare, where env is populated per-request) */
 function getResend() { return process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null; }
 function mailFrom() { return process.env.MAIL_FROM || "Les Émirs <contact@lesemirs.com>"; }
-function restaurantEmail() { return process.env.RESTAURANT_EMAIL || null; }
+/* contact@ receives only the site's « Écrivez-nous » messages. Reservation
+   alerts (new, changed, cancelled, missed) reach the staff by push and on the
+   dashboards; they are emailed only if RESERVATION_EMAIL is set. */
+function restaurantEmail() { return process.env.RESERVATION_EMAIL || null; }
+function contactEmail() { return process.env.CONTACT_EMAIL || "contact@lesemirs.com"; }
 function base() { return process.env.PUBLIC_BASE_URL || "https://lesemirs.com"; }
 
 function vapid() {
@@ -725,8 +729,7 @@ export async function notifyOwnerMessage(sql, m) {
   /* a réclamation (/reclamation page, QR "Réclamation" door) goes, in full, to
      its own mailbox only — never to the contact inbox */
   const isClaim = /^\[Réclamation\]/.test(String(m.body || ""));
-  const re = restaurantEmail();
-  if (re && !isClaim) await sendEmail(re, `✉️ Nouveau message — ${m.name || "site"}`,
+  if (!isClaim) await sendEmail(contactEmail(), `✉️ Nouveau message — ${m.name || "site"}`,
     shell(`<b>Nouveau message depuis le site</b><br><br>${line}<br><br><a href="${base()}/admin">Ouvrir le tableau de bord</a>`));
   if (isClaim)
     await sendEmail(process.env.RECLAMATION_EMAIL || "reclamation@lesemirs.com", `⚠️ Réclamation — ${m.name || "client"}`,
