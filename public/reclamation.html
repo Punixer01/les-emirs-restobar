@@ -83,13 +83,7 @@ textarea{resize:vertical;min-height:160px}
 .sent .done{display:block}
 .sent form,.sent .head{display:none}
 
-.side h3{margin:0;font:300 clamp(1.4rem,2.4vw,1.8rem)/1.2 var(--serif)}
-.steps{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:18px}
-.steps li{display:grid;grid-template-columns:40px 1fr;gap:14px;align-items:start}
-.steps b{width:40px;height:40px;border-radius:50%;border:1px solid rgba(169,140,75,.5);display:flex;align-items:center;justify-content:center;font:400 15px/1 var(--serif);color:var(--gold)}
-.steps span{display:block;font-weight:500;color:var(--ink)}
-.steps small{display:block;color:var(--stone);font-size:14px;line-height:1.6}
-.contact{margin-top:30px;display:grid;gap:12px}
+.contact{display:grid;gap:12px}
 .contact a{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1px solid rgba(169,140,75,.4);border-radius:16px;background:linear-gradient(180deg,#fff,rgba(255,255,255,.5));transition:border-color .25s}
 .contact a:hover{border-color:var(--gold)}
 .contact svg{width:22px;height:22px;color:var(--gold);flex:0 0 auto}
@@ -171,17 +165,11 @@ textarea{resize:vertical;min-height:160px}
       <div class="done" role="status">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M7.8 12.3l2.8 2.8 5.6-6"/></svg>
         <h3 data-t="okH">Merci, c’est bien reçu.</h3>
-        <p data-t="okP">La direction a reçu votre réclamation et vous recontacte rapidement.</p>
+        <p data-t="okP">La direction a reçu votre réclamation et vous recontactera rapidement.</p>
       </div>
     </div>
 
     <aside class="side">
-      <h3 data-t="sH">Comment nous la traitons</h3>
-      <ol class="steps">
-        <li><b>1</b><div><span data-t="s1">Transmise à la direction</span><small data-t="s1p">Votre réclamation arrive directement chez la direction, en entier.</small></div></li>
-        <li><b>2</b><div><span data-t="s2">Étudiée avec l’équipe</span><small data-t="s2p">Nous vérifions ce qui s’est passé le jour de votre visite.</small></div></li>
-        <li><b>3</b><div><span data-t="s3">Une réponse personnelle</span><small data-t="s3p">Nous vous rappelons ou vous écrivons pour faire suite à votre réclamation.</small></div></li>
-      </ol>
       <div class="contact">
         <a href="mailto:reclamation@lesemirs.com" data-claim-mail>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg>
@@ -231,10 +219,7 @@ textarea{resize:vertical;min-height:160px}
         lTopic:"Sujet", tService:"Service", tFood:"Nourriture", tBooking:"Réservation", tBill:"Addition", tOther:"Autre",
         lName:"Nom", lPhone:"Téléphone", lEmail:"Email", lDay:"Date de la visite", opt:"(facultatif)", lBody:"Votre réclamation",
         ph:"Ce qui s’est passé, l’heure, la table…", send:"Envoyer la réclamation",
-        okH:"Merci, c’est bien reçu.", okP:"La direction a reçu votre réclamation et vous recontacte rapidement.",
-        sH:"Comment nous la traitons", s1:"Transmise à la direction", s1p:"Votre réclamation arrive directement chez la direction, en entier.",
-        s2:"Étudiée avec l’équipe", s2p:"Nous vérifions ce qui s’est passé le jour de votre visite.",
-        s3:"Une réponse personnelle", s3p:"Nous vous rappelons ou vous écrivons pour faire suite à votre réclamation.",
+        okH:"Merci, c’est bien reçu.", okP:"La direction a reçu votre réclamation et vous recontactera rapidement.",
         cMail:"Par email", cPhone:"Par téléphone", note:"Une question, une demande d’information ?", noteA:"Écrivez-nous",
         fTag:"Apéros, déjeuners, dîners… et vibes chill au cœur de Port El Kantaoui.", fHours:"Horaires", fHoursV:"Tous les jours · 12h — 00h", fHome:"Retour au site",
         eName:"Merci d’indiquer votre nom.", ePhone:"Merci d’indiquer votre téléphone pour que nous puissions vous rappeler.",
@@ -247,9 +232,6 @@ textarea{resize:vertical;min-height:160px}
         lName:"Name", lPhone:"Phone", lEmail:"Email", lDay:"Date of visit", opt:"(optional)", lBody:"Your complaint",
         ph:"What happened, the time, the table…", send:"Send the complaint",
         okH:"Thank you, we have received it.", okP:"The management has your complaint and will get back to you quickly.",
-        sH:"How we handle it", s1:"Sent to the management", s1p:"Your complaint goes straight to the management, in full.",
-        s2:"Reviewed with the team", s2p:"We check what happened on the day of your visit.",
-        s3:"A personal answer", s3p:"We call you back or write to you to follow up on your complaint.",
         cMail:"By email", cPhone:"By phone", note:"A question, need some information?", noteA:"Write to us",
         fTag:"Aperitifs, lunches, dinners… and chill vibes in the heart of Port El Kantaoui.", fHours:"Opening hours", fHoursV:"Every day · 12pm — 12am", fHome:"Back to the website",
         eName:"Please enter your name.", ePhone:"Please enter your phone number so we can call you back.",
