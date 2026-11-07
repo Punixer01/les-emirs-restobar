@@ -305,9 +305,9 @@
     "Salades": "Salads",
     "Pizzas": "Pizzas",
     "À partager": "To share",
-    "Envie juste d’un moment Apéro ?": "In the mood for a drink and a bite?",
+    "Envie juste d’un moment Apéro ?": "Just here for an aperitif moment?",
     "Voici nos petits snacks gourmands à partager et à savourer entre amis…":
-      "Here are our tasty little snacks, to share and enjoy with friends…",
+      "Enjoy our delicious snacks, made for sharing with friends…",
     "Prix en dinars tunisiens (DT), taxes comprises.":
       "Prices in Tunisian dinars (DT), taxes included.",
     "Suggestions du jour et arrivages présentés à table.":
