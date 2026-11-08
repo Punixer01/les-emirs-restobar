@@ -361,8 +361,8 @@
     /* ---- titres de page ---- */
     "Restaurant Les Émirs – Spécialités tunisiennes et méditerranéennes à Port El Kantaoui":
       "Restaurant Les Émirs – Tunisian and Mediterranean specialities in Port El Kantaoui",
-    "Vibes chill au cœur de Port El Kantaoui : apéros, déjeuners, dîners et soirées live en terrasse. Poissons, fruits de mer, spécialités tunisiennes et méditerranéennes.":
-      "Chill vibes in the heart of Port El Kantaoui: aperitifs, lunches, dinners and live nights on the terrace. Fish, seafood, Tunisian and Mediterranean specialities.",
+    "Apéros, déjeuners, dîners et vibes chill au cœur de Port El Kantaoui. Soirées live en terrasse. Spécialités tunisiennes & méditerranéennes, poissons & fruits de mer.":
+      "Aperitifs, lunches, dinners and chill vibes in the heart of Port El Kantaoui. Live nights on the terrace. Tunisian & Mediterranean specialities, fish & seafood.",
     "La Carte — Les Émirs · Port El Kantaoui": "Menu — Les Émirs · Port El Kantaoui",
     "La carte du Restaurant Les Émirs, Port El Kantaoui : entrées, spécialités tunisiennes, pâtes, viandes, poissons et desserts.":
       "The menu of Restaurant Les Émirs, Port El Kantaoui: starters, Tunisian specialities, pasta, meat, fish and desserts.",
