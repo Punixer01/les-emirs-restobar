@@ -696,7 +696,7 @@ body.is-gerant .op__acts:not(:has(.op__thumb)), body.is-readonly .op__acts:not(:
 .tag--due:hover{background:#f9e3d6}
 @keyframes dueGlow{0%,100%{box-shadow:0 0 0 0 rgba(164,85,47,0)}50%{box-shadow:0 0 0 4px rgba(164,85,47,.16)}}
 @media(prefers-reduced-motion:reduce){.tag--due{animation:none}}
-.row__occ{margin-top:6px;font-size:13px;color:#8a6d1f;background:#faf5e6;border:1px solid #ecdfbf;border-radius:8px;padding:6px 10px;display:inline-block}
+.row__occ{margin-top:6px;font-size:15px;font-weight:700;color:#8a6d1f;background:#faf5e6;border:1px solid #ecdfbf;border-radius:8px;padding:6px 10px;display:inline-block}
 .row__mod{margin-top:6px;font-size:12.5px;color:#a4552f}
 /* ---- Ardoise (unpaid tables) ---- */
 .ard-photo{display:flex;align-items:center;gap:12px;padding:14px;border:1.5px dashed var(--line);border-radius:12px;background:var(--bone);color:var(--stone);font-size:14px;font-weight:500;cursor:pointer;transition:border-color .2s,background .2s}
@@ -2015,7 +2015,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
     if(r.arrived_at) t+='<span class="tag tag--arr">arrivé</span>';            /* stays visible while Accepté (#2) */
     if(r.arrival_undos>0) t+='<span class="tag tag--corr" title="Arrivée corrigée '+r.arrival_undos+' fois (clic par erreur)">↩ '+r.arrival_undos+' correction'+(r.arrival_undos>1?'s':'')+'</span>';
     if(r.modified&&r.status==='pending') t+='<span class="tag tag--mod">modifiée · à revoir</span>';  /* pending only: the "à revoir" action cue; accepted cards rely on the detail line below (no duplicate) */
-    if(r.status==='cancelled'&&r.mod_summary) t+='<span class="tag tag--cancel">'+esc(r.mod_summary)+'</span>';  /* who cancelled, as a badge */
+    if((r.status==='cancelled'||r.status==='declined')&&r.mod_summary) t+='<span class="tag tag--cancel">'+esc(r.mod_summary)+'</span>';  /* who cancelled / refused, as a badge */
     if(r.waiting) t+='<span class="tag tag--wait">attend une table</span>';
     if(r.late_minutes>0) t+='<span class="tag tag--late">'+r.late_minutes+' min de retard</span>';
     else if(r.late_minutes===0 && r.arrived_at) t+='<span class="tag tag--ontime">à l\'heure</span>';
@@ -2247,7 +2247,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
               '<span class="nowrap">réf '+esc(r.reference)+'</span>'
             ].filter(Boolean).join(' · ')+history(r)+'</div>'+
           occasion(r)+
-          (r.mod_summary&&r.status!=='cancelled'?'<div class="row__mod">'+esc(r.mod_summary)+'</div>':'')+
+          (r.mod_summary&&r.status!=='cancelled'&&r.status!=='declined'?'<div class="row__mod">'+esc(r.mod_summary)+'</div>':'')+
         '</div>'+
         '<span class="pill pill--'+r.status+'">'+statusFr(r.status)+(r.arrived_at&&r.status==='accepted'?' · arrivé':'')+'</span>'+
         '<div class="act">'+a+'</div></div>';
