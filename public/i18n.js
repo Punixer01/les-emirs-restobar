@@ -306,7 +306,9 @@
     "Pizzas": "Pizzas",
     "À partager": "To share",
     "Envie juste d’un moment Apéro ?": "Just here for an aperitif moment?",
-    "Cocktails, mocktails & shots à partir de 17h": "Cocktails, mocktails & shots from 5 pm",
+    "À partir de 17h": "From 5 pm",
+    "Cocktails, mocktails & shots": "Cocktails, mocktails & shots",
+    "Préparés par notre mixologue, de 17h à minuit.": "Made by our mixologist, from 5 pm to midnight.",
     "Voici nos petits snacks gourmands à partager et à savourer entre amis…":
       "Enjoy our delicious snacks, made for sharing with friends…",
     "Prix en dinars tunisiens (DT), taxes comprises.":
