@@ -457,6 +457,10 @@
   };
 
   /* ---- language choice ---- */
+  /* the staff dashboards load this file only for the menu editor's English
+     boxes: no FR | EN switch there, always in French (the guest's choice on
+     this phone is left alone) */
+  if (window.EMIRS_STAFF) { window.EMIRS_LANG = "fr"; return; }
   if (!ENABLED) {
     try { localStorage.removeItem("emirs_lang"); } catch (e) {}
     window.EMIRS_LANG = "fr";

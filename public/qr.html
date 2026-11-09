@@ -86,7 +86,7 @@ body.ready .door:nth-child(5){animation-delay:.49s} body.ready .doors>div .door{
 .door[aria-expanded="true"] .door__arr{transform:rotate(90deg)}
 
 /* social: opens under its door */
-.social{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--ease)}
+.social{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--ease);scroll-margin-bottom:18px}
 .social.open{grid-template-rows:1fr}
 .social>div{overflow:hidden;display:grid;gap:8px}
 .social.open>div{padding-top:2px}
@@ -221,7 +221,11 @@ body.ready .skip{display:none}
   document.getElementById("skip").addEventListener("click", ready);
 
   /* ---- social opens in place ---- */
-  function opener(btn, panel){ btn.addEventListener("click", function(){ var o=btn.getAttribute("aria-expanded")!=="true"; btn.setAttribute("aria-expanded", String(o)); panel.classList.toggle("open", o); }); }
+  /* opening a door scrolls down to what it opened, once the panel has unfolded */
+  function opener(btn, panel){ btn.addEventListener("click", function(){ var o=btn.getAttribute("aria-expanded")!=="true"; btn.setAttribute("aria-expanded", String(o)); panel.classList.toggle("open", o);
+    if(!o) return;
+    var done=false, go=function(){ if(done) return; done=true; panel.scrollIntoView({behavior:"smooth", block:"nearest"}); };
+    panel.addEventListener("transitionend", go, {once:true}); setTimeout(go, 650); }); }
   opener(document.getElementById("socialBtn"), document.getElementById("social"));
   /* La Carte: Menu · Boissons · Snacks/Apéros */
   opener(document.getElementById("menuBtn"), document.getElementById("cartes"));
