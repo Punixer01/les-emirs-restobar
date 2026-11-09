@@ -1533,8 +1533,16 @@ p{margin:0}
         tapas:["Snacks/Apéros","Our snacks list is coming online soon — please ask your waiter."],
         menu:["The menu","Our menu is coming online soon."]}
   };
+  /* cocktails & mocktails only while the mixologist is in: 17:00 → midnight,
+     restaurant time (a tourist's phone may be on another time zone) */
+  function barOpen(){
+    try{ return +new Intl.DateTimeFormat("en-GB",{timeZone:"Africa/Tunis",hour:"2-digit",hourCycle:"h23"}).format(new Date())>=17; }
+    catch(e){ return new Date().getHours()>=17; }
+  }
+  var MIXO=/^(cocktails|mocktails)$/i;
   function buildMenu(data){
-    data=data.filter(function(sec){ return (sec.k||"menu")===CUR_CAT; });
+    var bar=barOpen();
+    data=data.filter(function(sec){ return (sec.k||"menu")===CUR_CAT && (bar || !MIXO.test((sec.c||"").trim())); });
     sheetFoot.hidden = CUR_CAT!=="tapas";
     /* a carte with one section (Snacks/Apéros): its button already names it —
        no section tab, no heading repeating it */
