@@ -23,6 +23,7 @@ Réalisé et maintenu par l'agence **Autopat** (Mehdi Karoui, +216 24 692 211). 
 - **Aucune trace d'IA**, ni sur le site ni dans l'historique Git :
   - pas de ligne `Co-Authored-By`, pas de lien `Claude-Session`, pas de « Generated with … » dans les commits ou les pull requests ;
   - auteur des commits : `Mahassen <restaurant.lesemirs@gmail.com>`, sans « via Claude » ;
+    au début de chaque session, avant tout commit : `git config user.name "Mahassen"` puis `git config user.email "restaurant.lesemirs@gmail.com"` ;
   - aucune mention de Claude, Anthropic ou d'une IA dans les pages, les commentaires ou les textes.
 - **Code serveur** : ne pas modifier `netlify/functions/`, `functions/`, `mail-worker/`, `cron/`, `db/`, `scripts/` sans accord de Mehdi. Ces dossiers gèrent les réservations, les emails et les dettes clients : une erreur s'y voit chez les clients.
 
