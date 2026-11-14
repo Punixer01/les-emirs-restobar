@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="facebook-domain-verification" content="6hzd6s6iiaimqlh7zo7da4nxba13am" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="only light" />
 <title>Restaurant Les Émirs – Spécialités tunisiennes et méditerranéennes à Port El Kantaoui</title>
 <meta name="description" content="Apéros, déjeuners, dîners et vibes chill au cœur de Port El Kantaoui. Soirées live en terrasse. Spécialités tunisiennes &amp; méditerranéennes, poissons &amp; fruits de mer." />
 <meta name="keywords" content="restaurant Les Émirs, restaurant Sousse, restaurant méditerranéen Sousse, restaurant tunisien Sousse, restaurant Port El Kantaoui, restaurant vue mer Sousse, restaurant vue sur la marina, meilleur restaurant Sousse, où manger à Sousse, restaurant fruits de mer Sousse, restaurant poisson Sousse, terrasse Port El Kantaoui, soirée karaoké Sousse, gargoulette des Emirs, gastronomie tunisienne, Les Émirs, réserver restaurant Sousse" />
@@ -285,10 +286,11 @@ p{margin:0}
   box-shadow:0 -30px 90px rgba(0,0,0,.4);transform:translateY(34px);transition:transform .6s var(--ease)}
 .sheet.open .sheet__box{transform:none}
 .sheet__head{padding:clamp(22px,3vw,34px) clamp(22px,4vw,52px) 0;flex-shrink:0;transition:padding .35s var(--ease)}
-/* scrolling down the carte folds the logo/title away: only the cartes and sections stay */
+/* scrolling down the carte folds the title row away; the logo bar (logo, Réserver, ×) always stays */
 .sheet__bar,.sheet__titlerow{max-height:160px;transition:max-height .35s var(--ease),opacity .25s,margin .35s var(--ease)}
 .sheet__head.mini{padding-top:10px}
-.sheet__head.mini .sheet__bar,.sheet__head.mini .sheet__titlerow{max-height:0;opacity:0;margin:0;overflow:hidden;pointer-events:none}
+.sheet__head.mini .sheet__titlerow{max-height:0;opacity:0;margin:0;overflow:hidden;pointer-events:none}
+.sheet__head.mini .sheet__logo{margin-bottom:4px}
 .sheet__head.mini .sheet__cats{margin-top:0}
 .sheet__head.mini .sheet__cats button{padding:10px 6px}
 .sheet__head.mini .sheet__tabs{padding:12px 0 10px}
@@ -1637,7 +1639,7 @@ p{margin:0}
   }
   sheetCats.addEventListener("click", function(e){
     var b=e.target.closest("[data-cat]"); if(!b || b.getAttribute("data-cat")===CUR_CAT) return;
-    setCat(b.getAttribute("data-cat")); track('menu_cat',{cat:CUR_CAT});
+    foldHead(); setCat(b.getAttribute("data-cat")); track('menu_cat',{cat:CUR_CAT});
   });
 
   /* tab click -> scroll inside sheet.
@@ -1660,17 +1662,24 @@ p{margin:0}
   sheetTabs.addEventListener("click", function(e){
     var b=e.target.closest("button"); if(!b) return;
     var t=document.getElementById(b.dataset.target); if(!t) return;
+    foldHead();
+    /* measured after the fold has settled, so it lands on the heading */
+    setTimeout(function(){
     var top=sheetBody.scrollTop + t.getBoundingClientRect().top - sheetBody.getBoundingClientRect().top - 6;
     glideTo(Math.max(0, Math.min(top, sheetBody.scrollHeight-sheetBody.clientHeight)));
+    }, 360);
   });
   /* scroll-spy the tabs — never call scrollIntoView here: it would cancel
      the sheet's own smooth scroll. The tab strip is panned by scrollLeft. */
   var spy=null, lastCur=null;
   /* fold the head while reading down, unfold on the way back up */
-  var sheetHead=sheet.querySelector(".sheet__head"), lastY=0;
+  var sheetHead=sheet.querySelector(".sheet__head"), lastY=0, holdMini=0;
+  /* a tap on Menu / Boissons / Snacks or on a section goes straight to the
+     dishes: the title row folds away (logo stays) and the list glides there */
+  function foldHead(){ holdMini=Date.now()+900; sheetHead.classList.add("mini"); }
   sheetBody.addEventListener("scroll", function(){
     var y=sheetBody.scrollTop, d=y-lastY;
-    if(y<30 || d<-12) sheetHead.classList.remove("mini");
+    if((y<30 || d<-12) && Date.now()>holdMini) sheetHead.classList.remove("mini");
     else if(d>8 && y>60 && sheetBody.scrollHeight-sheetBody.clientHeight>240) sheetHead.classList.add("mini");
     if(Math.abs(d)>8 || y<30) lastY=y;
   }, {passive:true});
