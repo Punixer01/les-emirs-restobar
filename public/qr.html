@@ -107,6 +107,22 @@ body.ready .door:nth-child(5){animation-delay:.49s} body.ready .doors>div .door{
 .skip{position:fixed;inset:0;z-index:3;background:none;border:0;cursor:pointer}
 body.ready .skip{display:none}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+/* a door is open: the page tightens so all five doors AND what opened fit on
+   one phone screen, with no scrolling */
+@media(max-height:860px){
+  body.compact main{padding-top:calc(18px + env(safe-area-inset-top));padding-bottom:16px}
+  body.compact .logo{width:128px;margin:6px 0 2px}
+  body.compact .rule--b{margin-top:8px}
+  body.compact .doors{margin-top:12px;gap:8px}
+  body.compact .door{padding:10px 14px 10px 12px;gap:12px}
+  body.compact .door__ico{flex-basis:38px;height:38px}
+  body.compact .door__ico svg{width:17px;height:17px}
+  body.compact .door__t{font-size:18px}
+  body.compact .door__sub{font-size:9.5px;margin-top:2px}
+  body.compact .carte{padding:11px 6px 10px;gap:5px}
+  body.compact .soc{padding:10px 14px}
+}
+body.compact main,body.compact .logo,body.compact .door{transition:padding .4s var(--ease),width .4s var(--ease),margin .4s var(--ease),transform .5s var(--ease)}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01s!important;animation-delay:0s!important;transition-duration:.01s!important}
 }
@@ -222,7 +238,12 @@ body.ready .skip{display:none}
 
   /* ---- social opens in place ---- */
   /* opening a door scrolls down to what it opened, once the panel has unfolded */
-  function opener(btn, panel, stay){ btn.addEventListener("click", function(){ var o=btn.getAttribute("aria-expanded")!=="true"; btn.setAttribute("aria-expanded", String(o)); panel.classList.toggle("open", o);
+  /* one door open at a time; while one is open the page goes compact */
+  var OPENERS=[];
+  function opener(btn, panel, stay){ OPENERS.push([btn,panel]); btn.addEventListener("click", function(){ var o=btn.getAttribute("aria-expanded")!=="true";
+    OPENERS.forEach(function(p){ if(p[0]!==btn){ p[0].setAttribute("aria-expanded","false"); p[1].classList.remove("open"); } });
+    btn.setAttribute("aria-expanded", String(o)); panel.classList.toggle("open", o);
+    document.body.classList.toggle("compact", o);
     if(!o || stay) return;
     var done=false, go=function(){ if(done) return; done=true; panel.scrollIntoView({behavior:"smooth", block:"nearest"}); };
     panel.addEventListener("transitionend", go, {once:true}); setTimeout(go, 650); }); }
