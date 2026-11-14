@@ -108,6 +108,13 @@ body.ready .door:nth-child(5){animation-delay:.49s} body.ready .doors>div .door{
 .skip{position:fixed;inset:0;z-index:3;background:none;border:0;cursor:pointer}
 body.ready .skip{display:none}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+/* a door is open: the logo folds away so every button stays on screen
+   (sizes unchanged); it comes back when the door closes */
+.mark{max-height:260px;overflow:hidden}
+body.ready .mark{transition:margin-top 1.3s var(--ease),max-height .45s var(--ease),opacity .3s}
+body.ready.folded .mark{max-height:0;opacity:0}
+body.folded .doors{margin-top:0}
+body.ready .doors{transition:margin-top .45s var(--ease)}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01s!important;animation-delay:0s!important;transition-duration:.01s!important}
 }
@@ -223,8 +230,12 @@ body.ready .skip{display:none}
 
   /* ---- social opens in place ---- */
   /* opening a door scrolls down to what it opened, once the panel has unfolded */
-  function opener(btn, panel, stay){ btn.addEventListener("click", function(){ var o=btn.getAttribute("aria-expanded")!=="true";
+  /* one door open at a time; while one is open the logo folds away */
+  var OPENERS=[];
+  function opener(btn, panel, stay){ OPENERS.push([btn,panel]); btn.addEventListener("click", function(){ var o=btn.getAttribute("aria-expanded")!=="true";
+    OPENERS.forEach(function(p){ if(p[0]!==btn){ p[0].setAttribute("aria-expanded","false"); p[1].classList.remove("open"); } });
     btn.setAttribute("aria-expanded", String(o)); panel.classList.toggle("open", o);
+    document.body.classList.toggle("folded", o);
     if(!o || stay) return;
     var done=false, go=function(){ if(done) return; done=true; panel.scrollIntoView({behavior:"smooth", block:"nearest"}); };
     panel.addEventListener("transitionend", go, {once:true}); setTimeout(go, 650); }); }
