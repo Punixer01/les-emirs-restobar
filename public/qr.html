@@ -228,8 +228,7 @@ body.ready .skip{display:none}
     panel.addEventListener("transitionend", go, {once:true}); setTimeout(go, 650); }); }
   opener(document.getElementById("socialBtn"), document.getElementById("social"));
   /* La Carte: Menu · Boissons · Snacks/Apéros */
-  /* La Carte opens in place without scrolling: the five doors stay in view */
-  opener(document.getElementById("menuBtn"), document.getElementById("cartes"), true);
+  opener(document.getElementById("menuBtn"), document.getElementById("cartes"));
 
   /* ---- the terrace film, only on a connection that can afford it ---- */
   var c=navigator.connection||{};
