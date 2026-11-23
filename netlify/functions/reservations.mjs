@@ -2,9 +2,10 @@ import { sql } from "./_lib/db.mjs";
 import { recordMissed } from "./missed.mjs";
 import { dueIndex } from "./_lib/dues.mjs";
 import { json, readBody, validateBooking, makeRef, fmtDate, fmtTime, seatFr } from "./_lib/util.mjs";
-import { auth, passToken, STAFF, WRITERS, isWatcher } from "./_lib/auth.mjs";
+import { auth, passToken, signId, STAFF, WRITERS, isWatcher } from "./_lib/auth.mjs";
+import { enabled as payOnline } from "./_lib/clictopay.mjs";
 import { sweepExpired } from "./_lib/sweep.mjs";
-import { notifyClientReceived, notifyClientDecision, notifyOwnerNew, pushOwners } from "./_lib/notify.mjs";
+import { notifyClientReceived, notifyClientDecision, notifyOwnerNew, notifyCreditReminder, pushOwners } from "./_lib/notify.mjs";
 import { rateLimit } from "./_lib/ratelimit.mjs";
 
 // GET  /api/reservations   (staff) — ?status= &date= &scope=today|upcoming|waiting
@@ -270,12 +271,41 @@ async function create(req) {
     catch (e) { console.error("[assign at create]", e); }
   }
 
+  /* online payment settings (owner): { deposit_min, deposit_per_person, reminder_fr, reminder_en } */
+  let pay = {};
+  if (!staff) {
+    try { const s = await sql`select value from settings where key = 'payments'`; if (s.length) pay = JSON.parse(s[0].value) || {}; }
+    catch (e) { pay = {}; }
+  }
+  /* a large group leaves a deposit per person, fixed now so a later change of
+     setting never moves what this guest was asked */
+  let deposit = null;
+  const per = Number(pay.deposit_per_person) || 0;
+  if (!staff && per > 0 && r.party_size >= (Number(pay.deposit_min) || 10)) {
+    const due = Math.round(r.party_size * per * 1000) / 1000;
+    try {
+      await sql`update reservations set deposit_due = ${due} where id = ${r.id}`;
+      r.deposit_due = due;
+      deposit = { amount: due, url: payOnline() ? `/api/pay?k=deposit&id=${r.id}&t=${passToken(r.id)}` : null };
+      if (deposit.url) r.deposit_url = deposit.url;
+    } catch (e) { console.error("[deposit]", e); }
+  }
+
   // notifications: guests always hear back; staff bookings only if asked
   if (!staff) {
     try { await notifyClientReceived(r); } catch (e) { console.error("[notify client]", e); }
     let debt = null;
     try { debt = (await dueIndex())(clientId, r.phone); } catch (e) { /* never block a booking */ }
     try { await notifyOwnerNew(sql, r, debt); } catch (e) { console.error("[notify owner]", e); }
+    /* a guest who still owes on the Crédit book can book, and is reminded to
+       settle it — with a pay link per account once online payment is on.
+       Sent only when the owner has written the reminder text. */
+    const text = r.lang === "en" ? (pay.reminder_en || pay.reminder_fr) : pay.reminder_fr;
+    if (debt && r.email && text) {
+      const links = payOnline() ? debt.accounts.map((a) => ({
+        amount: a.balance, url: `/api/pay?k=credit&a=${a.id}&t=${signId("credit", a.id)}` })) : [];
+      try { await notifyCreditReminder(r, debt.due, text, links); } catch (e) { console.error("[credit reminder]", e); }
+    }
   } else {
     /* a staff-added booking pings every staff device (direction + réception) so
        the whole team sees it appear, and still emails the guest if asked. */
@@ -301,7 +331,7 @@ async function create(req) {
   // the guest gets their pass immediately — no waiting on email
   const pt = passToken(r.id);
   return json({
-    ok: true, reference, reservation: r,
+    ok: true, reference, reservation: r, deposit,
     pass: { id: r.id, token: pt, url: `/pass?r=${r.id}&t=${pt}` },
   });
 }

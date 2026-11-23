@@ -379,6 +379,30 @@ function occBlock(r) {
   return `<div style="margin:16px 0;padding:12px 14px;background:#faf5e6;border:1px solid #ecdfbf;border-radius:8px;font-size:13.5px;color:#8a6d1f">✎ ${esc(r.note)}</div>`;
 }
 
+/* a group booking's deposit: the amount, and the pay button once online payment is on */
+function depositBlock(r, en) {
+  if (!r || !(Number(r.deposit_due) > 0)) return "";
+  const amt = Number(r.deposit_due).toFixed(3) + " DT";
+  const txt = en ? `For a group of ${r.party_size}, a deposit of <b>${amt}</b> confirms your table.`
+                 : `Pour un groupe de ${r.party_size} personnes, un acompte de <b>${amt}</b> confirme votre table.`;
+  return `<br><div style="padding:12px 14px;border:1px solid #e2dccf;border-radius:8px;background:#faf7f0">${txt}` +
+    (r.deposit_url ? btn(base() + r.deposit_url, en ? "Pay the deposit" : "Régler l’acompte", true) : "") + `</div>`;
+}
+
+/* A guest who still owes on the Crédit book: the owner's own reminder text,
+   the amount, and one pay button per account (none until online payment is on). */
+export async function notifyCreditReminder(r, due, text, links) {
+  const en = isEn(r);
+  const html = shell(
+    `<div style="font-family:Georgia,serif;font-size:19px;color:#17150f;margin-bottom:18px">${en ? "Your account at Les Émirs" : "Votre compte aux Émirs"}</div>` +
+    esc(text).replace(/\n/g, "<br>") +
+    `<br><br>${en ? "Amount due" : "Montant dû"} : <b>${Number(due).toFixed(3)} DT</b>` +
+    (links || []).map((l) => btn(base() + l.url, (en ? "Pay " : "Régler ") + Number(l.amount).toFixed(3) + " DT", true)).join("")
+  );
+  await sendEmail(r.email, en ? "Your account — Les Émirs" : "Votre compte — Les Émirs", html);
+  try { await logOutbound(r.email, en ? "Your account — Les Émirs" : "Votre compte — Les Émirs", html); } catch (e) { /* the log never blocks the mail */ }
+}
+
 export async function notifyClientReceived(r) {
   if (isEn(r)) {
     const whenEn = `${enDateLong(r.res_date)}, ${fmtTime(r.res_time)}`;
@@ -389,6 +413,7 @@ export async function notifyClientReceived(r) {
        <b>${whenEn}</b><br>
        ${r.party_size} guest${r.party_size > 1 ? "s" : ""} · ${seatEn(r.seating)}<br>` +
        occBlock(r) +
+       depositBlock(r, true) +
        `<br>Thank you, we have received your booking request. <b style="font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:17px;color:#17150f">A booking is only valid once our team has confirmed it by email.</b><br><br>We will reply to your request as soon as possible.`
     );
     const smsEn = `Les Emirs: booking request received (${r.reference}) - ${whenEn}, ${r.party_size} guests.` +
@@ -405,6 +430,7 @@ export async function notifyClientReceived(r) {
      <b>${when}</b><br>
      ${r.party_size} couverts · ${seatPhrase(r.seating)}<br>` +
      occBlock(r) +
+     depositBlock(r, false) +
      `<br>Merci, nous avons reçu votre demande de réservation. <b style="font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:17px;color:#17150f">La réservation n’est considérée valide que seulement après la confirmation de notre équipe envoyée par email.</b><br><br>Nous vous enverrons une réponse à votre demande dans les plus brefs délais.`
   );
   const sms = `Les Emirs: demande de reservation recue (${r.reference}) — ${when}, ${r.party_size} couverts.` + (r.note ? ` Occasion: ${r.note}.` : "") + ` Valide seulement apres confirmation de notre equipe par email.`;

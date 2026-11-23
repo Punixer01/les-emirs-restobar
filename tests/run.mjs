@@ -14,7 +14,7 @@ const TMP = path.join(HERE, ".tmp");
 fs.rmSync(TMP, { recursive: true, force: true });
 fs.mkdirSync(path.join(TMP, "_lib"), { recursive: true });
 for (const f of fs.readdirSync(SRC)) if (f.endsWith(".mjs")) fs.copyFileSync(path.join(SRC, f), path.join(TMP, f));
-for (const f of ["auth.mjs", "util.mjs", "dues.mjs", "xlsx.mjs", "qr.mjs", "reminders.mjs"])
+for (const f of ["auth.mjs", "util.mjs", "dues.mjs", "xlsx.mjs", "qr.mjs", "reminders.mjs", "clictopay.mjs"])
   fs.copyFileSync(path.join(SRC, "_lib", f), path.join(TMP, "_lib", f));
 
 /* the database: every query is logged; a test decides the answers */
@@ -43,7 +43,7 @@ export const sendSms = rec("sms"), sendWhatsApp = rec("wa"), sendWhatsAppTemplat
 export const pushTest = rec("pushtest"), telegram = rec("telegram");
 export const notifyClientReceived = rec("received"), notifyClientDecision = rec("decision");
 export const notifyClientCancelled = rec("cancelled"), notifyClientCustom = rec("custom");
-export const notifyClientReminder = rec("reminder");
+export const notifyClientReminder = rec("reminder"), notifyCreditReminder = rec("creditReminder");
 export const notifyOwnerNew = rec("ownerNew"), notifyOwnerChange = rec("ownerChange"), notifyOwnerCancel = rec("ownerCancel"), notifyOwnerMissed = rec("ownerMissed");
 export const notifyOwnerMessage = rec("ownerMsg"), sendClientMessage = rec("clientMsg"), sendMarketingEmail = rec("marketing");
 export const shell = (s) => String(s);

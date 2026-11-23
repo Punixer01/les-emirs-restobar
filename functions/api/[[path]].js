@@ -34,6 +34,7 @@ import waitlist from "../../netlify/functions/waitlist.mjs";
 import missed from "../../netlify/functions/missed.mjs";
 import audit from "../../netlify/functions/audit.mjs";
 import cron from "../../netlify/functions/cron.mjs";
+import pay from "../../netlify/functions/pay.mjs";
 import { verifyToken, sessionStillValid } from "../../netlify/functions/_lib/auth.mjs";
 import { sql } from "../../netlify/functions/_lib/db.mjs";
 
@@ -72,6 +73,7 @@ const routes = {
   missed,
   audit,
   cron,
+  pay,
 };
 
 function json(data, status) {
@@ -85,7 +87,7 @@ function json(data, status) {
    one to its JSON reply, a readable summary (`audit`: names, before/after).
    Public website traffic is not dashboard activity and is not recorded.
    Access codes, PINs, photos, files and push subscriptions are never kept. */
-const UNTRACKED = new Set(["track", "wa-webhook", "qr", "pass", "setup", "audit", "cron"]);
+const UNTRACKED = new Set(["track", "wa-webhook", "qr", "pass", "setup", "audit", "cron", "pay"]);
 const HIDE = /_code$|^pin$|password|token|photo|attachment|subscription/i;
 
 function scrub(v, depth) {

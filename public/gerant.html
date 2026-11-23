@@ -689,6 +689,8 @@ body.is-gerant .op__acts:not(:has(.op__thumb)), body.is-readonly .op__acts:not(:
 .tag--own{background:#eee9dd;color:#726a5c}
 .tag--arr{background:#eaf3ef;color:#1f473f;border:1px solid #b7d6c8}
 .tag--mod{background:#fdf1ea;color:#a4552f;border:1px solid #e8cbbb;font-weight:600}
+.tag--paid{background:#e6f2ea;color:#1f6b3a;border:1px solid #bfdcc8;font-weight:600}
+.tag--due{background:#fbf3e2;color:#8a6d1f;border:1px solid #ecdfbf;font-weight:600}
 .tag--cancel{background:#fbe9e7;color:#a12f22;border:1px solid #eec4bd;font-weight:600}
 .tag--risk{background:#f6e3e0;color:#8f2318;border:1px solid #e9bdb6;font-weight:600}
 .tag--due{background:#fdf1ea;color:#a4552f;border:1px solid #e8cbbb;font-weight:700;cursor:pointer;font-family:inherit;line-height:inherit;
@@ -2017,6 +2019,12 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
     if(r.modified&&r.status==='pending') t+='<span class="tag tag--mod">modifiée · à revoir</span>';  /* pending only: the "à revoir" action cue; accepted cards rely on the detail line below (no duplicate) */
     if((r.status==='cancelled'||r.status==='declined')&&r.mod_summary) t+='<span class="tag tag--cancel">'+esc(r.mod_summary)+'</span>';  /* who cancelled / refused, as a badge */
     if(r.waiting) t+='<span class="tag tag--wait">attend une table</span>';
+    /* group deposit: paid online or still to pay */
+    if(r.deposit_due>0){
+      var dp=Number(r.deposit_paid||0), dd=Number(r.deposit_due);
+      t+= dp>=dd-0.0005 ? '<span class="tag tag--paid">💳 acompte payé '+dd.toFixed(3)+' DT</span>'
+                        : '<span class="tag tag--due">acompte à payer '+(dd-dp).toFixed(3)+' DT</span>';
+    }
     if(r.late_minutes>0) t+='<span class="tag tag--late">'+r.late_minutes+' min de retard</span>';
     else if(r.late_minutes===0 && r.arrived_at) t+='<span class="tag tag--ontime">à l\'heure</span>';
     if((r.bookings_completed||0)>=5) t+='<span class="tag tag--loyal">fidèle · '+r.bookings_completed+' visites</span>';
@@ -2985,7 +2993,7 @@ body:not(.is-reception):not(.is-gerant):not(.is-readonly) .req-mark{display:none
      ============================================================ */
   function dt(n){ return Number(n||0).toFixed(3)+' DT'; }
   var ACCTS=[], dbPhotoData=null, dbThumbData=null, dbOpenId=null, doCtx=null, doMethod=null, doWhen=null;
-  var PAY_FR={cash:'Espèces', cheque:'Chèque', tpe:'TPE', virement:'Virement bancaire'};
+  var PAY_FR={cash:'Espèces', cheque:'Chèque', tpe:'TPE', virement:'Virement bancaire', clictopay:'Carte en ligne (ClicToPay)'};
   /* the direction enters old paper debts: no number, no ticket required.
      Everyone else keeps both rules (also enforced by the server). */
   function OWNER_FREE(){ return PAGE==='owner' && ROLE==='owner'; }

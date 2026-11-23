@@ -145,6 +145,17 @@ export function verifyPassToken(id, token) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
+/* Payment links: "credit:<account>" (pay a crédit balance) and
+   "payret:<payment>" (the gateway's way back). Each kind signs only itself. */
+export function signId(kind, id) {
+  return crypto.createHmac("sha256", secret()).update(kind + ":" + id).digest("base64url").slice(0, 22);
+}
+export function verifySigned(kind, id, token) {
+  if (!token) return false;
+  const a = Buffer.from(String(token)), b = Buffer.from(signId(kind, id));
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
 export function auth(req, roles) {
   const h = req.headers.get("authorization") || "";
   const token = h.startsWith("Bearer ") ? h.slice(7) : null;

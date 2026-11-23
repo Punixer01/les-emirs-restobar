@@ -307,6 +307,8 @@
     "À partager": "To share",
     "Envie juste d’un moment Apéro ?": "Just here for an aperitif moment?",
     "À partir de 17h": "From 5 pm",
+    "Pour un groupe, un acompte confirme votre table :": "For a group, a deposit confirms your table:",
+    "Régler l’acompte en ligne": "Pay the deposit online",
     "Cocktails, mocktails & shots": "Cocktails, mocktails & shots",
     "Préparés par notre mixologue, de 17h à minuit.": "Made by our mixologist, from 5 pm to midnight.",
     "Voici nos petits snacks gourmands à partager et à savourer entre amis…":

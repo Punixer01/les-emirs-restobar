@@ -650,6 +650,8 @@ p{margin:0}
 .passlb__qr svg,.passlb__qr img{width:100%;max-width:224px;height:auto;display:block}
 .passlb__when{font-family:var(--font-serif);font-size:1.3rem;letter-spacing:-.01em}
 .passlb__meta{font-family:var(--font-sans);font-size:13px;color:var(--stone);margin-top:5px}
+.passlb__dep{font-family:var(--font-sans);font-size:14px;color:var(--ink);background:#fff;border:1px solid rgba(169,140,75,.45);border-radius:12px;padding:12px 14px;margin:14px auto 0;max-width:24rem;line-height:1.5;text-align:center}
+.passlb__pay{display:block;margin-top:10px;background:var(--marine);color:var(--bone);text-decoration:none;border-radius:100px;padding:12px 16px;font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
 .passlb__occ{font-family:var(--font-sans);font-size:13px;color:#8a6d1f;background:#faf5e6;border:1px solid #ecdfbf;border-radius:10px;padding:8px 12px;margin:14px auto 0;max-width:24rem;line-height:1.5}
 .passlb__note{font-family:var(--font-sans);font-weight:400;font-size:clamp(.95rem,2.4vw,1.08rem);
   line-height:1.55;color:var(--ink);margin-top:18px;padding-top:18px;border-top:1px solid var(--hair)}
@@ -1344,6 +1346,10 @@ p{margin:0}
     <div class="passlb__when" id="passWhen">—</div>
     <div class="passlb__meta" id="passMeta">—</div>
     <div class="passlb__occ" id="passOcc" hidden></div>
+    <div class="passlb__dep" id="passDep" hidden>
+      <span>Pour un groupe, un acompte confirme votre table&nbsp;:</span> <b id="passDepAmt"></b>
+      <a class="passlb__pay" id="passDepBtn" href="#" hidden>Régler l’acompte en ligne</a>
+    </div>
     <p class="passlb__note">Merci, nous avons reçu votre demande de réservation. <b>La réservation n’est considérée valide que seulement après la confirmation de notre équipe envoyée par email.</b><br /><br />
       Nous vous enverrons une réponse à votre demande dans les plus brefs délais.</p>
     <button class="passlb__link" type="button" data-passclose>Parfait, merci</button>
@@ -1978,6 +1984,15 @@ p{margin:0}
     /* echo back the guest's special-occasion note so they see it was received */
     var occEl=document.getElementById("passOcc");
     if(occEl){ var n=(note||r.note||"").trim(); if(n){ occEl.textContent="✎ "+n; occEl.hidden=false; } else { occEl.textContent=""; occEl.hidden=true; } }
+    /* a group: the deposit, and the pay button once online payment is on */
+    var dep=document.getElementById("passDep"), dp=res.deposit;
+    if(dep){
+      dep.hidden=!(dp && dp.amount>0);
+      if(dp && dp.amount>0){
+        document.getElementById("passDepAmt").textContent=Number(dp.amount).toFixed(3)+" DT";
+        var pb=document.getElementById("passDepBtn"); pb.hidden=!dp.url; if(dp.url) pb.href=dp.url;
+      }
+    }
     lb.classList.add("open"); lb.setAttribute("aria-hidden","false");
     document.body.classList.add("locked");
     /* The sheet appears under the finger that just tapped "Demander la
@@ -2525,6 +2540,6 @@ p{margin:0}
   document.getElementById("year").textContent=new Date().getFullYear();
 })();
 </script>
-<script src="/i18n.js?v=20261109d" defer></script>
+<script src="/i18n.js?v=20261123a" defer></script>
 </body>
 </html>
